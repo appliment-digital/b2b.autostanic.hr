@@ -90,8 +90,7 @@ const isOutsideClicked = (event) => {
                 <router-view></router-view>
             </div>
         </div>
-        <AppRightMenu></AppRightMenu>
-
+        <!-- <AppRightMenu></AppRightMenu> -->
         <div class="layout-mask"></div>
     </div>
     <Toast></Toast>

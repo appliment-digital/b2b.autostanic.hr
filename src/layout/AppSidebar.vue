@@ -39,12 +39,8 @@ const anchor = () => {
 <template>
     <div class="layout-sidebar" @mouseenter="onMouseEnter()" @mouseleave="onMouseLeave()">
         <div class="sidebar-header pr-2">
-            <a @click="navigateToDashboard" class="app-logo cursor-pointer font-bold text-white bg-blue-500 py-2 px-3 border-round-lg">iWashPro</a>
+            <a @click="navigateToDashboard" class="app-logo cursor-pointer font-bold text-white bg-blue-500 py-2 px-3 border-round-lg">Auto Stanić</a>
             <button class="layout-sidebar-anchor p-link" type="button" @click="anchor()"></button>
-        </div>
-
-        <div ref="menuContainer" class="layout-menu-container">
-            <AppMenu></AppMenu>
         </div>
     </div>
 </template>

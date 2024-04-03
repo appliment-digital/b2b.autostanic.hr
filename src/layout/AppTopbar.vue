@@ -77,13 +77,14 @@ const onSidebarButtonClick = () => {
                     </IconField>
                 </li>
                 <li :class="isHorizontal ? 'block topbar-item' : 'block sm:hidden topbar-item'">
-                    <a v-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'px-scalein', leaveToClass: 'hidden', leaveActiveClass: 'px-fadeout', hideOnOutsideClick: 'true' }" v-ripple>
+                    <!-- <a v-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'px-scalein', leaveToClass: 'hidden', leaveActiveClass: 'px-fadeout', hideOnOutsideClick: 'true' }" v-ripple>
                         <Button type="button" icon="pi pi-search" text severity="secondary"></Button>
-                    </a>
+                    </a> -->
                     <ul :class="'hidden topbar-menu active-topbar-menu p-3 w-15rem  z-5'" style="bottom: -5.8rem">
                         <IconField iconPosition="left" class="w-full">
                             <InputIcon class="pi pi-search" />
                             <InputText type="text" placeholder="Search" class="w-full" />
+                            
                         </IconField>
                     </ul>
                 </li>
@@ -113,23 +114,29 @@ const onSidebarButtonClick = () => {
                             </a>
                         </li>
                         <li role="menuitem" class="m-0">
-                            <a
-                                href="#"
-                                class="flex align-items-center hover:text-primary-500 transition-duration-200"
-                                v-styleclass="{ selector: '@grandparent', enterClass: 'hidden', enterActiveClass: 'px-scalein', leaveToClass: 'hidden', leaveActiveClass: 'px-fadeout', hideOnOutsideClick: 'true' }"
-                            >
-                                <i class="pi pi-fw pi-sign-out mr-2"></i>
-                                <span>Logout</span>
-                            </a>
+                            
                         </li>
+                        
                     </ul>
                 </li>
+                
                 <li>
-                    <Button type="button" icon="pi pi-cog" class="flex-shrink-0" text severity="secondary" @click="onConfigButtonClick()"></Button>
+                    <a
+                        href="#"
+                        class="flex align-items-center hover:text-primary-500 transition-duration-200"
+                        v-styleclass="{ selector: '@grandparent', enterClass: 'hidden', enterActiveClass: 'px-scalein', leaveActiveClass: 'px-fadeout', hideOnOutsideClick: 'true' }"
+                    >
+                        <i class="pi pi-fw pi-sign-out mr-2"></i>
+                    </a>
                 </li>
+                <!-- 
                 <li>
                     <Button type="button" icon="pi pi-question" class="flex-shrink-0 bg-yellow-500" rounded severity="warning" @click="onSidebarButtonClick()"></Button>
-                </li>
+                </li> 
+                <li>
+                    <Button type="button" icon="pi pi-cog" class="flex-shrink-0" text severity="secondary" @click="onConfigButtonClick()"></Button>
+                </li> 
+                -->
             </ul>
         </div>
     </div>
