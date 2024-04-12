@@ -41,4 +41,47 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function add($data)
+    {
+        $user = new self();
+
+        $user->name = $data["name"];
+        $user->last_name = $data["last_name"];
+        $user->email = $data["email"];
+        $user->bitrix_company_id = $data["bitrix_company_id"];
+        
+        $user->save();
+        $user->refresh();
+
+        return $user;
+    }
+
+    public static function updateUser($id, $data)
+    {
+        $user = self::find($id);
+
+        $user->name = $data["name"];
+        $user->last_name = $data["last_name"];
+        $user->email = $data["email"];
+        $user->bitrix_company_id = $data["bitrix_company_id"];
+        
+        $user->save();
+        $user->refresh();
+
+        return $user;
+    }
+
+    public static function deactivate($id)
+    {
+        $user = self::find($id);
+
+        $user->active = 0;
+        
+        $user->save();
+        $user->refresh();
+
+        return $user;
+    }
+
 }
