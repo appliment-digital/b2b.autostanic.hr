@@ -14,11 +14,10 @@
 </template>
 
 <style lang="scss">
-.layout {
-    max-width: 1200px;
-    margin: 0 auto;
-    margin-top: 2rem;
-    padding: 1rem;
-    border-radius: 4px;
-}
+    .layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-top: 2rem;
+        border-radius: 4px;
+    }
 </style>

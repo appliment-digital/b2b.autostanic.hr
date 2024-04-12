@@ -19,8 +19,9 @@ export default {
 </script>
 
 <template>
+    <h2 class="text-center">Postavi Lozinku</h2>
+
     <div class="flex flex-column sm:w-3 mx-auto">
-        <h2>Postavi Lozinku</h2>
 
         <div class="mt-6">
             <InputText
