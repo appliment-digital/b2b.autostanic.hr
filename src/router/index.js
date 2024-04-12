@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Layout from '@/views/Layout.vue';
-import About from '@/views/About.vue';
 import Login from '@/views/pages/Login.vue';
 import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
@@ -9,12 +8,9 @@ import Admin from '@/views/pages/Admin.vue';
 const routes = [
     {
         path: '/',
+        redirect: '/login',
         component: Layout,
         children: [
-            {
-                path: '/about',
-                component: About,
-            },
             {
                 path: '/login',
                 component: Login,
