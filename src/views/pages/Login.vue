@@ -1,13 +1,13 @@
 <script>
 import router from '@/router';
-import UserService from "../../service/UserService.js";
+import UserService from '../../service/UserService.js';
 
 const userService = new UserService();
 export default {
     data() {
         return {
             email: null,
-            password: null
+            password: null,
         };
     },
     methods: {
@@ -18,54 +18,65 @@ export default {
         handleForgotPasswordClick() {
             router.push('/forgot');
         },
+
         login() {
-            userService.login(this.email, this.password).then((data) => {
-                if (data && data.success) {
-                    //redirect to dashboard
-                    this.$router.push("/admin");
-                } else {
+            userService
+                .login(this.email, this.password)
+                .then((data) => {
+                    if (data && data.success) {
+                        // redirect to dashboard
+                        this.$router.push('/admin');
+                    } else {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Login failed',
+                            life: 3000,
+                        });
+                    }
+                })
+                .catch((response) => {
                     this.$toast.add({
-                        severity: "error",
-                        summary: "Error",
-                        detail: "Login failed",
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Login failed',
                         life: 3000,
                     });
-                }
-            }).catch((response) => {
-                this.$toast.add({
-                    severity: "error",
-                    summary: "Error",
-                    detail: "Login failed",
-                    life: 3000,
                 });
-            });
         },
     },
 };
 </script>
 
 <template>
-    <h1 class="mb-7 text-center">Auto Stanić</h1>
+    <div
+        class="login-screen flex flex-column justify-content-center mx-auto w-10 sm:w-7 md:w-4 lg:w-3"
+    >
+        <img
+            src="images/as-logo.png"
+            class="logo mx-auto mb-6"
+            style="height: 48px"
+        />
 
-    <div class="flex flex-column sm:w-4 mx-auto">
         <InputText
-            class="login-input mb-3"
+            class="w-full mb-3"
             type="text"
             v-model="email"
             placeholder="E-mail"
         />
-        <InputText
-            class="login-input"
-            type="text"
-            v-model="password"
+        <Password
+            class="w-full"
+            inputClass="w-full"
             placeholder="Password"
+            :feedback="false"
+            v-model="password"
         />
 
-        <div class="flex justify-content-between mt-6">
+        <div class="flex justify-content-between mt-6 w-full">
             <Button
                 @click="handleForgotPasswordClick"
-                label="Forgot password"
-                class="login-button underline"
+                label="Zaboravljena lozinka?"
+                class="login-button underline p-0 m-0 text-300"
                 link
             />
             <Button @click="login()" label="Submit" class="login-button" />
@@ -73,4 +84,8 @@ export default {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.login-screen {
+    height: 70vh;
+}
+</style>

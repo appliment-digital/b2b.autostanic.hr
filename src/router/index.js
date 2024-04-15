@@ -4,6 +4,7 @@ import Login from '@/views/pages/Login.vue';
 import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
 import Admin from '@/views/pages/Admin.vue';
+import Home from '@/views/pages/Home.vue';
 
 const routes = [
     {
@@ -11,6 +12,10 @@ const routes = [
         redirect: '/login',
         component: Layout,
         children: [
+            {
+                path: '/home',
+                component: Home,
+            },
             {
                 path: '/login',
                 component: Login,
