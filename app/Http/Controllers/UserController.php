@@ -17,61 +17,54 @@ class UserController extends BaseController
 
     public function get($id)
     {
-        try{
+        try {
 
             return User::find($id);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
-    public function getAllActive()
+    public function getAll()
     {
-        try{
+        try {
 
-            //ovdje treba dohvatiti sve koji su aktivni imaju role customer i to sa vezom na tablicu kategorija popusta
-            //dodatno treba dohvatiti podatke s bitrixa
+            //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
+            $user = new User();
+            $userData = $user::role('customer')->orderBy('users.id', 'DESC')
+                ->get();
 
-
-        }catch (Exception $e) {
+            return response()->json(['data' => $userData]);
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
-    
+
     public function add(Request $request)
     {
-        try{
-
-            return $request;
-
+        try {
             return User::add($request);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
     public function update(Request $request, $id)
     {
-        try{
-
+        try {
             return User::updateUser($request, $id);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
     public function deactivate($id)
     {
-        try{
+        try {
 
             return User::deactivate($id);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
-
 }

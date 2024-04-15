@@ -1,10 +1,21 @@
 <script>
+import UserService from "../service/UserService.js";
 import router from '@/router';
+
+const userService = new UserService();
 
 export default {
     data() {
         return {};
     },
+    methods: {
+        logout(){
+            userService.logout()
+                .then(response => {
+                    this.$router.push("/login");
+                });
+        }
+    }
 };
 </script>
 
@@ -30,6 +41,7 @@ export default {
                 text
             />
             <Button
+                @click="logout()"
                 class="block"
                 severity="secondary"
                 icon="pi pi-sign-out"
