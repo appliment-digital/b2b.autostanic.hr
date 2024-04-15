@@ -1,9 +1,14 @@
 <script>
 import router from '@/router';
+import UserService from "../../service/UserService.js";
 
+const userService = new UserService();
 export default {
     data() {
-        return {};
+        return {
+            email: null,
+            password: null
+        };
     },
     methods: {
         changeMessage() {
@@ -12,6 +17,28 @@ export default {
 
         handleForgotPasswordClick() {
             router.push('/forgot');
+        },
+        login() {
+            userService.login(this.email, this.password).then((data) => {
+                if (data && data.success) {
+                    //redirect to dashboard
+                    this.$router.push("/admin");
+                } else {
+                    this.$toast.add({
+                        severity: "error",
+                        summary: "Error",
+                        detail: "Login failed",
+                        life: 3000,
+                    });
+                }
+            }).catch((response) => {
+                this.$toast.add({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "Login failed",
+                    life: 3000,
+                });
+            });
         },
     },
 };
@@ -24,14 +51,14 @@ export default {
         <InputText
             class="login-input mb-3"
             type="text"
-            v-model="value"
-            placeholder="username"
+            v-model="email"
+            placeholder="E-mail"
         />
         <InputText
             class="login-input"
             type="text"
-            v-model="value"
-            placeholder="password"
+            v-model="password"
+            placeholder="Password"
         />
 
         <div class="flex justify-content-between mt-6">
@@ -41,7 +68,7 @@ export default {
                 class="login-button underline"
                 link
             />
-            <Button label="Submit" class="login-button" />
+            <Button @click="login()" label="Submit" class="login-button" />
         </div>
     </div>
 </template>

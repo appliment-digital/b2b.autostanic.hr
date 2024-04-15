@@ -31,6 +31,7 @@ class UserController extends BaseController
         try{
 
             //ovdje treba dohvatiti sve koji su aktivni imaju role customer i to sa vezom na tablicu kategorija popusta
+            //dodatno treba dohvatiti podatke s bitrixa
 
 
         }catch (Exception $e) {
@@ -38,9 +39,11 @@ class UserController extends BaseController
         }
     }
     
-    public function create(Request $request)
+    public function add(Request $request)
     {
         try{
+
+            return $request;
 
             return User::add($request);
 
