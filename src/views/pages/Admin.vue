@@ -2,13 +2,17 @@
 import router from '@/router';
 import { users } from '@/users.js';
 
+import UserService from "../../service/UserService.js";
+
+const userService = new UserService();
 export default {
     data() {
         return {
             visible: false,
             dialog: false,
 
-            users: users,
+            user: {},
+            users: [],
             selectedUsers: null,
             searchQuery: '',
 
@@ -40,6 +44,12 @@ export default {
         handleSaveEditUserClick() {
             this.isEditUser = false;
         },
+        add(){
+            userService.add()
+                .then(response => {
+                    this.userRoles = response;
+                });
+        }
     },
     computed: {
         filteredUsers() {
@@ -173,10 +183,11 @@ export default {
         header="Dodaj korisnika"
         :style="{ width: '25rem' }"
     >
-        <InputText class="w-full mt-1 mb-3" type="text" placeholder="Ime" />
-        <InputText class="w-full mb-3" type="text" placeholder="Prezime" />
-        <InputText class="w-full mb-3" type="text" placeholder="E-mail" />
+        <InputText v-model="user.name" class="w-full mt-1 mb-3" type="text" placeholder="Ime" />
+        <InputText v-model="user.last_name" class="w-full mb-3" type="text" placeholder="Prezime" />
+        <InputText v-model="user.email" class="w-full mb-3" type="text" placeholder="E-mail" />
         <InputText
+            v-model="user.bitrix_company_id"
             class="w-full mb-3"
             type="text"
             placeholder="Bitrix company ID"
@@ -206,7 +217,7 @@ export default {
                 severity="success"
                 label="Spremi"
                 style="min-width: 120px"
-                @click="handleSaveAddUserClick"
+                @click="add()"
             />
         </div>
     </Dialog>
