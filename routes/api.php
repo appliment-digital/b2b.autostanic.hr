@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DiscountTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +27,11 @@ Route::middleware('auth:sanctum')->group(function () {
     //****************   USER CONTOLLER ******************
     Route::post('/user/add', [UserController::class, 'add']);
     Route::post('/user/getAll', [UserController::class, 'getAll']);
+    Route::post('/user/getCurrentUserData', [UserController::class, 'getCurrentUserData']);
+
+    //****************   DISCOUNT TYPE CONTOLLER ******************
+    Route::get('/discountType/getAll', [DiscountTypeController::class, 'getAll']);
+    Route::post('/discountType/add', [DiscountTypeController::class, 'add']);
+    Route::put('/discountType/update/{id}', [DiscountTypeController::class, 'update']);
+    Route::delete('/discountType/delete/{id}', [DiscountTypeController::class, 'delete']);
 });

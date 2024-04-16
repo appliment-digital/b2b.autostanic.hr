@@ -48,4 +48,8 @@ export default class UserService {
     async deactivate(object) {
         return Axios.post(this.apiResourceEndpoint + '/deactivate', object);
     }
+
+    async getCurrentUserData() {
+        return Axios.post(this.apiResourceEndpoint + '/getCurrentUserData');
+    }
 }

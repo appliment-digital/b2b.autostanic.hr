@@ -45,6 +45,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function discountTypes()
+    {
+        return $this->belongsToMany(DiscountType::class);
+    }
+
     public static function add($data)
     {
         $user = new self();

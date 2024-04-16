@@ -68,7 +68,7 @@ export default {
             });
         },
         getAll() {
-            userService.getAll(this.user).then((response) => {
+            userService.getAll().then((response) => {
                 this.users = response.data.data;
             });
         },
@@ -79,7 +79,6 @@ export default {
 
 <template>
     <Header></Header>
-    <h2 class="text-center">Admin Panel</h2>
     <span class="block text-center">Upravljanje korisnicima</span>
 
     <div class="flex flex-column sm:w-6 mx-auto mb-4"></div>
@@ -172,7 +171,7 @@ export default {
             header="Način plaćanja"
             sortable
         ></Column>
-        <!-- <Column field="discountType" header="Tip rabata" sortable></Column> -->
+        <Column field="discountType" header="Tip rabata" sortable></Column>
         <Column header="Aktivan">
             <template #body="{ data }">
                 <Checkbox

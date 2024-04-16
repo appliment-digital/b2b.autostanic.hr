@@ -1,24 +1,30 @@
 <script>
-import UserService from "../service/UserService.js";
+import UserService from '../service/UserService.js';
 import router from '@/router';
 
 const userService = new UserService();
 
 export default {
-    props: [
-        "isAdminPage",
-    ],
+    mounted() {
+        this.getCurrentUserData();
+    },
     data() {
-        return {};
+        return {
+            userData: null,
+        };
     },
     methods: {
-        logout(){
-            userService.logout()
-                .then(response => {
-                    this.$router.push("/login");
-                });
-        }
-    }
+        logout() {
+            userService.logout().then((response) => {
+                this.$router.push('/login');
+            });
+        },
+        getCurrentUserData() {
+            userService.getCurrentUserData().then((response) => {
+                this.userData = response;
+            });
+        },
+    },
 };
 </script>
 
