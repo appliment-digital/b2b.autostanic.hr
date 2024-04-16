@@ -73,13 +73,12 @@ export default {
         />
 
         <div class="flex justify-content-between mt-6 w-full">
-            <Button
+            <a
                 @click="handleForgotPasswordClick"
-                label="Zaboravljena lozinka?"
-                class="login-button underline p-0 m-0 text-300"
-                link
-            />
-            <Button @click="login()" label="Submit" class="login-button" />
+                label=""
+                class="underline text-300 flex align-items-center cursor-pointer"
+            >Zaboravljena lozinka?</a>
+            <Button @click="login()" label="Submit" class="button--submit" />
         </div>
     </div>
 </template>
@@ -87,5 +86,9 @@ export default {
 <style scoped>
 .login-screen {
     height: 70vh;
+}
+.button--submit {
+    background-color: #123649;
+    border: none;
 }
 </style>
