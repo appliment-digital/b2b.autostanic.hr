@@ -26,4 +26,5 @@ Route::middleware('auth:sanctum')->group(function () {
     //****************   USER CONTOLLER ******************
     Route::post('/user/add', [UserController::class, 'add']);
     Route::post('/user/getAll', [UserController::class, 'getAll']);
+    Route::post('/user/getCurrentUserData', [UserController::class, 'getCurrentUserData']);
 });

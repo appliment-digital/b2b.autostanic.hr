@@ -67,4 +67,9 @@ class UserController extends BaseController
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
+
+    public function getCurrentUserData()
+    {
+        return auth()->user();
+    }
 }
