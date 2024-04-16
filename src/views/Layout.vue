@@ -9,7 +9,7 @@
         <RouterLink to="/admin">Admin</RouterLink>
     </div>
 
-    <div class="layout mb-10">
+    <div class="layout mb-8">
         <Toast></Toast>
         <router-view></router-view>
     </div>
@@ -21,5 +21,6 @@
     margin: 0 auto;
     margin-top: 2rem;
     border-radius: 4px;
+        padding: 1rem;
 }
 </style>
