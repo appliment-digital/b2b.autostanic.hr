@@ -28,10 +28,10 @@ class UserController extends BaseController
     public function getAll()
     {
         try {
-
             //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
-            $user = new User();
-            $userData = $user::role('customer')->orderBy('users.id', 'DESC')
+
+            $userData = User::role('customer')
+                ->orderBy('users.id', 'DESC')
                 ->get();
 
             return response()->json(['data' => $userData]);
@@ -43,7 +43,14 @@ class UserController extends BaseController
     public function add(Request $request)
     {
         try {
-            return User::add($request);
+            $user = User::add($request);
+            if ($user) {
+                $success['user'] =  $user;
+
+                return $this->sendResponse($success, 'dodan korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Spremanje korisnika nije uspjelo.']);
+            }
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
@@ -52,7 +59,15 @@ class UserController extends BaseController
     public function update(Request $request, $id)
     {
         try {
-            return User::updateUser($request, $id);
+            $user = User::updateUser($request, $id);
+
+            if ($user) {
+                $success['user'] =  $user;
+
+                return $this->sendResponse($success, 'ažuriran korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Ažuriranje korisnika nije uspjelo.']);
+            }
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }

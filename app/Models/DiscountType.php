@@ -21,31 +21,52 @@ class DiscountType extends Model
 
     public static function add($data)
     {
-        $userIds = [1, 2, 3]; // Array of user IDs
-        $discountType = new DiscountType();
-        $discountType->name = 'Your Discount Type Name';
+        $discountType = new self();
+        $discountType->name = $data['name'];
+        $discountType->discount = $data['discount'];
+
         $discountType->save();
 
-        // Attach users to the discount type
+        $userIds = array_column($data['users'], 'id');
         $discountType->users()->attach($userIds);
+
+        return $discountType;
     }
 
     public static function updateDiscountType($id, $data)
     {
-        $discountType = DiscountType::find($id);
+        $discountType = self::find($id);
 
-        // Attach users to the discount type
-        $users = [1, 2, 3]; // Array of user IDs
-        $discountType->users()->attach($users);
+        $discountType->name = $data['name'];
+        $discountType->discount = $data['discount'];
+
+        $discountType->save();
+
+        // Detach all existing users
+        $discountType->users()->detach();
+
+        $userIds = array_column($data['users'], 'id');
+        $discountType->users()->attach($userIds);
+
+        return $discountType;
     }
 
     public static function getAll()
     {
-        return DiscountType::with('users')->get();
+        return self::with('users')->get();
     }
 
     public static function get($id)
     {
         return DiscountType::with('users')->find($id);
+    }
+
+    public static function erase($id)
+    {
+        $discountType = self::find($id);
+
+        if ($discountType) {
+            return $discountType->delete();
+        }
     }
 }
