@@ -17,58 +17,74 @@ class UserController extends BaseController
 
     public function get($id)
     {
-        try{
+        try {
 
             return User::find($id);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
-    public function getAllActive()
+    public function getAll()
     {
-        try{
+        try {
+            //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
 
-            //ovdje treba dohvatiti sve koji su aktivni imaju role customer i to sa vezom na tablicu kategorija popusta
+            $userData = User::role('customer')
+                ->orderBy('users.id', 'DESC')
+                ->get();
 
-
-        }catch (Exception $e) {
+            return response()->json(['data' => $userData]);
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
-    
-    public function create(Request $request)
+
+    public function add(Request $request)
     {
-        try{
+        try {
+            $user = User::add($request);
+            if ($user) {
+                $success['user'] =  $user;
 
-            return User::add($request);
-
-        }catch (Exception $e) {
+                return $this->sendResponse($success, 'dodan korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Spremanje korisnika nije uspjelo.']);
+            }
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
     public function update(Request $request, $id)
     {
-        try{
+        try {
+            $user = User::updateUser($request, $id);
 
-            return User::updateUser($request, $id);
+            if ($user) {
+                $success['user'] =  $user;
 
-        }catch (Exception $e) {
+                return $this->sendResponse($success, 'ažuriran korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Ažuriranje korisnika nije uspjelo.']);
+            }
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
     public function deactivate($id)
     {
-        try{
+        try {
 
             return User::deactivate($id);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
+    public function getCurrentUserData()
+    {
+        return auth()->user();
+    }
 }

@@ -1,19 +1,38 @@
 <script>
 import router from '@/router';
 import { users } from '@/users.js';
+import { FilterMatchMode } from 'primevue/api';
 
+import UserService from '../../service/UserService.js';
+import Header from '@/components/Header.vue';
+
+const userService = new UserService();
 export default {
+    components: {
+        Header,
+    },
+    created() {
+        //set filters for datatable
+        this.filters = {
+            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        };
+    },
+    mounted() {
+        this.getAll();
+    },
     data() {
         return {
             visible: false,
             dialog: false,
 
-            users: users,
+            user: {},
+            users: [],
             selectedUsers: null,
             searchQuery: '',
 
             isAddUser: false,
             isEditUser: false,
+            filters: {},
         };
     },
     methods: {
@@ -40,24 +59,26 @@ export default {
         handleSaveEditUserClick() {
             this.isEditUser = false;
         },
-    },
-    computed: {
-        filteredUsers() {
-            return this.users.filter((user) =>
-                Object.values(user).some((value) =>
-                    value
-                        .toString()
-                        .toLowerCase()
-                        .includes(this.searchQuery.toLowerCase()),
-                ),
-            );
+        add() {
+            userService.add(this.user).then((response) => {
+                if (response.data.id) {
+                    this.isAddUser = false;
+                    this.getAll();
+                }
+            });
+        },
+        getAll() {
+            userService.getAll().then((response) => {
+                this.users = response.data.data;
+            });
         },
     },
+    computed: {},
 };
 </script>
 
 <template>
-    <h2 class="text-center">Admin Panel</h2>
+    <Header></Header>
     <span class="block text-center">Upravljanje korisnicima</span>
 
     <div class="flex flex-column sm:w-6 mx-auto mb-4"></div>
@@ -70,6 +91,7 @@ export default {
             label="Korisnici"
             style="min-width: 220px"
         />
+
         <Button
             class="block mb-3"
             severity="success"
@@ -92,18 +114,20 @@ export default {
             style="min-width: 220px"
         />
     </Sidebar>
-
     <DataTable
-        :value="filteredUsers"
+        :value="users"
         v-model:selection="selectedUsers"
         :rows="5"
         :rowsPerPageOptions="[5, 10, 20, 50]"
         tableStyle="min-width: 50rem"
         paginator
+        :filters="filters"
         dataKey="id"
     >
         <template #header>
-            <div class="flex justify-content-between">
+            <div
+                class="flex flex-column md:flex-row md:justify-content-between md:align-items-center"
+            >
                 <div class="flex">
                     <Button
                         class="mr-3"
@@ -121,24 +145,40 @@ export default {
                     <InputIcon>
                         <i class="pi pi-search" />
                     </InputIcon>
-                    <InputText v-model="searchQuery" placeholder="Pretraži" />
+                    <InputText
+                        v-model="filters['global'].value"
+                        placeholder="Pretraži"
+                    />
                 </IconField>
             </div>
         </template>
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-        <Column field="firstName" header="Ime" sortable></Column>
-        <Column field="lastName" header="Prezime" sortable></Column>
+        <Column field="name" header="Ime" sortable></Column>
+        <Column field="last_name" header="Prezime" sortable></Column>
         <Column field="email" header="E-mail" sortable></Column>
         <Column
-            field="deliveryPlace"
+            field="bitrix_company_id"
+            header="Bitrix Company ID"
+            sortable
+        ></Column>
+        <Column
+            field="delivery_point"
             header="Mjesto isporuke"
             sortable
         ></Column>
-        <Column field="paymentType" header="Način plaćanja" sortable></Column>
+        <Column
+            field="payment_method"
+            header="Način plaćanja"
+            sortable
+        ></Column>
         <Column field="discountType" header="Tip rabata" sortable></Column>
-        <Column field="isActive" header="Aktivan">
+        <Column header="Aktivan">
             <template #body="{ data }">
-                <Checkbox class="custom-checkbox" v-model="data.isActive" :binary="true" />
+                <Checkbox
+                    class="custom-checkbox"
+                    v-model="data.active"
+                    :binary="true"
+                />
             </template>
         </Column>
         <Column field="actions" header="Akcije">
@@ -173,20 +213,44 @@ export default {
         header="Dodaj korisnika"
         :style="{ width: '25rem' }"
     >
-        <InputText class="w-full mt-1 mb-3" type="text" placeholder="Ime" />
-        <InputText class="w-full mb-3" type="text" placeholder="Prezime" />
-        <InputText class="w-full mb-3" type="text" placeholder="E-mail" />
         <InputText
+            v-model="user.name"
+            class="w-full mt-1 mb-3"
+            type="text"
+            placeholder="Ime"
+        />
+        <InputText
+            v-model="user.last_name"
+            class="w-full mb-3"
+            type="text"
+            placeholder="Prezime"
+        />
+        <InputText
+            v-model="user.email"
+            class="w-full mb-3"
+            type="text"
+            placeholder="E-mail"
+        />
+        <Password
+            v-model="user.password"
+            class="w-full mb-3"
+            type="text"
+            placeholder="Lozinka"
+        />
+        <InputButton
+            v-model="user.bitrix_company_id"
             class="w-full mb-3"
             type="text"
             placeholder="Bitrix company ID"
         />
         <InputText
+            v-model="user.delivery_point"
             class="w-full mb-3"
             type="text"
             placeholder="Mjesto isporuke"
         />
         <InputText
+            v-model="user.payment_method"
             class="w-full mb-3"
             type="text"
             placeholder="Naćin plaćanja"
@@ -206,7 +270,7 @@ export default {
                 severity="success"
                 label="Spremi"
                 style="min-width: 120px"
-                @click="handleSaveAddUserClick"
+                @click="add()"
             />
         </div>
     </Dialog>

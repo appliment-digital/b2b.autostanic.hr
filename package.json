@@ -14,6 +14,7 @@
         "@fullcalendar/interaction": "^6.1.8",
         "@fullcalendar/timegrid": "^6.1.8",
         "@fullcalendar/vue3": "^6.1.8",
+        "axios": "^1.6.8",
         "chart.js": "^4.3.0",
         "laravel-vite-plugin": "^0.8.1",
         "primeflex": "^3.3.1",

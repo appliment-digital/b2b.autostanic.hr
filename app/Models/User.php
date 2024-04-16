@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -42,6 +45,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function discountTypes()
+    {
+        return $this->belongsToMany(DiscountType::class);
+    }
+
     public static function add($data)
     {
         $user = new self();
@@ -49,8 +57,17 @@ class User extends Authenticatable
         $user->name = $data["name"];
         $user->last_name = $data["last_name"];
         $user->email = $data["email"];
+        $user->email = $data["email"];
         $user->bitrix_company_id = $data["bitrix_company_id"];
-        
+
+        if (strlen($data["password"]) >= 6) {
+            $user->password = Hash::make($data["password"]);
+        } else {
+            return ['error' => "Password needs to be at least 6 or more characters"];
+        }
+
+        $user->syncRoles(2);
+
         $user->save();
         $user->refresh();
 
@@ -65,7 +82,7 @@ class User extends Authenticatable
         $user->last_name = $data["last_name"];
         $user->email = $data["email"];
         $user->bitrix_company_id = $data["bitrix_company_id"];
-        
+
         $user->save();
         $user->refresh();
 
@@ -77,11 +94,10 @@ class User extends Authenticatable
         $user = self::find($id);
 
         $user->active = 0;
-        
+
         $user->save();
         $user->refresh();
 
         return $user;
     }
-
 }
