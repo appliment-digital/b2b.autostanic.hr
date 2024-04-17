@@ -1,20 +1,22 @@
 <script>
 import router from '@/router';
+import UserService from '../../service/UserService.js';
 
+const userService = new UserService();
 export default {
     data() {
         return {
-            message: 'Hello Vue.js!',
+            email: null,
         };
     },
     methods: {
-        changeMessage() {
-            this.message = 'Vue.js is awesome!';
-        },
-
-        handleResetButtonClick() {
-            router.push('/reset');
-            console.log('hi');
+        forgotPassword() {
+            userService
+                .forgotPassword({ email: this.email })
+                .then((data) => {
+                    router.push('/reset');
+                })
+                .catch((response) => {});
         },
     },
 };
@@ -32,11 +34,15 @@ export default {
             <InputText
                 class="login-input w-8"
                 type="text"
-                v-model="value"
+                v-model="email"
                 placeholder="email"
             />
 
-            <Button @click="handleResetButtonClick" label="Submit" class="login-button" />
+            <Button
+                @click="forgotPassword()"
+                label="Submit"
+                class="login-button"
+            />
         </div>
     </div>
 </template>

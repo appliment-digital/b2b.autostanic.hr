@@ -33,7 +33,7 @@ export default {
     </div>
 
     <!-- Home Page: Search & Categories -->
-    <div class="grid mt-6 gap-3">
+    <div class="w-full mx-auto grid mt-6 gap-3">
         <!-- Search -->
         <div
             class="col-12 py-8 flex flex-column align-items-center justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"
@@ -228,7 +228,7 @@ export default {
     <!-- Home Page: Footer -->
     <footer>
         <div
-            class="mt-6 p-8 bg-white border-round grid column-gap-2 row-gap-8 justify-content-center align-items-center border-100 border-round border-1 md:column-gap-4"
+            class="w-full mx-auto mt-6 p-8 bg-white border-round grid column-gap-2 row-gap-8 justify-content-center align-items-center border-100 border-round border-1 md:column-gap-4"
         >
             <!-- Footer: Company Information -->
             <div class="col-12 md:col-5">

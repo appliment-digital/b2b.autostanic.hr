@@ -1,11 +1,12 @@
 <script>
 import { FilterMatchMode } from 'primevue/api';
 
-import DiscountTypeService from '../service/DiscountTypeService.js';
-import UserService from '../service/UserService.js';
+import DiscountTypeService from '@/service/DiscountTypeService.js';
+import UserService from '@/service/UserService.js';
 
 const discountTypeService = new DiscountTypeService();
 const userService = new UserService();
+
 export default {
     created() {
         //set filters for datatable
@@ -143,142 +144,147 @@ export default {
 </script>
 
 <template>
-    <div class="card">
-        <Toolbar class="mb-4">
-            <template v-slot:start>
-                <Button
-                    label="Dodaj"
-                    icon="pi pi-plus"
-                    class="p-button mr-2"
-                    @click="openDialog()"
-                    text
-                    raised
-                />
-            </template>
-            <template v-slot:end>
-                <Button
-                    v-if="expandedRows == null"
-                    text
-                    raised
-                    icon="pi pi-window-maximize"
-                    label="Prošiti"
-                    class="mr-2"
-                    @click="expandAll()"
-                />
-                <Button
-                    v-else
-                    text
-                    raised
-                    icon="pi pi-window-minimize"
-                    label="Sažmi"
-                    @click="collapseAll()"
-                />
-            </template>
-        </Toolbar>
-        <DataTable
-            v-model:expandedRows="expandedRows"
-            :value="discountTypes"
-            @rowExpand="onRowExpand"
-            @rowCollapse="onRowCollapse"
-            :paginator="true"
-            :rows="5"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
-            :filters="filters"
-            responsiveLayout="scroll"
-        >
-            <template #header>
-                <div
-                    class="flex flex-column md:flex-row md:justify-content-between md:align-items-center"
-                >
-                    <h5 class="m-0">Upravljanje tipovima rabata</h5>
-                    <IconField iconPosition="left">
-                        <InputIcon>
-                            <i class="pi pi-search" />
-                        </InputIcon>
-                        <InputText
-                            v-model="filters['global'].value"
-                            placeholder="Pretraži"
-                        />
-                    </IconField>
-                </div>
-            </template>
-            <Column expander style="width: 5rem" />
-            <Column field="name" header="Naziv"></Column>
-            <Column field="discount" header="Rabat %"></Column>
-            <Column field="users" header="Korisnici">
-                <template #body="{ data }">
-                    <span v-for="(user, index) in data.users" :key="user.id">
-                        {{ user.name }} {{ user.last_name }}
-                        <template v-if="index !== data.users.length - 1"
-                            >,
-                        </template>
-                    </span>
-                </template>
-            </Column>
-            <Column field="actions" header="Akcije">
-                <template #body="slotProps">
-                    <div class="flex">
-                        <Button
-                            class="mr-2"
-                            icon="pi pi-user-edit"
-                            aria-label="Edit"
-                            @click="openDialog(slotProps.data)"
-                            text
-                            raised
-                            rounded
-                            outlined
-                        />
-                        <Button
-                            @click="confirmDialog(slotProps.data)"
-                            icon="pi pi-times"
-                            aria-label="Remove"
-                            text
-                            raised
-                            rounded
-                            outlined
-                        />
+    <Card>
+        <template #content>
+            <DataTable
+                v-model:expandedRows="expandedRows"
+                :value="discountTypes"
+                @rowExpand="onRowExpand"
+                @rowCollapse="onRowCollapse"
+                :paginator="true"
+                :rows="5"
+                :rowsPerPageOptions="[5, 10, 20, 50]"
+                :filters="filters"
+                responsiveLayout="scroll"
+            >
+                <template #header>
+                    <div
+                        class="flex flex-column md:flex-row md:justify-content-between md:align-items-center"
+                    >
+                        <div>
+                            <Button
+                                label="Dodaj"
+                                icon="pi pi-plus"
+                                class="p-button mr-2"
+                                @click="openDialog()"
+                                outlined
+                            />
+                            <Button
+                                v-if="expandedRows == null"
+                                icon="pi pi-window-maximize"
+                                label="Prošiti"
+                                class="mr-2"
+                                @click="expandAll()"
+                                outlined
+                            />
+                            <Button
+                                v-else
+                                icon="pi pi-angle-double-down"
+                                label="Proširi"
+                                class="mr-2"
+                                @click="collapseAll()"
+                                outlined
+                            />
+                        </div>
+                        <IconField iconPosition="left">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText
+                                v-model="filters['global'].value"
+                                placeholder="Pretraži"
+                                style="min-width: 240px"
+                            />
+                        </IconField>
                     </div>
                 </template>
-            </Column>
-            <template #expansion="slotProps">
-                <div class="p-2">
-                    <h6>Korisnici</h6>
-                    <DataTable :value="slotProps.data.users">
-                        <Column header="Ime i prezime">
-                            <template #body="{ data }">
-                                <span
-                                    >{{ data.name }} {{ data.last_name }}</span
-                                >
+                <Column expander style="width: 5rem" />
+                <Column field="name" header="Naziv"></Column>
+                <Column field="discount" header="Rabat %"></Column>
+                <Column field="users" header="Korisnici">
+                    <template #body="{ data }">
+                        <span
+                            v-for="(user, index) in data.users"
+                            :key="user.id"
+                        >
+                            {{ user.name }} {{ user.last_name }}
+                            <template v-if="index !== data.users.length - 1"
+                                >,
                             </template>
-                        </Column>
-                        <Column field="email" header="E-mail"> </Column>
-                        <Column
-                            field="bitrix_company_id"
-                            header="Bitrix Company ID"
-                        ></Column>
-                        <Column field="delivery_point" header="Mjesto isporuke">
-                        </Column>
-                        <Column
-                            field="payment_method"
-                            header="Način plaćanja"
-                        ></Column>
-                        <Column field="active" header="Aktivan">
-                            <template #body="{ data }">
-                                <div v-if="data.active">
-                                    <span class="text-green-500">DA</span>
-                                </div>
-                                <div v-else>
-                                    <span class="text-red-500">NE</span>
-                                </div>
+                        </span>
+                    </template>
+                </Column>
+                <Column field="actions" header="Akcije">
+                    <template #body="slotProps">
+                        <div class="flex">
+                            <Button
+                                class="mr-2"
+                                icon="pi pi-user-edit"
+                                aria-label="Edit"
+                                @click="openDialog(slotProps.data)"
+                                text
+                                raised
+                                rounded
+                                outlined
+                            />
+                            <Button
+                                @click="confirmDialog(slotProps.data)"
+                                icon="pi pi-times"
+                                aria-label="Remove"
+                                text
+                                raised
+                                rounded
+                                outlined
+                            />
+                        </div>
+                    </template>
+                </Column>
+                <template #expansion="slotProps">
+                    <div class="p-2">
+                        <h6>Korisnici</h6>
+                        <DataTable :value="slotProps.data.users">
+                            <Column header="Ime i prezime">
+                                <template #body="{ data }">
+                                    <span
+                                        >{{ data.name }}
+                                        {{ data.last_name }}</span
+                                    >
+                                </template>
+                            </Column>
+                            <Column field="email" header="E-mail"> </Column>
+                            <Column
+                                field="bitrix_company_id"
+                                header="Bitrix Company ID"
+                            ></Column>
+                            <Column
+                                field="delivery_point"
+                                header="Mjesto isporuke"
+                            >
+                            </Column>
+                            <Column
+                                field="payment_method"
+                                header="Način plaćanja"
+                            ></Column>
+                            <Column field="active" header="Aktivan">
+                                <template #body="{ data }">
+                                    <div v-if="data.active">
+                                        <span class="text-green-500">DA</span>
+                                    </div>
+                                    <div v-else>
+                                        <span class="text-red-500">NE</span>
+                                    </div>
+                                </template>
+                            </Column>
+                            <template #empty>
+                                Još nema dodanih korisnika
                             </template>
-                        </Column>
-                        <template #empty> Još nema dodanih korisnika </template>
-                    </DataTable>
-                </div>
-            </template>
-            <template #empty> Još nema unesenih tipova rabata. </template>
-        </DataTable>
-    </div>
+                        </DataTable>
+                    </div>
+                </template>
+                <template #empty> Još nema unesenih tipova rabata. </template>
+            </DataTable>
+        </template>
+    </Card>
 
     <Dialog
         v-model:visible="discountTypeDialog"

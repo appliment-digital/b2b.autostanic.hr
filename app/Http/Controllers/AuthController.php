@@ -75,6 +75,7 @@ class AuthController extends BaseController
                 'email' => 'required|email'
             ]);
 
+
             $user = User::where('email', $request->email)->first();
             if (!$user) {
 
@@ -89,15 +90,15 @@ class AuthController extends BaseController
                 if ($user->save()) {
                     $userData = array(
                         'email' => $user->email,
-                        'full_name' => $user->name,
+                        'full_name' => $user->name . " " . $user->last_name,
                         'random' => $random
                     );
                     // return $userData;
                     Mail::send('emails.reset_password', $userData, function ($message) use ($userData) {
-                        $message->from('noreply@prostoria.eu', 'Password Request');
+                        $message->from('sales@autostanic.hr', 'Resetiranje lozinke');
 
                         $message->to($userData['email'], $userData['full_name']);
-                        $message->subject('Reset Password Request (MetaBlink)');
+                        $message->subject('Zahtjev za resetiranje lozinke');
                     });
 
                     return response()->json([
@@ -123,7 +124,6 @@ class AuthController extends BaseController
 
     public function resetPassword(Request $request)
     {
-
         $request->validate([
             'email' => 'required|email',
             'verification_code' => 'required|integer',

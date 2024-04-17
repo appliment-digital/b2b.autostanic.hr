@@ -33,6 +33,14 @@ export default class UserService {
             });
     }
 
+    async forgotPassword(email) {
+        return Axios.post('/api/forgot-password', email);
+    }
+
+    async resetPassword(object) {
+        return Axios.post('/api/reset-password', object);
+    }
+
     async getAll(object) {
         return Axios.post(this.apiResourceEndpoint + '/getAll', object);
     }
