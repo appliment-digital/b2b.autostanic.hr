@@ -31,10 +31,12 @@ export default {
     methods: {
         closeDialog() {
             this.isDialogVisible = false;
+            this.user = {};
         },
         openDialog(user) {
             if (user) {
-                this.user = user.data;
+                this.user = user;
+                console.log(this.user);
             }
             this.isDialogVisible = true;
         },
@@ -199,7 +201,6 @@ export default {
                 tableStyle="min-width: 50rem"
                 paginator
                 dataKey="id"
-                selectionMode="single"
                 :value="users"
                 :rows="5"
                 :rowsPerPageOptions="[5, 10, 20, 50]"
@@ -228,13 +229,34 @@ export default {
                         </IconField>
                     </div>
                 </template>
-                <Column
-                    selectionMode="multiple"
-                    headerStyle="width: 3rem"
-                ></Column>
                 <Column field="name" header="Ime" sortable></Column>
                 <Column field="last_name" header="Prezime" sortable></Column>
                 <Column field="email" header="E-mail" sortable></Column>
+                <Column field="discount_types" header="Tip rabata" sortable>
+                    <template #body="{ data }">
+                        <span
+                            v-for="(discountType, index) in data.discount_types"
+                            :key="discountType.id"
+                        >
+                            {{ discountType.name }}
+                            <template
+                                v-if="index !== data.discount_types.length - 1"
+                                >,
+                            </template>
+                        </span>
+                    </template>
+                </Column>
+                <Column field="roles" header="Uloga" sortable>
+                    <template #body="{ data }">
+                        <span v-if="data.roles && data.roles.length > 0">
+                            <span v-if="data.roles[0].name === 'admin'">
+                                Administrator
+                            </span>
+                            <span v-else> Korisnik </span>
+                        </span>
+                        <span v-else> Korisnik </span>
+                    </template>
+                </Column>
                 <Column
                     field="bitrix_company_id"
                     header="Bitrix company ID"
@@ -250,20 +272,7 @@ export default {
                     header="Način plaćanja"
                     sortable
                 ></Column>
-                <Column field="discount_types" header="Tip rabata" sortable>
-                    <template #body="{ data }">
-                        <span
-                            v-for="(discountType, index) in data.discount_types"
-                            :key="discountType.id"
-                        >
-                            {{ discountType.name }}
-                            <template
-                                v-if="index !== data.discount_types.length - 1"
-                                >,
-                            </template>
-                        </span>
-                    </template>
-                </Column>
+
                 <Column field="active" header="Aktivan">
                     <template #body="{ data }">
                         <Checkbox
@@ -274,13 +283,13 @@ export default {
                     </template>
                 </Column>
                 <Column field="actions" header="Akcije">
-                    <template #body>
+                    <template #body="{ data }">
                         <div class="flex">
                             <Button
                                 class="mr-2"
                                 icon="pi pi-user-edit"
                                 aria-label="Edit"
-                                @click="handleTableButtonClick('edit')"
+                                @click="openDialog(data)"
                                 text
                                 raised
                                 rounded
@@ -289,6 +298,7 @@ export default {
                         </div>
                     </template>
                 </Column>
+                <template #empty> Još nema dodanih korisnika. </template>
             </DataTable>
         </template>
     </Card>

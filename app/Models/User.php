@@ -68,15 +68,15 @@ class User extends Authenticatable
             return "Lozinka treba imati bar 6 znakova.";
         }
 
-        return $data['discount_types'];
-
-        $discountTypeIds = array_column($data['discount_types'], 'id');
-        $user->discountTypes()->attach($discountTypeIds);
-
         $user->syncRoles($data["role"]["id"]);
 
         $user->save();
         $user->refresh();
+
+        if (!empty($data['discount_types'])) {
+            $discountTypeIds = array_column($data['discount_types'], 'id');
+            $user->discountTypes()->attach($discountTypeIds);
+        }
 
         return $user;
     }

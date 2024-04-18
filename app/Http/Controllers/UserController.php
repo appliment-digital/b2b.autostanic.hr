@@ -31,6 +31,7 @@ class UserController extends BaseController
             //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
 
             $userData = User::with('discountTypes')
+                ->with('roles')
                 ->orderBy('users.id', 'DESC')
                 ->get();
 
