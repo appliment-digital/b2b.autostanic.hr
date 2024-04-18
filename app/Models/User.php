@@ -92,26 +92,38 @@ class User extends Authenticatable
         $user->delivery_point = $data["delivery_point"];
         $user->payment_method = $data["payment_method"];
 
-        if (strlen($data["password"]) >= 6) {
+        if (isset($data["password"]) && strlen($data["password"]) >= 6) {
             $user->password = Hash::make($data["password"]);
+        } elseif (!isset($data["password"]) || strlen($data["password"]) == 0) {
+            // Keep the old password
         } else {
             return "Lozinka treba imati bar 6 znakova.";
         }
 
-        $discountTypeIds = array_column($data['discount_types'], 'id');
-        $user->discountTypes()->attach($discountTypeIds);
-
-        $user->syncRoles($data["role"]["id"]);
+        if (!empty($data['role'])) {
+            $user->syncRoles($data["role"]["id"]);
+        }
 
         $user->save();
         $user->refresh();
 
+        if (!empty($data['discount_types'])) {
+            $user->discountTypes()->detach();
+
+            $discountTypeIds = array_column($data['discount_types'], 'id');
+            $user->discountTypes()->attach($discountTypeIds);
+        }
+
         return $user;
     }
 
-    public static function deactivate($id)
+    public static function changeStatus($id, $data)
     {
         $user = self::find($id);
+
+        if ($data['status'] == 'activate') {
+            $user->active = 1;
+        }
 
         $user->active = 0;
 

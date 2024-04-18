@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/getAll', [UserController::class, 'getAll']);
     Route::get('/user/getRoles', [UserController::class, 'getRoles']);
     Route::post('/user/getCurrentUserData', [UserController::class, 'getCurrentUserData']);
+    Route::post('/user/changeStatus', [UserController::class, 'changeStatus']);
 
     //****************   DISCOUNT TYPE CONTOLLER ******************
     Route::get('/discountType/getAll', [DiscountTypeController::class, 'getAll']);

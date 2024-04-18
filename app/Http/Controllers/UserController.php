@@ -61,7 +61,9 @@ class UserController extends BaseController
     public function update(Request $request, $id)
     {
         try {
-            $user = User::updateUser($request, $id);
+            $user = User::updateUser($id, $request);
+
+            return $user;
 
             if ($user) {
                 $success['user'] =  $user;
@@ -75,11 +77,21 @@ class UserController extends BaseController
         }
     }
 
-    public function deactivate($id)
+    public function changeStatus(Request $request)
     {
         try {
 
-            return User::deactivate($id);
+            $user = User::changeStatus($request->id, $request);
+
+            if ($user->active) {
+                $success['user'] =  $user;
+                return $this->sendResponse($success, 'aktiviran korisnik.');
+            } else if (!$user->active) {
+                $success['user'] =  $user;
+                return $this->sendResponse($success, 'deaktiviran korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Izmjena statusa korisnika nije uspjela.']);
+            }
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }

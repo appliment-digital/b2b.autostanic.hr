@@ -35,8 +35,15 @@ export default {
         },
         openDialog(user) {
             if (user) {
+                if (user.discount_types && user.discount_types.length > 0) {
+                    user.discount_types.forEach((v) => delete v.pivot);
+                }
+                if (user.roles && user.roles.length > 0) {
+                    user.roles.forEach((v) => delete v.pivot);
+                    user.roles = user.roles[0];
+                }
+
                 this.user = user;
-                console.log(this.user);
             }
             this.isDialogVisible = true;
         },
@@ -96,8 +103,58 @@ export default {
         },
         getDiscountTypes() {
             discountTypeService.getAll().then((response) => {
+                response.data.data.forEach((v) => delete v.pivot);
+                response.data.data.forEach((v) => delete v.users);
                 this.discountTypes = response.data.data;
             });
+        },
+        changeStatus(user) {
+            userService.changeStatus(user).then((response) => {
+                if (response.data.success) {
+                    this.$toast.add({
+                        severity: 'success',
+                        summary: 'Uspješno',
+                        detail: response.data.message,
+                        life: 3000,
+                    });
+                    this.getAll();
+                } else {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Greška',
+                        detail: response.data.message,
+                        life: 3000,
+                    });
+                }
+            });
+        },
+        confirmDialog(user) {
+            console.log(user.active);
+            if (user.active == true) {
+                this.$confirm.require({
+                    group: 'templating',
+                    header: 'Potvrda',
+                    message:
+                        'Molim vas potvrdite da želite deaktivirati korisnika ' +
+                        user.name +
+                        ' ' +
+                        user.last_name,
+                    icon: 'pi pi-exclamation-circle',
+                    acceptIcon: 'pi pi-check',
+                    rejectIcon: 'pi pi-times',
+                    rejectClass: 'p-button-outlined p-button-sm',
+                    acceptClass: 'p-button-sm',
+                    rejectLabel: 'Odustani',
+                    acceptLabel: 'Potvrdi',
+                    accept: () => {
+                        this.changeStatus(user);
+                    },
+                    reject: () => {},
+                });
+            } else if (user.active == false) {
+                user.status = 'activate';
+                this.changeStatus(user);
+            }
         },
     },
     computed: {},
@@ -136,13 +193,25 @@ export default {
 
         <label>Uloga</label>
         <Dropdown
-            v-model="user.role"
+            v-model="user.roles"
             class="w-full mt-2 mb-3"
-            filter
             :options="roles"
             optionLabel="name"
             placeholder="Odaberite ulogu"
-        />
+        >
+            <!-- <template #value="slotProps">
+                <div v-if="slotProps.value && slotProps.value.name == 'admin'">
+                    <div>{{ slotProps.value.name }}</div>
+                </div>
+                <span v-else>
+                    {{ slotProps.placeholder }}
+                </span>
+            </template>
+            <template #option="slotProps">
+                <div v-if="slotProps.option.name == 'admin'">Administrator</div>
+                <div v-else>Korisnik</div>
+            </template> -->
+        </Dropdown>
 
         <label>Tip rabata</label>
         <MultiSelect
@@ -276,6 +345,7 @@ export default {
                 <Column field="active" header="Aktivan">
                     <template #body="{ data }">
                         <Checkbox
+                            @click="confirmDialog(data)"
                             class="custom-checkbox"
                             v-model="data.active"
                             :binary="true"
@@ -300,6 +370,20 @@ export default {
                 </Column>
                 <template #empty> Još nema dodanih korisnika. </template>
             </DataTable>
+
+            <ConfirmDialog group="templating">
+                <template #message="slotProps">
+                    <div
+                        class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border"
+                    >
+                        <i
+                            :class="slotProps.message.icon"
+                            class="text-5xl text-primary-500"
+                        ></i>
+                        <p>{{ slotProps.message.message }}</p>
+                    </div>
+                </template>
+            </ConfirmDialog>
         </template>
     </Card>
 </template>
