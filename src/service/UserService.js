@@ -50,7 +50,10 @@ export default class UserService {
     }
 
     async update(object) {
-        return Axios.post(this.apiResourceEndpoint + '/update', object);
+        return Axios.put(
+            this.apiResourceEndpoint + '/update/' + object.id,
+            object,
+        );
     }
 
     async deactivate(object) {
@@ -59,5 +62,9 @@ export default class UserService {
 
     async getCurrentUserData() {
         return Axios.post(this.apiResourceEndpoint + '/getCurrentUserData');
+    }
+
+    async getRoles() {
+        return Axios.get(this.apiResourceEndpoint + '/getRoles');
     }
 }

@@ -31,6 +31,7 @@ class UserController extends BaseController
             //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
 
             $userData = User::role('customer')
+                ->with('discountTypes')
                 ->orderBy('users.id', 'DESC')
                 ->get();
 
@@ -44,13 +45,14 @@ class UserController extends BaseController
     {
         try {
             $user = User::add($request);
-            if ($user) {
-                $success['user'] =  $user;
-
-                return $this->sendResponse($success, 'dodan korisnik.');
-            } else {
-                return $this->sendError(['error' => 'Spremanje korisnika nije uspjelo.']);
+            if ($user === "Lozinka treba imati bar 6 znakova.") {
+                return $this->sendError(['error' => $user]);
+            } elseif (isset($user['error'])) {
+                return $this->sendError($user, 'Greška prilikom dodavanja korisnika.');
             }
+
+            $success['user'] =  $user;
+            return $this->sendResponse($success, 'Korisnik je uspješno dodan.');
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
@@ -86,5 +88,14 @@ class UserController extends BaseController
     public function getCurrentUserData()
     {
         return auth()->user();
+    }
+
+    public function getRoles()
+    {
+        try {
+            return response()->json(\Spatie\Permission\Models\Role::all());
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+        }
     }
 }

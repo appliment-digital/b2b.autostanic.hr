@@ -1,82 +1,104 @@
 <script>
-import { users } from '@/users.js';
+import { FilterMatchMode } from 'primevue/api';
+import UserService from '../../service/UserService.js';
+import DiscountTypeService from '@/service/DiscountTypeService.js';
+
+const userService = new UserService();
+const discountTypeService = new DiscountTypeService();
 
 export default {
+    created() {
+        //set filters for datatable
+        this.filters = {
+            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        };
+    },
+    mounted() {
+        this.getAll();
+        this.getRoles();
+        this.getDiscountTypes();
+    },
     data() {
         return {
             isDialogVisible: false,
-
-            dialogTitle: '',
-            dialogFields: {
-                firstName: '',
-                lastName: '',
-                email: '',
-                bitrixCompanyID: '',
-                deliveryAddress: '',
-                paymentType: '',
-                discountType: '',
-            },
-
-            users: users,
-
+            users: [],
+            user: {},
             selectedUser: null,
-
-            searchQuery: '',
+            roles: [],
+            discountTypes: [],
         };
     },
     methods: {
-        handleTableButtonClick(button, event) {
-            if (button === 'add') {
-                this.setDialogTitle('Dodaj korisnika');
-                this.setDialogFields(null);
-                this.openDialog();
-            }
-
-            if (button === 'edit') {
-                this.setDialogTitle('Uredi korisnika');
-                this.setDialogFields(event.data);
-                this.openDialog();
-            }
-        },
-
-        handleCloseDialogClick() {
-            this.closeDialog();
-        },
-
         closeDialog() {
             this.isDialogVisible = false;
         },
-
-        openDialog() {
+        openDialog(user) {
+            if (user) {
+                this.user = user.data;
+            }
             this.isDialogVisible = true;
         },
-
-        setDialogTitle(title) {
-            this.dialogTitle = title;
+        getRoles() {
+            userService.getRoles().then((response) => {
+                this.roles = response.data;
+            });
         },
-
-        setDialogFields(data) {
-            Object.keys(this.dialogFields).forEach((key) => {
-                if (!data) {
-                    this.dialogFields[key] = "";
-                } else {
-                    this.dialogFields[key] = data[key];
-                }
+        saveUser() {
+            if (!this.user.id) {
+                userService.add(this.user).then((response) => {
+                    console.log(response.data);
+                    if (response.data.success) {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                        this.closeDialog();
+                        this.getAll();
+                    } else {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                    }
+                });
+            } else {
+                userService.update(this.user).then((response) => {
+                    if (response.data.success) {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                        this.closeDialog();
+                        this.getAll();
+                    } else {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                    }
+                });
+            }
+        },
+        getAll() {
+            userService.getAll().then((response) => {
+                this.users = response.data.data;
+            });
+        },
+        getDiscountTypes() {
+            discountTypeService.getAll().then((response) => {
+                this.discountTypes = response.data.data;
             });
         },
     },
-    computed: {
-        filteredUsers() {
-            return this.users.filter((user) =>
-                Object.values(user).some((value) =>
-                    value
-                        .toString()
-                        .toLowerCase()
-                        .includes(this.searchQuery.toLowerCase()),
-                ),
-            );
-        },
-    },
+    computed: {},
 };
 </script>
 
@@ -85,38 +107,73 @@ export default {
         modal
         dismissableMask
         closeOnEscape
-        :header="dialogTitle"
+        header="Detalji korisnika"
         :visible="isDialogVisible"
         :style="{ width: '30rem' }"
         @update:visible="closeDialog"
     >
         <!-- Dialog Input: First Name -->
-        <label for="firstName">Ime</label>
-        <InputText v-model="dialogFields.firstName" id="firstName" class="w-full mt-2 mb-3" type="text" />
+        <label>Ime</label>
+        <InputText v-model="user.name" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: Last Name -->
-        <label for="lastName">Prezime</label>
-        <InputText v-model="dialogFields.lastName" id="lastName" class="w-full mt-2 mb-3" type="text" />
+        <label>Prezime</label>
+        <InputText v-model="user.last_name" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: E-mai -->
-        <label for="email">E-mail</label>
-        <InputText v-model="dialogFields.email" id="email" class="w-full mt-2 mb-3" type="text" />
+        <label>E-mail</label>
+        <InputText v-model="user.email" class="w-full mt-2 mb-3" />
+
+        <label>Lozinka</label>
+        <Password
+            v-model="user.password"
+            class="w-full mt-2 mb-3"
+            inputClass="w-full"
+            :feedback="false"
+        />
+
+        <label>Uloga</label>
+        <Dropdown
+            v-model="user.role"
+            class="w-full mt-2 mb-3"
+            filter
+            :options="roles"
+            optionLabel="name"
+            placeholder="Odaberite ulogu"
+        />
+
+        <label>Tip rabata</label>
+        <MultiSelect
+            v-model="user.discountTypes"
+            display="chip"
+            :options="discountTypes"
+            optionLabel="name"
+            placeholder="Odaberite tip rabata"
+            :maxSelectedLabels="3"
+            class="w-full mt-2 mb-3"
+        >
+            <template #option="slotProps">
+                <span>
+                    {{ slotProps.option.name }}
+                </span>
+            </template>
+        </MultiSelect>
 
         <!-- Dialog Input: Bitrix Company ID -->
-        <label for="bitrixCompanyID">Bitrix Company ID</label>
-        <InputText v-model="dialogFields.bitrixCompanyID" id="bitrixCompanyID" class="w-full mt-2 mb-3" type="text" />
+        <label>Bitrix Company ID</label>
+        <InputNumber
+            v-model="user.bitrix_company_id"
+            class="w-full mt-2 mb-3"
+            :min="1"
+        />
 
         <!-- Dialog Input: Delivery Address -->
-        <label for="deliveryAddress">Mjesto isporuke</label>
-        <InputText v-model="dialogFields.deliveryAddress" id="deliveryAddress" class="w-full mt-2 mb-3" type="text" />
+        <label>Mjesto isporuke</label>
+        <InputText v-model="user.delivery_point" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: Payment Type -->
-        <label for="paymentType">Način plaćanja</label>
-        <InputText v-model="dialogFields.paymentType" id="paymentType" class="w-full mt-2 mb-3" type="text" />
-
-        <!-- Dialog Input: Discount Type -->
-        <label for="discountType">Tip rabata</label>
-        <InputText v-model="dialogFields.discountType" id="discountType" class="w-full mt-2 mb-3" type="text" />
+        <label>Način plaćanja</label>
+        <InputText v-model="user.payment_method" class="w-full mt-2 mb-3" />
 
         <div class="flex justify-content-end">
             <Button
@@ -124,14 +181,14 @@ export default {
                 severity="danger"
                 label="Odustani"
                 style="min-width: 100px"
-                @click="handleCloseDialogClick"
+                @click="closeDialog()"
             />
             <Button
                 class="block mt-5"
                 severity="success"
                 label="Spremi"
                 style="min-width: 100px"
-                @click=""
+                @click="saveUser()"
             />
         </div>
     </Dialog>
@@ -143,11 +200,11 @@ export default {
                 paginator
                 dataKey="id"
                 selectionMode="single"
-                :value="filteredUsers"
+                :value="users"
                 :rows="5"
                 :rowsPerPageOptions="[5, 10, 20, 50]"
                 :selection="selectedUser"
-                @row-click="(e) => handleTableButtonClick('edit', e)"
+                @row-click="(e) => openDialog(e)"
             >
                 <template #header>
                     <div class="flex justify-content-between">
@@ -155,7 +212,7 @@ export default {
                             label="Dodaj"
                             icon="pi pi-plus"
                             class="p-button"
-                            @click="handleTableButtonClick('add')"
+                            @click="openDialog()"
                             outlined
                         />
 
@@ -175,34 +232,48 @@ export default {
                     selectionMode="multiple"
                     headerStyle="width: 3rem"
                 ></Column>
-                <Column field="firstName" header="Ime" sortable></Column>
-                <Column field="lastName" header="Prezime" sortable></Column>
+                <Column field="name" header="Ime" sortable></Column>
+                <Column field="last_name" header="Prezime" sortable></Column>
                 <Column field="email" header="E-mail" sortable></Column>
                 <Column
-                    field="deliveryPlace"
+                    field="bitrix_company_id"
+                    header="Bitrix company ID"
+                    sortable
+                ></Column>
+                <Column
+                    field="delivery_point"
                     header="Mjesto isporuke"
                     sortable
                 ></Column>
                 <Column
-                    field="paymentType"
+                    field="payment_type"
                     header="Način plaćanja"
                     sortable
                 ></Column>
-                <Column
-                    field="discountType"
-                    header="Tip rabata"
-                    sortable
-                ></Column>
-                <Column field="isActive" header="Aktivan">
+                <Column field="discount_types" header="Tip rabata" sortable>
+                    <template #body="{ data }">
+                        <span
+                            v-for="(discountType, index) in data.discount_types"
+                            :key="discountType.id"
+                        >
+                            {{ discountType.name }}
+                            <template
+                                v-if="index !== data.discount_types.length - 1"
+                                >,
+                            </template>
+                        </span>
+                    </template>
+                </Column>
+                <Column field="active" header="Aktivan">
                     <template #body="{ data }">
                         <Checkbox
                             class="custom-checkbox"
-                            v-model="data.isActive"
+                            v-model="data.active"
                             :binary="true"
                         />
                     </template>
                 </Column>
-                <!-- <Column field="actions" header="Akcije">
+                <Column field="actions" header="Akcije">
                     <template #body>
                         <div class="flex">
                             <Button
@@ -215,17 +286,9 @@ export default {
                                 rounded
                                 outlined
                             />
-                            <Button
-                                icon="pi pi-times"
-                                aria-label="Remove"
-                                text
-                                raised
-                                rounded
-                                outlined
-                            />
                         </div>
                     </template>
-                </Column> -->
+                </Column>
             </DataTable>
         </template>
     </Card>
