@@ -144,7 +144,7 @@ export default {
 
         <label>Tip rabata</label>
         <MultiSelect
-            v-model="user.discountTypes"
+            v-model="user.discount_types"
             display="chip"
             :options="discountTypes"
             optionLabel="name"
@@ -246,7 +246,7 @@ export default {
                     sortable
                 ></Column>
                 <Column
-                    field="payment_type"
+                    field="payment_method"
                     header="Način plaćanja"
                     sortable
                 ></Column>

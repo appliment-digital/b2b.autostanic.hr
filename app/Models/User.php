@@ -68,6 +68,11 @@ class User extends Authenticatable
             return "Lozinka treba imati bar 6 znakova.";
         }
 
+        return $data['discount_types'];
+
+        $discountTypeIds = array_column($data['discount_types'], 'id');
+        $user->discountTypes()->attach($discountTypeIds);
+
         $user->syncRoles($data["role"]["id"]);
 
         $user->save();
@@ -90,10 +95,13 @@ class User extends Authenticatable
         if (strlen($data["password"]) >= 6) {
             $user->password = Hash::make($data["password"]);
         } else {
-            return ['error' => "Password needs to be at least 6 or more characters"];
+            return "Lozinka treba imati bar 6 znakova.";
         }
 
-        $user->syncRoles($data["role"]);
+        $discountTypeIds = array_column($data['discount_types'], 'id');
+        $user->discountTypes()->attach($discountTypeIds);
+
+        $user->syncRoles($data["role"]["id"]);
 
         $user->save();
         $user->refresh();
