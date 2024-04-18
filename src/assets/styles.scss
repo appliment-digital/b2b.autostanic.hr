@@ -11,7 +11,7 @@
 /* Demos */
 @import '@/assets/demo/demo.scss';
 
-//Manrope font
+// font 
 @import "@fontsource/manrope";
 @import "@fontsource/manrope/200.css";
 @import "@fontsource/manrope/300.css";
@@ -21,25 +21,12 @@
 @import "@fontsource/manrope/700.css";
 @import "@fontsource/manrope/800.css";
 
-*
-{
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
     font-family: 'Manrope';
-}
-
-.layout-config-button
-{
-    display: none;
-}
-
-.layout-topbar .topbar-menu li button span
-{
-    color: inherit;
-}
-
-.layout-breadcrumb ol {
-    gap: 0.3rem;
-}
-
-.layout-content-wrapper {
-    padding-top: 1rem;
 }

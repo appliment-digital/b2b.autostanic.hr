@@ -45,6 +45,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function discountTypes()
+    {
+        return $this->belongsToMany(DiscountType::class);
+    }
+
     public static function add($data)
     {
         $user = new self();
@@ -54,14 +59,21 @@ class User extends Authenticatable
         $user->email = $data["email"];
         $user->email = $data["email"];
         $user->bitrix_company_id = $data["bitrix_company_id"];
+        $user->delivery_point = $data["delivery_point"];
+        $user->payment_method = $data["payment_method"];
 
         if (strlen($data["password"]) >= 6) {
             $user->password = Hash::make($data["password"]);
         } else {
-            return ['error' => "Password needs to be at least 6 or more characters"];
+            return "Lozinka treba imati bar 6 znakova.";
         }
 
-        $user->syncRoles(2);
+        return $data['discount_types'];
+
+        $discountTypeIds = array_column($data['discount_types'], 'id');
+        $user->discountTypes()->attach($discountTypeIds);
+
+        $user->syncRoles($data["role"]["id"]);
 
         $user->save();
         $user->refresh();
@@ -77,6 +89,19 @@ class User extends Authenticatable
         $user->last_name = $data["last_name"];
         $user->email = $data["email"];
         $user->bitrix_company_id = $data["bitrix_company_id"];
+        $user->delivery_point = $data["delivery_point"];
+        $user->payment_method = $data["payment_method"];
+
+        if (strlen($data["password"]) >= 6) {
+            $user->password = Hash::make($data["password"]);
+        } else {
+            return "Lozinka treba imati bar 6 znakova.";
+        }
+
+        $discountTypeIds = array_column($data['discount_types'], 'id');
+        $user->discountTypes()->attach($discountTypeIds);
+
+        $user->syncRoles($data["role"]["id"]);
 
         $user->save();
         $user->refresh();

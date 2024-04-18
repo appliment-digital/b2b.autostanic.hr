@@ -33,6 +33,14 @@ export default class UserService {
             });
     }
 
+    async forgotPassword(email) {
+        return Axios.post('/api/forgot-password', email);
+    }
+
+    async resetPassword(object) {
+        return Axios.post('/api/reset-password', object);
+    }
+
     async getAll(object) {
         return Axios.post(this.apiResourceEndpoint + '/getAll', object);
     }
@@ -42,10 +50,21 @@ export default class UserService {
     }
 
     async update(object) {
-        return Axios.post(this.apiResourceEndpoint + '/update', object);
+        return Axios.put(
+            this.apiResourceEndpoint + '/update/' + object.id,
+            object,
+        );
     }
 
     async deactivate(object) {
         return Axios.post(this.apiResourceEndpoint + '/deactivate', object);
+    }
+
+    async getCurrentUserData() {
+        return Axios.post(this.apiResourceEndpoint + '/getCurrentUserData');
+    }
+
+    async getRoles() {
+        return Axios.get(this.apiResourceEndpoint + '/getRoles');
     }
 }

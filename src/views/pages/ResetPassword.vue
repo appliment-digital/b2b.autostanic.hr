@@ -3,16 +3,28 @@ import router from '@/router';
 
 export default {
     data() {
-        return {};
+        return {
+            email: null,
+            verificationCode: null,
+            password: null,
+            passwordConfirm: null,
+        };
     },
     methods: {
         changeMessage() {
             this.message = 'Vue.js is awesome!';
         },
-
-        handleForgotPasswordClick() {
-            // router.push('/forgot');
-            console.log('hi');
+        forgotPassword() {
+            userService
+                .forgotPassword({
+                    email: this.email,
+                    verification_code: this.verificationCode,
+                    password: this.password,
+                })
+                .then((data) => {
+                    router.push('/');
+                })
+                .catch((response) => {});
         },
     },
 };
@@ -22,33 +34,32 @@ export default {
     <h2 class="text-center">Postavi Lozinku</h2>
 
     <div class="flex flex-column sm:w-3 mx-auto">
-
         <div class="mt-6">
             <InputText
                 class="block w-full mb-3"
                 type="text"
-                v-model="value"
+                v-model="email"
                 placeholder="email"
             />
 
             <InputText
                 class="block w-full mb-3"
                 type="text"
-                v-model="value"
+                v-model="verificationCode"
                 placeholder="verification code"
             />
 
             <InputText
                 class="block w-full mb-3"
                 type="text"
-                v-model="value"
+                v-model="password"
                 placeholder="new password"
             />
 
             <InputText
                 class="block w-full mb-5"
                 type="text"
-                v-model="value"
+                v-model="passwordConfirm"
                 placeholder="confirm password"
             />
 
@@ -58,7 +69,6 @@ export default {
                 @click="handleResetButtonClick"
             />
         </div>
-
     </div>
 </template>
 

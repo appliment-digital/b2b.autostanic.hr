@@ -22,8 +22,7 @@ class AuthController extends BaseController
 
                 $authUser = Auth::user();
 
-                if ($authUser->deactivated == 1)
-                {
+                if ($authUser->deactivated == 1) {
                     return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
                 }
 
@@ -45,38 +44,10 @@ class AuthController extends BaseController
     {
         $request->session()->flush();
         $id = (int)explode('|', $request->token)[0];
-        if (auth()->user()->tokens()->where('id', $id)->delete())
-        {
+        if (auth()->user()->tokens()->where('id', $id)->delete()) {
             return ['message' => 'Logged out'];
         }
     }
-
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
-            'confirm_password' => 'required|same:password',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Error validation', $validator->errors());
-        }
-
-        $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
-        $user = User::create($input);
-        $success['token'] =  $user->createToken('MyAuthApp')->plainTextToken;
-        $success['name'] =  $user->name;
-        $success['last_name'] =  $user->last_name;
-
-
-        return $this->sendResponse($success, 'User created successfully.');
-    }
-
-
 
     public function getUserName(Request $request)
     {
@@ -104,6 +75,7 @@ class AuthController extends BaseController
                 'email' => 'required|email'
             ]);
 
+
             $user = User::where('email', $request->email)->first();
             if (!$user) {
 
@@ -118,15 +90,15 @@ class AuthController extends BaseController
                 if ($user->save()) {
                     $userData = array(
                         'email' => $user->email,
-                        'full_name' => $user->name,
+                        'full_name' => $user->name . " " . $user->last_name,
                         'random' => $random
                     );
                     // return $userData;
                     Mail::send('emails.reset_password', $userData, function ($message) use ($userData) {
-                        $message->from('noreply@prostoria.eu', 'Password Request');
+                        $message->from('sales@autostanic.hr', 'Resetiranje lozinke');
 
                         $message->to($userData['email'], $userData['full_name']);
-                        $message->subject('Reset Password Request (MetaBlink)');
+                        $message->subject('Zahtjev za resetiranje lozinke');
                     });
 
                     return response()->json([
@@ -152,7 +124,6 @@ class AuthController extends BaseController
 
     public function resetPassword(Request $request)
     {
-
         $request->validate([
             'email' => 'required|email',
             'verification_code' => 'required|integer',

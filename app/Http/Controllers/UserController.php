@@ -28,10 +28,10 @@ class UserController extends BaseController
     public function getAll()
     {
         try {
-
             //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
-            $user = new User();
-            $userData = $user::role('customer')->orderBy('users.id', 'DESC')
+
+            $userData = User::with('discountTypes')
+                ->orderBy('users.id', 'DESC')
                 ->get();
 
             return response()->json(['data' => $userData]);
@@ -43,7 +43,15 @@ class UserController extends BaseController
     public function add(Request $request)
     {
         try {
-            return User::add($request);
+            $user = User::add($request);
+            if ($user === "Lozinka treba imati bar 6 znakova.") {
+                return $this->sendError(['error' => $user]);
+            } elseif (isset($user['error'])) {
+                return $this->sendError($user, 'Greška prilikom dodavanja korisnika.');
+            }
+
+            $success['user'] =  $user;
+            return $this->sendResponse($success, 'Korisnik je uspješno dodan.');
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
@@ -52,7 +60,15 @@ class UserController extends BaseController
     public function update(Request $request, $id)
     {
         try {
-            return User::updateUser($request, $id);
+            $user = User::updateUser($request, $id);
+
+            if ($user) {
+                $success['user'] =  $user;
+
+                return $this->sendResponse($success, 'ažuriran korisnik.');
+            } else {
+                return $this->sendError(['error' => 'Ažuriranje korisnika nije uspjelo.']);
+            }
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
@@ -63,6 +79,20 @@ class UserController extends BaseController
         try {
 
             return User::deactivate($id);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+        }
+    }
+
+    public function getCurrentUserData()
+    {
+        return auth()->user();
+    }
+
+    public function getRoles()
+    {
+        try {
+            return response()->json(\Spatie\Permission\Models\Role::all());
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
         }
