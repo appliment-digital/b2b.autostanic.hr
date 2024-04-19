@@ -38,16 +38,16 @@ export default {
 
 <template>
     <div
-        class="flex flex-wrap row-gap-2 align-items-center sm:flex-row sm:grid sm:flex-row sm:flex-nowrap"
+        class="flex flex-wrap row-gap-2 align-items-end sm:flex-row sm:grid sm:flex-row sm:flex-nowrap"
     >
         <!-- Header: Logo -->
-        <div class="col-6 sm:col">
-            <img src="images/as-logo.png" class="logo" style="height: 48px" />
+        <div class="p-0 col-6 sm:col p-0" style="height: 48px">
+            <img src="images/as-logo.png" class="logo" />
         </div>
 
         <!-- Header: Search Bar -->
         <div
-            class="flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
+            class="p-0 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
@@ -56,7 +56,7 @@ export default {
         </div>
 
         <!-- Header: User Info & Shopping Cart -->
-        <div class="flex-order-1 col-6 flex justify-content-end sm:col">
+        <div class="p-0 flex-order-1 col-6 flex justify-content-end sm:col">
             <div class="flex relative">
                 <Button
                     class="mr-2"
@@ -72,4 +72,8 @@ export default {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.logo {
+    max-height: 100%
+}
+</style>

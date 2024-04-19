@@ -12,11 +12,6 @@ import UserService from '../service/UserService.js';
 const userService = new UserService();
 
 export default {
-    props: ['userInitials'],
-    mounted() {
-        //console.log(this.userInitials);
-    },
-    updated() {},
     data() {
         return {};
     },
@@ -66,7 +61,7 @@ export default {
                 style="
                     list-style: none;
                     top: calc(100% + 8px);
-                    right: -7px;
+                    right: 0;
                     border-bottom-right-radius: 0 !important;
                 "
             >
