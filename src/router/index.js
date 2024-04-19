@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Layout from '@/components/Layout.vue';
+import AdminLayout from '@/components/AdminLayout.vue';
 import Login from '@/views/pages/Login.vue';
 import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
@@ -9,7 +10,6 @@ import Home from '@/views/pages/Home.vue';
 const routes = [
     {
         path: '/',
-        redirect: '/login',
         component: Layout,
         children: [
             {
@@ -28,8 +28,14 @@ const routes = [
                 path: '/reset',
                 component: ResetPassword,
             },
+        ],
+    },
+    {
+        path: '/admin',
+        component: AdminLayout,
+        children: [
             {
-                path: '/admin',
+                path: '',
                 component: Admin,
             },
         ],
@@ -41,7 +47,7 @@ const router = createRouter({
     routes,
     scrollBehavior() {
         return { left: 0, top: 0 };
-    }
+    },
 });
 
 export default router;

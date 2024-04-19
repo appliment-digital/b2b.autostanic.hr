@@ -7,10 +7,12 @@
 
 <style scoped>
 .layout {
-    max-width: 1200px;
+    max-width: 1460px;
     margin: 0 auto;
     margin-top: 2rem;
     border-radius: 4px;
-    padding: 1rem;
+    margin-left: 80px;
+    display: grid;
+    place-content: center;
 }
 </style>
