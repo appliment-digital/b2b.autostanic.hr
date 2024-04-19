@@ -13,7 +13,7 @@ const routes = [
         component: Layout,
         children: [
             {
-                path: '/home',
+                path: '/',
                 component: Home,
             },
             {
@@ -41,7 +41,7 @@ const router = createRouter({
     routes,
     scrollBehavior() {
         return { left: 0, top: 0 };
-    }
+    },
 });
 
 export default router;

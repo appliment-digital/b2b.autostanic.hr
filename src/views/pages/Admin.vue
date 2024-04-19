@@ -2,6 +2,10 @@
 // primevue
 import { FilterMatchMode } from 'primevue/api';
 
+// pinia
+import { mapStores } from 'pinia';
+import { useUserStore } from '@/store/userStore.js';
+
 // services
 import UserService from '@/service/UserService.js';
 
@@ -22,9 +26,7 @@ export default {
             global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         };
     },
-    mounted() {
-        // this.getAll();
-    },
+    mounted() {},
     data() {
         return {
             // display tables based on icon click
@@ -35,6 +37,9 @@ export default {
 
             filters: {},
         };
+    },
+    computed: {
+        ...mapStores(useUserStore),
     },
     methods: {
         handleTableChangeClick(icon) {
@@ -47,6 +52,9 @@ export default {
                 this.showTables.users = false;
                 this.showTables.discounts = true;
             }
+        },
+        handleLogoutClick() {
+            this.logout();
         },
 
         add() {
@@ -62,8 +70,12 @@ export default {
                 this.users = response.data.data;
             });
         },
+        logout() {
+            userService.logout().then((response) => {
+                this.$router.push('/login');
+            });
+        },
     },
-    computed: {},
 };
 </script>
 
@@ -84,17 +96,29 @@ export default {
         style="width: 80px; transition: none"
     >
         <Button
-            class="block mx-auto mt-2 mb-7"
+            :label="userStore.initials"
+            v-tooltip="userStore.fullName"
+            class="mx-auto mt-2 mr-2 flex align-items-center justify-content-center"
+            style="width: 42px; height: 42px"
+            severity="secondary"
+            rounded
+            raised
+            text
+        />
+
+        <Button
+            class="block mx-auto mt-2 mb-7 flex align-items-center"
             severity="secondary"
             icon="pi pi-sign-out"
             v-tooltip="'Logout'"
+            @click="handleLogoutClick"
             rounded
             text
             raised
         />
 
         <Button
-            class="block mx-auto mb-3"
+            class="block mx-auto mb-3 flex align-items-center"
             severity="secondary"
             icon="pi pi-user"
             v-tooltip="'Korisnici'"
@@ -103,13 +127,15 @@ export default {
         />
 
         <Button
-            class="block mx-auto mb-3"
+            class="block mx-auto mb-3 flex align-items-center"
             severity="success"
             icon="pi pi-wallet"
             v-tooltip="'Kategorije popusta'"
             @click="handleTableChangeClick('discounts')"
             rounded
         />
+
+        <!-- 
         <Button
             v-tooltip="'Baneri'"
             class="block mx-auto mb-3"
@@ -117,13 +143,14 @@ export default {
             icon="pi pi-globe"
             rounded
         />
+
         <Button
             v-tooltip="'Objave'"
             severity="help"
             class="block mx-auto mb-3"
             icon="pi pi-megaphone"
             rounded
-        />
+        /> -->
     </Sidebar>
 </template>
 

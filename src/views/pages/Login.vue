@@ -1,14 +1,25 @@
 <script>
+// vue-router
 import router from '@/router';
+
+// pinia
+import { mapStores } from 'pinia';
+import { useUserStore } from '@/store/userStore.js';
+
+// services
 import UserService from '../../service/UserService.js';
 
 const userService = new UserService();
+
 export default {
     data() {
         return {
             email: null,
             password: null,
         };
+    },
+    computed: {
+        ...mapStores(useUserStore),
     },
     methods: {
         changeMessage() {
@@ -22,10 +33,22 @@ export default {
         login() {
             userService
                 .login(this.email, this.password)
-                .then((data) => {
-                    if (data && data.success) {
-                        // redirect to dashboard
-                        this.$router.push('/admin');
+                .then((response) => {
+                    console.log({response});
+                    if (response && response.success) {
+
+                        // store user data to global store
+                        const {data: userData} = response
+                        try {
+                            
+                        this.userStore.addUser(userData)
+                        } catch (error) {
+                            console.error(error);
+                            
+                        }
+
+                        // redirect
+                        this.$router.push('/');
                     } else {
                         this.$toast.add({
                             severity: 'error',
@@ -77,7 +100,8 @@ export default {
                 @click="handleForgotPasswordClick"
                 label=""
                 class="underline text-300 flex align-items-center cursor-pointer"
-            >Zaboravljena lozinka?</a>
+                >Zaboravljena lozinka?</a
+            >
             <Button @click="login()" label="Submit" class="button--submit" />
         </div>
     </div>

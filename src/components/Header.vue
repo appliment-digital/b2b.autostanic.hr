@@ -1,22 +1,26 @@
 <script>
+// services
 import UserService from '../service/UserService.js';
-import router from '@/router';
+
+// pinia
+import { mapStores } from 'pinia';
+import { useUserStore } from '@/store/userStore.js';
 
 const userService = new UserService();
 
 export default {
-    mounted() {
-        this.getCurrentUserData();
-    },
-    updated() {
-        console.log('hello');
-    },
+    mounted() {},
+    updated() {},
     data() {
         return {
             userData: null,
-            loggedUser: "",
-            loggedUserInitials: "",
+            loggedUser: '',
+            loggedUserInitials: '',
         };
+    },
+    watch: {},
+    computed: {
+        ...mapStores(useUserStore),
     },
     methods: {
         logout() {
@@ -24,20 +28,6 @@ export default {
                 this.$router.push('/login');
             });
         },
-        getCurrentUserData() {
-            console.log('getting current user data..');
-
-            userService.getCurrentUserData().then((response) => {
-                this.userData = response.data;
-
-                const name = this.userData.name;
-                const lastName = this.userData.last_name;
-
-                this.loggedUser = `${name} ${lastName}`;
-                this.loggedUserInitials = `${name[0]} ${lastName[0]}`;
-            });
-        },
-       
     },
 };
 </script>
@@ -65,20 +55,19 @@ export default {
             <div class="flex">
                 <Button
                     v-tooltip.top="{
-                        value: loggedUser,
+                        value: userStore.fullName,
                         showDelay: 0,
                         hideDelay: 300,
                     }"
-                    class="block mr-2"
+                    :label="userStore.initials"
+                    class="test-size block mr-2"
                     severity="primary"
-                    icon="pi pi-user"
-                    :label="loggedUserInitials"
                     rounded
                     raised
                     text
                 />
                 <Button
-                    class="block mr-2"
+                    class="mr-2"
                     severity="secondary"
                     icon="pi pi-shopping-cart"
                     rounded
@@ -87,7 +76,7 @@ export default {
                 />
                 <Button
                     @click="logout()"
-                    class="block"
+                    class=""
                     severity="secondary"
                     icon="pi pi-sign-out"
                     rounded
@@ -99,4 +88,10 @@ export default {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.test-size {
+    padding: 0;
+    width: 42px;
+    height: 42px;
+}
+</style>
