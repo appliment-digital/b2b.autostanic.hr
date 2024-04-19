@@ -1,7 +1,7 @@
 <script>
 // vue-router
 import router from '@/router';
-
+import axios from 'axios';
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -29,32 +29,57 @@ export default {
         handleForgotPasswordClick() {
             router.push('/forgot');
         },
-
+        // login() {
+        //     axios
+        //         .post('api/login', {
+        //             email: this.email,
+        //             password: this.password,
+        //         })
+        //         .then((response) => {
+        //             console.log(response.data);
+        //             // If login successful
+        //             if (response.data.success) {
+        //                 // You can also redirect the user if needed
+        //             } else {
+        //                 // If login unsuccessful
+        //             }
+        //         })
+        //         .catch((error) => {
+        //             console.error('Error:', error);
+        //         });
+        // },
         login() {
             userService
                 .login(this.email, this.password)
-                .then((response) => {
-                    if (response && response.success) {
-                        // store user data to the global store
-                        const {data: userData} = response
-                        this.userStore.addUser(userData)
-
-                        // redirect
-                        this.$router.push('/');
-                    } else {
+                .then((data) => {
+                    console.log('then', data);
+                    if (data.error) {
                         this.$toast.add({
                             severity: 'error',
                             summary: 'Error',
-                            detail: 'Login failed',
+                            detail: data.error,
                             life: 3000,
                         });
                     }
+                    if (data.success) {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: data.message,
+                            life: 3000,
+                        });
+                        const { data: userData } = data;
+                        this.userStore.addUser(userData);
+                        // redirect
+                        this.$router.push('/');
+                    }
                 })
-                .catch((response) => {
+                .catch((error) => {
+                    //console.log(error.data);
                     this.$toast.add({
                         severity: 'error',
-                        summary: 'Error',
-                        detail: 'Login failed',
+                        summary: 'Greška',
+                        detail: error.data.error,
                         life: 3000,
                     });
                 });

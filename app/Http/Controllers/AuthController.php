@@ -16,28 +16,27 @@ class AuthController extends BaseController
 {
     public function login(Request $request)
     {
-        try {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
 
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            $authUser = Auth::user();
 
-                $authUser = Auth::user();
-
-                if ($authUser->active == 0) {
-                    return $this->sendError(['error' => 'nemate pravo pristupa']);
-                }
-
-                $success['token'] =  $authUser->createToken('MyAuthApp')->plainTextToken;
-                $success['id'] =  $authUser->id;
-                $success['name'] =  $authUser->name;
-                $success['last_name'] =  $authUser->last_name;
-                $success['email'] =  $authUser->email;
-
-                return $this->sendResponse($success, 'Dobro došli');
-            } else {
-                return $this->sendError(['error' => 'nemate pravo pristupa']);
+            if ($authUser->active == false) {
+                return response()->json(['error' => 'Nemate pravo pristupa.'], 401);
             }
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+
+            $token =  $authUser->createToken('MyAuthApp')->plainTextToken;
+            $response = [
+                'success' => true,
+                'message' => 'Dobro došli',
+                'token' => $token,
+                'id' => $authUser->id,
+                'name' => $authUser->name,
+                'last_name' => $authUser->last_name,
+                'email' => $authUser->email,
+            ];
+            return response()->json($response, 200);
+        } else {
+            return response()->json(['error' => 'Email ili lozinka koju ste unijeli nisu ispravni.'], 401);
         }
     }
 
