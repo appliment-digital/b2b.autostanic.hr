@@ -34,10 +34,8 @@ export default {
             userService
                 .login(this.email, this.password)
                 .then((response) => {
-                    console.log({response});
                     if (response && response.success) {
-
-                        // store user data to global store
+                        // store user data to the global store
                         const {data: userData} = response
                         this.userStore.addUser(userData)
 
