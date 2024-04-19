@@ -5,6 +5,7 @@ export const useUserStore = defineStore('user', {
         return {
             count: 0,
             user: null,
+            isLoggedIn: false,
         };
     },
     getters: {
@@ -47,5 +48,13 @@ export const useUserStore = defineStore('user', {
             localStorage.setItem('userInitials', `${name.charAt(0)}${lastName.charAt(0)}`)
             localStorage.setItem('userFullName', `${name} ${lastName}`)
         },
+        login() {
+            this.isLoggedIn = true;
+            localStorage.setItem('isLoggedIn', true) 
+        },
+        logout() {
+            this.isLoggedIn = false;
+            localStorage.setItem('isLoggedIn', false) 
+        }
     },
 });

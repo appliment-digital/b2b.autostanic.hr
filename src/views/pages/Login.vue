@@ -56,7 +56,7 @@ export default {
                         });
                         const { data: userData } = data;
                         this.userStore.addUser(userData);
-                        // redirect
+                        this.userStore.login();
                         this.$router.push('/');
                     }
                 })

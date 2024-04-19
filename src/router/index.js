@@ -7,6 +7,9 @@ import ResetPassword from '@/views/pages/ResetPassword.vue';
 import Admin from '@/views/pages/Admin.vue';
 import Home from '@/views/pages/Home.vue';
 
+// pinia
+import { useUserStore } from '@/store/userStore';
+
 const routes = [
     {
         path: '/',
@@ -15,6 +18,7 @@ const routes = [
             {
                 path: '/',
                 component: Home,
+                meta: { requiresAuth: true },
             },
             {
                 path: '/login',
@@ -33,6 +37,7 @@ const routes = [
     {
         path: '/admin',
         component: AdminLayout,
+        meta: { requiresAuth: true },
         children: [
             {
                 path: '',
@@ -48,6 +53,21 @@ const router = createRouter({
     scrollBehavior() {
         return { left: 0, top: 0 };
     },
+});
+
+router.beforeEach(async (to, from, next) => {
+    const userStore = useUserStore();
+    const storedIsUserLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
+
+    if (to.meta.requiresAuth && storedIsUserLoggedIn) {
+        next();
+    }
+
+    if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+        next('/login');
+    } else {
+        next();
+    }
 });
 
 export default router;

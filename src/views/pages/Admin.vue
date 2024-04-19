@@ -82,6 +82,7 @@ export default {
             userService.logout().then((response) => {
                 this.$router.push('/login');
             });
+            this.userStore.logout()
         },
     },
 };

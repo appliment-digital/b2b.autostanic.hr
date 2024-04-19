@@ -2,6 +2,10 @@
 // vue-router
 import router from '@/router';
 
+// pinia
+import { mapStores } from 'pinia';
+import { useUserStore } from '@/store/userStore.js';
+
 // services
 import UserService from '../service/UserService.js';
 
@@ -17,7 +21,9 @@ export default {
         return {};
     },
     watch: {},
-    computed: {},
+    computed: {
+        ...mapStores(useUserStore),
+    },
     methods: {
         handleAdminIconClick() {
             this.$router.push('/admin');
@@ -27,6 +33,7 @@ export default {
             userService.logout().then((response) => {
                 this.$router.push('/login');
             });
+            this.userStore.logout();
         },
     },
 };
@@ -44,7 +51,7 @@ export default {
                     leaveActiveClass: 'px-fadeout',
                     hideOnOutsideClick: 'true',
                 }"
-                :label="this.userInitials"
+                :label="userStore.initials"
                 style="width: 42px; height: 42px"
                 class="flex justify-content-center"
                 severity="primary"
@@ -80,6 +87,23 @@ export default {
                         <span>Privacy</span>
                     </a>
                 </li> -->
+                <li role="menuitem" class="m-0 mb-3">
+                    <a
+                        href="#"
+                        class="flex align-items-center hover:text-primary-500 transition-duration-200"
+                        v-styleclass="{
+                            selector: '@grandparent',
+                            enterClass: 'hidden',
+                            enterActiveClass: 'px-scalein',
+                            leaveToClass: 'hidden',
+                            leaveActiveClass: 'px-fadeout',
+                            hideOnOutsideClick: 'true',
+                        }"
+                    >
+                        <i class="pi pi-fw pi-user mr-2"></i>
+                        <span>{{ userStore.fullName }}</span>
+                    </a>
+                </li>
                 <li role="menuitem" class="m-0 mb-3">
                     <a
                         href="#"

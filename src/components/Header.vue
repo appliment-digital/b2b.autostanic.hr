@@ -66,7 +66,7 @@ export default {
                     raised
                     text
                 />
-                <UserMenu :userInitials="userStore.initials" />
+                <UserMenu />
             </div>
         </div>
     </div>
