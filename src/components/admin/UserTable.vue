@@ -108,28 +108,29 @@ export default {
                 this.discountTypes = response.data.data;
             });
         },
-        changeStatus(user) {
-            userService.changeStatus(user).then((response) => {
-                if (response.data.success) {
-                    this.$toast.add({
-                        severity: 'success',
-                        summary: 'Uspješno',
-                        detail: response.data.message,
-                        life: 3000,
-                    });
-                    this.getAll();
-                } else {
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Greška',
-                        detail: response.data.message,
-                        life: 3000,
-                    });
-                }
-            });
+        changeStatus(user, active) {
+            userService
+                .changeStatus({ id: user.id, active: active })
+                .then((response) => {
+                    if (response.data.success) {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                        this.getAll();
+                    } else {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                    }
+                });
         },
         confirmDialog(user) {
-            console.log(user.active);
             if (user.active == true) {
                 this.$confirm.require({
                     group: 'templating',
@@ -147,13 +148,14 @@ export default {
                     rejectLabel: 'Odustani',
                     acceptLabel: 'Potvrdi',
                     accept: () => {
-                        this.changeStatus(user);
+                        //deaktiviranje korisnika
+                        this.changeStatus(user, 0);
                     },
                     reject: () => {},
                 });
             } else if (user.active == false) {
-                user.status = 'activate';
-                this.changeStatus(user);
+                //aktiviranje korisnika
+                this.changeStatus(user, 1);
             }
         },
     },
@@ -199,18 +201,23 @@ export default {
             optionLabel="name"
             placeholder="Odaberite ulogu"
         >
-            <!-- <template #value="slotProps">
+            <template #value="slotProps">
                 <div v-if="slotProps.value && slotProps.value.name == 'admin'">
-                    <div>{{ slotProps.value.name }}</div>
+                    Administrator
                 </div>
-                <span v-else>
+                <div
+                    v-if="slotProps.value && slotProps.value.name == 'customer'"
+                >
+                    Korisnik
+                </div>
+                <div v-if="slotProps.value && slotProps.value.name == ''">
                     {{ slotProps.placeholder }}
-                </span>
+                </div>
             </template>
             <template #option="slotProps">
                 <div v-if="slotProps.option.name == 'admin'">Administrator</div>
                 <div v-else>Korisnik</div>
-            </template> -->
+            </template>
         </Dropdown>
 
         <label>Tip rabata</label>
@@ -274,7 +281,6 @@ export default {
                 :rows="5"
                 :rowsPerPageOptions="[5, 10, 20, 50]"
                 :selection="selectedUser"
-                @row-click="(e) => openDialog(e)"
             >
                 <template #header>
                     <div class="flex justify-content-between">

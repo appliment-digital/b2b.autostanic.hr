@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-
+use Exception;
 use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
@@ -57,7 +57,6 @@ class User extends Authenticatable
         $user->name = $data["name"];
         $user->last_name = $data["last_name"];
         $user->email = $data["email"];
-        $user->email = $data["email"];
         $user->bitrix_company_id = $data["bitrix_company_id"];
         $user->delivery_point = $data["delivery_point"];
         $user->payment_method = $data["payment_method"];
@@ -68,7 +67,9 @@ class User extends Authenticatable
             return "Lozinka treba imati bar 6 znakova.";
         }
 
-        $user->syncRoles($data["role"]["id"]);
+        if (!empty($data['roles'])) {
+            $user->syncRoles($data["roles"]["id"]);
+        }
 
         $user->save();
         $user->refresh();
@@ -100,8 +101,8 @@ class User extends Authenticatable
             return "Lozinka treba imati bar 6 znakova.";
         }
 
-        if (!empty($data['role'])) {
-            $user->syncRoles($data["role"]["id"]);
+        if (!empty($data['roles'])) {
+            $user->syncRoles($data["roles"]["id"]);
         }
 
         $user->save();
@@ -117,15 +118,11 @@ class User extends Authenticatable
         return $user;
     }
 
-    public static function changeStatus($id, $data)
+    public static function changeStatus($id, $active)
     {
         $user = self::find($id);
 
-        if ($data['status'] == 'activate') {
-            $user->active = 1;
-        }
-
-        $user->active = 0;
+        $user->active = $active;
 
         $user->save();
         $user->refresh();

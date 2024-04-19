@@ -22,8 +22,8 @@ class AuthController extends BaseController
 
                 $authUser = Auth::user();
 
-                if ($authUser->deactivated == 1) {
-                    return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
+                if ($authUser->active == 0) {
+                    return $this->sendError(['error' => 'nemate pravo pristupa']);
                 }
 
                 $success['token'] =  $authUser->createToken('MyAuthApp')->plainTextToken;
@@ -32,9 +32,9 @@ class AuthController extends BaseController
                 $success['last_name'] =  $authUser->last_name;
                 $success['email'] =  $authUser->email;
 
-                return $this->sendResponse($success, 'User signed in');
+                return $this->sendResponse($success, 'Dobro došli');
             } else {
-                return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
+                return $this->sendError(['error' => 'nemate pravo pristupa']);
             }
         } catch (Exception $e) {
             return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
