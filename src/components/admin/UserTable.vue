@@ -55,7 +55,6 @@ export default {
         saveUser() {
             if (!this.user.id) {
                 userService.add(this.user).then((response) => {
-                    console.log(response.data);
                     if (response.data.success) {
                         this.$toast.add({
                             severity: 'success',

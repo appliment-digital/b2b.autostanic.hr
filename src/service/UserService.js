@@ -15,7 +15,9 @@ export default class UserService {
                 return response.data;
             })
             .catch((error) => {
-                console.log(error.response);
+                //
+                throw error.response;
+                //console.log(error.response.);
                 //  this.showMsg = "Incorect email or password.Please try again.";
             });
     }
