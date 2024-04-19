@@ -65,39 +65,14 @@ export default {
                     border-bottom-right-radius: 0 !important;
                 "
             >
-                <!-- <li role="menuitem" class="m-0 mb-3">
-                    <a
-                        href="#"
-                        class="flex align-items-center hover:text-primary-500 transition-duration-200"
-                        v-styleclass="{
-                            selector: '@grandparent',
-                            enterClass: 'hidden',
-                            enterActiveClass: 'px-scalein',
-                            leaveToClass: 'hidden',
-                            leaveActiveClass: 'px-fadeout',
-                            hideOnOutsideClick: 'true',
-                        }"
-                    >
-                        <i class="pi pi-fw pi-lock mr-2"></i>
-                        <span>Privacy</span>
-                    </a>
-                </li> -->
                 <li role="menuitem" class="m-0 mb-3">
-                    <a
-                        href="#"
-                        class="flex align-items-center hover:text-primary-500 transition-duration-200"
-                        v-styleclass="{
-                            selector: '@grandparent',
-                            enterClass: 'hidden',
-                            enterActiveClass: 'px-scalein',
-                            leaveToClass: 'hidden',
-                            leaveActiveClass: 'px-fadeout',
-                            hideOnOutsideClick: 'true',
-                        }"
+                    <span
+                        class="flex align-items-center transition-duration-200"
+                        style="user-select: none"
                     >
                         <i class="pi pi-fw pi-user mr-2"></i>
                         <span>{{ userStore.fullName }}</span>
-                    </a>
+                    </span>
                 </li>
                 <li role="menuitem" class="m-0 mb-3">
                     <a
