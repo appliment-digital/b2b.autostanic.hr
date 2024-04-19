@@ -39,13 +39,7 @@ export default {
 
                         // store user data to global store
                         const {data: userData} = response
-                        try {
-                            
                         this.userStore.addUser(userData)
-                        } catch (error) {
-                            console.error(error);
-                            
-                        }
 
                         // redirect
                         this.$router.push('/');
