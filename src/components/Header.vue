@@ -15,7 +15,9 @@ export default {
     components: {
         UserMenu,
     },
-    mounted() {},
+    mounted() {
+        console.log(this.userStore.initials);
+    },
     updated() {},
     data() {
         return {};
@@ -38,6 +40,7 @@ export default {
     <div
         class="flex flex-wrap row-gap-2 align-items-center sm:flex-row sm:grid sm:flex-row sm:flex-nowrap"
     >
+        <!-- Header: Logo -->
         <div class="col-6 sm:col">
             <img src="images/as-logo.png" class="logo" style="height: 48px" />
         </div>
@@ -52,44 +55,22 @@ export default {
             </IconField>
         </div>
 
-        <!-- Header: User & Shopping Cart & Logout -->
+        <!-- Header: User Info & Shopping Cart -->
         <div class="flex-order-1 col-6 flex justify-content-end sm:col">
             <div class="flex relative">
-                <!-- <Dropdown :items="items" label="AA" :optionLabel="a" /> -->
-                <UserMenu />
-                <!-- <Button
-                    :label="userStore.initials"
-                    style="width: 42px; height: 42px"
-                    class="mr-2 flex justify-content-center"
-                    severity="primary"
-                    rounded
-                    raised
-                    text
-                /> -->
                 <Button
+                    class="mr-2"
                     severity="secondary"
                     icon="pi pi-shopping-cart"
                     rounded
                     raised
                     text
                 />
-                <!-- <Button
-                    @click="logout()"
-                    class=""
-                    severity="secondary"
-                    icon="pi pi-sign-out"
-                    rounded
-                    raised
-                    text
-                /> -->
+                <UserMenu :userInitials="userStore.initials" />
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.p-tooltip {
-    background-color: blue;
-    color: red;
-}
 </style>

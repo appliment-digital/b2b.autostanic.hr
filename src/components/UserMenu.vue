@@ -8,7 +8,10 @@ import UserService from '../service/UserService.js';
 const userService = new UserService();
 
 export default {
-    mounted() {},
+    props: ['userInitials'],
+    mounted() {
+        console.log(this.userInitials);
+    },
     updated() {},
     data() {
         return {};
@@ -41,7 +44,7 @@ export default {
                     leaveActiveClass: 'px-fadeout',
                     hideOnOutsideClick: 'true',
                 }"
-                label="HM"
+                :label="this.userInitials"
                 style="width: 42px; height: 42px"
                 class="mr-2 flex justify-content-center"
                 severity="primary"
@@ -52,8 +55,8 @@ export default {
             />
 
             <ul
-                :class="'topbar-menu active-topbar-menu p-4 w-12rem z-5 hidden bg-white border-round absolute shadow-1'"
-                style="list-style: none; top: 0; right: 102px"
+                :class="'topbar-menu active-topbar-menu p-4 w-15rem z-5 hidden bg-white border-round absolute shadow-1'"
+                style="list-style: none; top: calc(100% + 8px); right:-7px; border-bottom-right-radius: 0 !important;"
             >
                 <!-- <li role="menuitem" class="m-0 mb-3">
                     <a
