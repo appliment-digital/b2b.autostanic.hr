@@ -29,7 +29,6 @@ class UserController extends BaseController
     {
         try {
             //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
-
             $userData = User::with('discountTypes')
                 ->with('roles')
                 ->orderBy('users.id', 'DESC')
@@ -54,7 +53,7 @@ class UserController extends BaseController
             $success['user'] =  $user;
             return $this->sendResponse($success, 'Korisnik je uspješno dodan.');
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json(['error' => 'Exception: ' . $e->getMessage() . ' on line ' . $e->getLine() . ' in file ' . $e->getFile()]);
         }
     }
 
@@ -62,8 +61,6 @@ class UserController extends BaseController
     {
         try {
             $user = User::updateUser($id, $request);
-
-            return $user;
 
             if ($user) {
                 $success['user'] =  $user;
@@ -81,8 +78,7 @@ class UserController extends BaseController
     {
         try {
 
-            $user = User::changeStatus($request->id, $request);
-
+            $user = User::changeStatus($request->id, $request->active);
             if ($user->active) {
                 $success['user'] =  $user;
                 return $this->sendResponse($success, 'aktiviran korisnik.');

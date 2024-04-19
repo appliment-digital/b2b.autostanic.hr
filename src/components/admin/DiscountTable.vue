@@ -95,7 +95,12 @@ export default {
                 this.users = response.data.data;
             });
         },
-        expandAll() {},
+        expandAll() {
+            this.expandedRows = this.discountTypes.reduce(
+                (acc, p) => (acc[p.id] = true) && acc,
+                {},
+            );
+        },
         collapseAll() {
             this.expandedRows = null;
         },
