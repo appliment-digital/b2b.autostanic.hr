@@ -46,7 +46,7 @@ export default {
                 }"
                 :label="this.userInitials"
                 style="width: 42px; height: 42px"
-                class="mr-2 flex justify-content-center"
+                class="flex justify-content-center"
                 severity="primary"
                 rounded
                 raised
