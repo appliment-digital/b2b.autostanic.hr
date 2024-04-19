@@ -1,22 +1,24 @@
 <script>
-// services
-import UserService from '../service/UserService.js';
-
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 
+// services
+import UserService from '../service/UserService.js';
+
+// components
+import UserMenu from '@/components/UserMenu.vue'
+
 const userService = new UserService();
 
 export default {
+    components: {
+        UserMenu,
+    },
     mounted() {},
     updated() {},
     data() {
-        return {
-            userData: null,
-            loggedUser: '',
-            loggedUserInitials: '',
-        };
+        return {};
     },
     watch: {},
     computed: {
@@ -52,29 +54,26 @@ export default {
 
         <!-- Header: User & Shopping Cart & Logout -->
         <div class="flex-order-1 col-6 flex justify-content-end sm:col">
-            <div class="flex">
-                <Button
-                    v-tooltip.top="{
-                        value: userStore.fullName,
-                        showDelay: 0,
-                        hideDelay: 300,
-                    }"
+            <div class="flex relative">
+                <!-- <Dropdown :items="items" label="AA" :optionLabel="a" /> -->
+                <UserMenu />
+                <!-- <Button
                     :label="userStore.initials"
-                    class="test-size block mr-2"
+                    style="width: 42px; height: 42px"
+                    class="mr-2 flex justify-content-center"
                     severity="primary"
                     rounded
                     raised
                     text
-                />
+                /> -->
                 <Button
-                    class="mr-2"
                     severity="secondary"
                     icon="pi pi-shopping-cart"
                     rounded
                     raised
                     text
                 />
-                <Button
+                <!-- <Button
                     @click="logout()"
                     class=""
                     severity="secondary"
@@ -82,16 +81,15 @@ export default {
                     rounded
                     raised
                     text
-                />
+                /> -->
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.test-size {
-    padding: 0;
-    width: 42px;
-    height: 42px;
+.p-tooltip {
+    background-color: blue;
+    color: red;
 }
 </style>
