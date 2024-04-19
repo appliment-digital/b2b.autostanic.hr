@@ -33,7 +33,7 @@ export default {
     </div>
 
     <!-- Home Page: Search & Categories -->
-    <div class="w-full mx-auto grid mt-6 gap-3">
+    <div class="w-full mx-auto grid mt-3 gap-3">
         <!-- Search -->
         <div
             class="col-12 py-8 flex flex-column align-items-center justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"

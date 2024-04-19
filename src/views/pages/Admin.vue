@@ -89,7 +89,7 @@ export default {
 </script>
 
 <template>
-    <div style="min-width: 80vw">
+    <div>
         <h3 v-if="showTables.users" class="block mb-5 mt-3">
             Upravljanje korisnicima
         </h3>

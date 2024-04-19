@@ -1,5 +1,5 @@
 <template>
-    <div class="layout mb-8">
+    <div class="layout max-w-screen mx-auto mb-8 col">
         <Toast></Toast>
         <router-view></router-view>
     </div>
@@ -7,12 +7,8 @@
 
 <style scoped>
 .layout {
-    max-width: 1460px;
-    margin: 0 auto;
-    margin-top: 2rem;
-    border-radius: 4px;
-    margin-left: 80px;
-    display: grid;
-    place-content: center;
+    max-width: 100vw;
+    padding-left: 160px;
+    padding-right: 80px;
 }
 </style>
