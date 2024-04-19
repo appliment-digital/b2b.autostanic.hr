@@ -1,4 +1,7 @@
 <script>
+// vue-router
+import router from '@/router';
+
 // primevue
 import { FilterMatchMode } from 'primevue/api';
 
@@ -53,6 +56,11 @@ export default {
                 this.showTables.discounts = true;
             }
         },
+        
+        handleHomeClick() {
+            this.$router.push('/');
+        },
+
         handleLogoutClick() {
             this.logout();
         },
@@ -107,7 +115,18 @@ export default {
         />
 
         <Button
-            class="block mx-auto mt-2 mb-7 flex align-items-center"
+            class="block mx-auto mt-3 flex align-items-center"
+            severity="secondary"
+            icon="pi pi-home"
+            v-tooltip="'Naslovna'"
+            @click="handleHomeClick"
+            rounded
+            text
+            raised
+        />
+
+        <Button
+            class="block mx-auto mt-3 flex align-items-center"
             severity="secondary"
             icon="pi pi-sign-out"
             v-tooltip="'Logout'"
@@ -118,7 +137,7 @@ export default {
         />
 
         <Button
-            class="block mx-auto mb-3 flex align-items-center"
+            class="block mx-auto mt-7 mb-3 flex align-items-center"
             severity="secondary"
             icon="pi pi-user"
             v-tooltip="'Korisnici'"
