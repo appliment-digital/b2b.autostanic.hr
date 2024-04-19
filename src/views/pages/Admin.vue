@@ -56,7 +56,7 @@ export default {
                 this.showTables.discounts = true;
             }
         },
-        
+
         handleHomeClick() {
             this.$router.push('/');
         },
@@ -88,73 +88,76 @@ export default {
 </script>
 
 <template>
-    <h3 v-if="showTables.users" class="block mb-6">Upravljanje korisnicima</h3>
-    <h3 v-if="showTables.discounts" class="block mb-6">
-        Upravljanje popustima
-    </h3>
+    <div style="min-width: 80vw">
+        <h3 v-if="showTables.users" class="block mb-5 mt-3">
+            Upravljanje korisnicima
+        </h3>
+        <h3 v-if="showTables.discounts" class="block mb-5 mt-3">
+            Upravljanje popustima
+        </h3>
 
-    <UserTable v-if="showTables.users" />
-    <DiscountTable v-if="showTables.discounts" />
+        <UserTable v-if="showTables.users" />
+        <DiscountTable v-if="showTables.discounts" />
 
-    <Sidebar
-        :modal="false"
-        :visible="true"
-        :dismissable="false"
-        :show-close-icon="false"
-        style="width: 80px; transition: none"
-    >
-        <Button
-            :label="userStore.initials"
-            v-tooltip="userStore.fullName"
-            class="mx-auto mt-2 mr-2 flex align-items-center justify-content-center"
-            style="width: 42px; height: 42px"
-            severity="secondary"
-            rounded
-            raised
-            text
-        />
+        <Sidebar
+            :modal="false"
+            :visible="true"
+            :dismissable="false"
+            :show-close-icon="false"
+            style="width: 80px; transition: none"
+        >
+            <Button
+                :label="userStore.initials"
+                v-tooltip="userStore.fullName"
+                class="mx-auto mt-2 mr-2 flex align-items-center justify-content-center"
+                style="width: 42px; height: 42px"
+                severity="secondary"
+                rounded
+                raised
+                text
+            />
 
-        <Button
-            class="block mx-auto mt-3 flex align-items-center"
-            severity="secondary"
-            icon="pi pi-home"
-            v-tooltip="'Naslovna'"
-            @click="handleHomeClick"
-            rounded
-            text
-            raised
-        />
+            <Button
+                class="block mx-auto mt-3 flex align-items-center"
+                severity="secondary"
+                icon="pi pi-home"
+                v-tooltip="'Naslovna'"
+                @click="handleHomeClick"
+                rounded
+                text
+                raised
+            />
 
-        <Button
-            class="block mx-auto mt-3 flex align-items-center"
-            severity="secondary"
-            icon="pi pi-sign-out"
-            v-tooltip="'Logout'"
-            @click="handleLogoutClick"
-            rounded
-            text
-            raised
-        />
+            <Button
+                class="block mx-auto mt-3 flex align-items-center"
+                severity="secondary"
+                icon="pi pi-sign-out"
+                v-tooltip="'Logout'"
+                @click="handleLogoutClick"
+                rounded
+                text
+                raised
+            />
 
-        <Button
-            class="block mx-auto mt-7 mb-3 flex align-items-center"
-            severity="secondary"
-            icon="pi pi-user"
-            v-tooltip="'Korisnici'"
-            @click="handleTableChangeClick('users')"
-            rounded
-        />
+            <Button
+                class="block mx-auto mt-7 mb-3 flex align-items-center"
+                severity="secondary"
+                icon="pi pi-user"
+                v-tooltip="'Korisnici'"
+                @click="handleTableChangeClick('users')"
+                rounded
+            />
 
-        <Button
-            class="block mx-auto mb-3 flex align-items-center"
-            severity="success"
-            icon="pi pi-wallet"
-            v-tooltip="'Kategorije popusta'"
-            @click="handleTableChangeClick('discounts')"
-            rounded
-        />
+            <Button
+                class="block mx-auto mb-3 flex align-items-center"
+                severity="success"
+                icon="pi pi-wallet"
+                v-tooltip="'Kategorije popusta'"
+                @click="handleTableChangeClick('discounts')"
+                rounded
+            />
 
-        <!-- 
+            <!-- 
         <Button
             v-tooltip="'Baneri'"
             class="block mx-auto mb-3"
@@ -170,7 +173,8 @@ export default {
             icon="pi pi-megaphone"
             rounded
         /> -->
-    </Sidebar>
+        </Sidebar>
+    </div>
 </template>
 
 <style scoped></style>
