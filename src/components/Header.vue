@@ -8,9 +8,14 @@ export default {
     mounted() {
         this.getCurrentUserData();
     },
+    updated() {
+        console.log('hello');
+    },
     data() {
         return {
             userData: null,
+            loggedUser: "",
+            loggedUserInitials: "",
         };
     },
     methods: {
@@ -20,10 +25,19 @@ export default {
             });
         },
         getCurrentUserData() {
+            console.log('getting current user data..');
+
             userService.getCurrentUserData().then((response) => {
-                this.userData = response;
+                this.userData = response.data;
+
+                const name = this.userData.name;
+                const lastName = this.userData.last_name;
+
+                this.loggedUser = `${name} ${lastName}`;
+                this.loggedUserInitials = `${name[0]} ${lastName[0]}`;
             });
         },
+       
     },
 };
 </script>
@@ -37,7 +51,9 @@ export default {
         </div>
 
         <!-- Header: Search Bar -->
-        <div class="flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6">
+        <div
+            class="flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
+        >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
                 <InputText class="w-full" placeholder="Pretraži" />
@@ -48,11 +64,15 @@ export default {
         <div class="flex-order-1 col-6 flex justify-content-end sm:col">
             <div class="flex">
                 <Button
-                    v-tooltip.top="{ value: 'Hrvoje Mlinarevic', showDelay:0 , hideDelay: 300 }"
+                    v-tooltip.top="{
+                        value: loggedUser,
+                        showDelay: 0,
+                        hideDelay: 300,
+                    }"
                     class="block mr-2"
                     severity="primary"
                     icon="pi pi-user"
-                    label="HM"
+                    :label="loggedUserInitials"
                     rounded
                     raised
                     text
