@@ -24,17 +24,13 @@ class AuthController extends BaseController
                 return response()->json(['error' => 'Nemate pravo pristupa.'], 401);
             }
 
-            $token =  $authUser->createToken('MyAuthApp')->plainTextToken;
-            $response = [
-                'success' => true,
-                'message' => 'Dobro došli',
-                'token' => $token,
-                'id' => $authUser->id,
-                'name' => $authUser->name,
-                'last_name' => $authUser->last_name,
-                'email' => $authUser->email,
-            ];
-            return response()->json($response, 200);
+            $success['token'] =  $authUser->createToken('MyAuthApp')->plainTextToken;
+            $success['id'] =  $authUser->id;
+            $success['name'] =  $authUser->name;
+            $success['last_name'] =  $authUser->last_name;
+            $success['email'] =  $authUser->email;
+
+            return $this->sendResponse($success, 'Dobro došli');
         } else {
             return response()->json(['error' => 'Email ili lozinka koju ste unijeli nisu ispravni.'], 401);
         }
