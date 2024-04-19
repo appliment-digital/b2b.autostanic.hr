@@ -90,10 +90,10 @@ export default {
 
 <template>
     <div>
-        <h3 v-if="showTables.users" class="block mb-5 mt-3">
+        <h3 v-if="showTables.users" class="block mb-5">
             Upravljanje korisnicima
         </h3>
-        <h3 v-if="showTables.discounts" class="block mb-5 mt-3">
+        <h3 v-if="showTables.discounts" class="block mb-5">
             Upravljanje tipovima rabata
         </h3>
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="layout max-w-screen mx-auto mb-8 col">
+    <div class="layout max-w-screen mx-auto mb-8 pt-6 col">
         <Toast></Toast>
         <router-view></router-view>
     </div>
