@@ -92,6 +92,10 @@ export default {
         },
         getAllUsers() {
             userService.getAll().then((response) => {
+                response.data.data.forEach((v) => delete v.discount_types);
+                response.data.data.forEach((v) => delete v.pivot);
+                response.data.data.forEach((v) => delete v.roles);
+
                 this.users = response.data.data;
             });
         },
@@ -315,7 +319,6 @@ export default {
 
         <div class="field">
             <label>Korisnici<span class="text-red-500">*</span></label>
-
             <MultiSelect
                 v-model="discountType.users"
                 display="chip"
