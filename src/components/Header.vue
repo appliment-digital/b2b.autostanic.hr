@@ -7,7 +7,7 @@ import { useUserStore } from '@/store/userStore.js';
 import UserService from '../service/UserService.js';
 
 // components
-import UserMenu from '@/components/UserMenu.vue'
+import UserMenu from '@/components/UserMenu.vue';
 
 const userService = new UserService();
 
@@ -16,7 +16,7 @@ export default {
         UserMenu,
     },
     mounted() {
-        console.log(this.userStore.initials);
+        //console.log(this.userStore.initials);
     },
     updated() {},
     data() {
@@ -72,5 +72,4 @@ export default {
     </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

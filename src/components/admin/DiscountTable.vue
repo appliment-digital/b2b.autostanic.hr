@@ -174,7 +174,7 @@ export default {
                                 @click="openDialog()"
                                 outlined
                             />
-                            <Button
+                            <!-- <Button
                                 v-if="expandedRows == null"
                                 icon="pi pi-window-maximize"
                                 label="Prošiti"
@@ -189,7 +189,7 @@ export default {
                                 class="mr-2"
                                 @click="collapseAll()"
                                 outlined
-                            />
+                            /> -->
                         </div>
                         <IconField iconPosition="left">
                             <InputIcon>

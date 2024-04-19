@@ -93,7 +93,7 @@ export default {
             Upravljanje korisnicima
         </h3>
         <h3 v-if="showTables.discounts" class="block mb-5 mt-3">
-            Upravljanje popustima
+            Upravljanje tipovima rabata
         </h3>
 
         <UserTable v-if="showTables.users" />
@@ -132,7 +132,7 @@ export default {
                 class="block mx-auto mt-3 flex align-items-center"
                 severity="secondary"
                 icon="pi pi-sign-out"
-                v-tooltip="'Logout'"
+                v-tooltip="'Odjavi se'"
                 @click="handleLogoutClick"
                 rounded
                 text
@@ -152,7 +152,7 @@ export default {
                 class="block mx-auto mb-3 flex align-items-center"
                 severity="success"
                 icon="pi pi-wallet"
-                v-tooltip="'Kategorije popusta'"
+                v-tooltip="'Tipovi rabata'"
                 @click="handleTableChangeClick('discounts')"
                 rounded
             />

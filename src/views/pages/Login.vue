@@ -29,25 +29,6 @@ export default {
         handleForgotPasswordClick() {
             router.push('/forgot');
         },
-        // login() {
-        //     axios
-        //         .post('api/login', {
-        //             email: this.email,
-        //             password: this.password,
-        //         })
-        //         .then((response) => {
-        //             console.log(response.data);
-        //             // If login successful
-        //             if (response.data.success) {
-        //                 // You can also redirect the user if needed
-        //             } else {
-        //                 // If login unsuccessful
-        //             }
-        //         })
-        //         .catch((error) => {
-        //             console.error('Error:', error);
-        //         });
-        // },
         login() {
             userService
                 .login(this.email, this.password)
@@ -64,8 +45,13 @@ export default {
                     if (data.success) {
                         this.$toast.add({
                             severity: 'success',
-                            summary: 'Uspješno',
-                            detail: data.message,
+                            summary: 'Uspješna prijava',
+                            detail:
+                                data.message +
+                                ', ' +
+                                data.data.name +
+                                ' ' +
+                                data.data.last_name,
                             life: 3000,
                         });
                         const { data: userData } = data;
@@ -119,7 +105,11 @@ export default {
                 class="underline text-300 flex align-items-center cursor-pointer"
                 >Zaboravljena lozinka?</a
             >
-            <Button @click="login()" label="Submit" class="button--submit" />
+            <Button
+                @click="login()"
+                label="Prijavi se"
+                class="button--submit"
+            />
         </div>
     </div>
 </template>

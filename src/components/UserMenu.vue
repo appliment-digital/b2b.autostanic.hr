@@ -10,7 +10,7 @@ const userService = new UserService();
 export default {
     props: ['userInitials'],
     mounted() {
-        console.log(this.userInitials);
+        //console.log(this.userInitials);
     },
     updated() {},
     data() {
@@ -56,7 +56,12 @@ export default {
 
             <ul
                 :class="'topbar-menu active-topbar-menu p-4 w-15rem z-5 hidden bg-white border-round absolute shadow-1'"
-                style="list-style: none; top: calc(100% + 8px); right:-7px; border-bottom-right-radius: 0 !important;"
+                style="
+                    list-style: none;
+                    top: calc(100% + 8px);
+                    right: -7px;
+                    border-bottom-right-radius: 0 !important;
+                "
             >
                 <!-- <li role="menuitem" class="m-0 mb-3">
                     <a
@@ -90,7 +95,7 @@ export default {
                         }"
                     >
                         <i class="pi pi-fw pi-cog mr-2"></i>
-                        <span>Admin</span>
+                        <span>Postavke</span>
                     </a>
                 </li>
                 <li>
@@ -107,7 +112,7 @@ export default {
                         }"
                     >
                         <i class="pi pi-fw pi-sign-out mr-2"></i>
-                        <span>Logout</span>
+                        <span>Odjavi se</span>
                     </a>
                 </li>
             </ul>
