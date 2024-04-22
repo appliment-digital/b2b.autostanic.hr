@@ -15,9 +15,7 @@ export default {
     components: {
         UserMenu,
     },
-    mounted() {
-        //console.log(this.userStore.initials);
-    },
+    mounted() {},
     updated() {},
     data() {
         return {};
@@ -47,7 +45,7 @@ export default {
 
         <!-- Header: Search Bar -->
         <div
-            class="p-0 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
+            class="p-0 mt-2 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6 "
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
