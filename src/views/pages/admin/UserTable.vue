@@ -174,8 +174,6 @@ export default {
 <template>
     <h3 class="block mb-5">Upravljanje korisnicima</h3>
 
-    <Sidebar />
-
     <Dialog
         modal
         dismissableMask

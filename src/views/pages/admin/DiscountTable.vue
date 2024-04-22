@@ -164,8 +164,6 @@ export default {
 <template>
     <h3 class="block mb-5">Upravljanje tipovima rabata</h3>
 
-    <Sidebar />
-
     <Card>
         <template #content>
             <DataTable
