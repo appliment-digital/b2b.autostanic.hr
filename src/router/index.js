@@ -4,8 +4,11 @@ import AdminLayout from '@/components/AdminLayout.vue';
 import Login from '@/views/pages/Login.vue';
 import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
-import Admin from '@/views/pages/Admin.vue';
 import Home from '@/views/pages/Home.vue';
+
+// admin pages
+import UserTable from '@/views/pages/admin/UserTable.vue'
+import DiscountTable from '@/views/pages/admin/DiscountTable.vue'
 
 // pinia
 import { useUserStore } from '@/store/userStore';
@@ -40,8 +43,12 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
             {
-                path: '',
-                component: Admin,
+                path: 'users',
+                component: UserTable,
+            },
+            {
+                path: 'discounts',
+                component: DiscountTable,
             },
         ],
     },

@@ -21,7 +21,7 @@ export default {
     },
     methods: {
         handleAdminIconClick() {
-            this.$router.push('/admin');
+            this.$router.push('/admin/users');
         },
 
         logout() {
