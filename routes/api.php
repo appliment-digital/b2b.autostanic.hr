@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DiscountTypeController;
+use App\Http\Controllers\WebDatabaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,4 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discountType/add', [DiscountTypeController::class, 'add']);
     Route::put('/discountType/update/{id}', [DiscountTypeController::class, 'update']);
     Route::delete('/discountType/delete/{id}', [DiscountTypeController::class, 'delete']);
+
+    Route::get('/test', [WebDatabaseController::class, 'test']);
 });

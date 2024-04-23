@@ -8,7 +8,9 @@ import Sidebar from '@/components/admin/Sidebar.vue';
 // services
 import DiscountTypeService from '@/service/DiscountTypeService.js';
 import UserService from '@/service/UserService.js';
+import WebDatabaseService from '@/service/WebDatabaseService.js';
 
+const webDatabaseService = new WebDatabaseService();
 const discountTypeService = new DiscountTypeService();
 const userService = new UserService();
 
@@ -25,6 +27,7 @@ export default {
     mounted() {
         this.getAll();
         this.getAllUsers();
+        this.test();
     },
     data() {
         return {
@@ -38,6 +41,11 @@ export default {
     },
     computed: {},
     methods: {
+        test() {
+            webDatabaseService.test().then((response) => {
+                console.log(response);
+            });
+        },
         getAll() {
             discountTypeService.getAll().then((response) => {
                 this.discountTypes = response.data.data;
