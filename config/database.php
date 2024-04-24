@@ -77,14 +77,14 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-
-        'sqlsrv' => [
+        //vanjska baza za autostonić webshop
+        'webDb' => [
             'driver' => 'sqlsrv',
-            'host' =>  env('WEBDB_HOST'),
-            'port' => env('WEBDB_PORT'),
-            'database' => env('WEBDB_DATABASE'),
-            'username' => env('WEBDB_USERNAME'),
-            'password' => env('WEBDB_PASSWORD'),
+            'host' =>  env('WEB_DB_HOST'),
+            'port' => env('WEB_DB_PORT'),
+            'database' => env('WEB_DB_DATABASE'),
+            'username' => env('WEB_DB_USERNAME'),
+            'password' => env('WEB_DB_PASSWORD'),
             'charset' => 'utf8',
             'prefix' => '',
         ],
