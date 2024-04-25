@@ -77,8 +77,9 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-        //vanjska baza za autostonić webshop
-        'webDb' => [
+
+        // web shop database (Auto Stanic B2B) 
+        'webshopdb' => [
             'driver' => 'sqlsrv',
             'host' =>  env('WEB_DB_HOST'),
             'port' => env('WEB_DB_PORT'),

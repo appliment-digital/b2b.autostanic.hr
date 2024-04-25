@@ -6,6 +6,7 @@ export const useUserStore = defineStore('user', {
             count: 0,
             user: null,
             isLoggedIn: false,
+            robohashName: '',
         };
     },
     getters: {
@@ -55,6 +56,9 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.isLoggedIn = false;
             localStorage.setItem('isLoggedIn', false) 
+        },
+        robohash(name) {
+            this.robohashName = name;
         }
     },
 });

@@ -14,7 +14,11 @@ export default {
             items: [{ label: 'Naslovna' }],
         };
     },
-    methods: {},
+    methods: {
+        handleCategoryClick(category) {
+            this.$router.push(`/${category}`);
+        },
+    },
     computed: {},
 };
 </script>
@@ -22,11 +26,9 @@ export default {
 <template>
     <Header />
 
-    <Breadcrumb :home="home" :model="items" class="mt-4" />
-
     <!-- Home Page: Banner -->
     <div
-        class="banner surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
+        class="banner mt-6 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
     >
         <h3 class="text-white uppercase text-5xl m-0">B2B Auto Stanić</h3>
         <span class="text-white text-xl mt-2">Sve na jednom mjestu</span>
@@ -40,7 +42,9 @@ export default {
         >
             <div>
                 <!-- Checkboxes -->
-                <div class="flex flex-column column-gap-3 sm:col sm:flex-row md:flex-column">
+                <div
+                    class="flex flex-column column-gap-3 sm:col sm:flex-row md:flex-column"
+                >
                     <div class="flex mb-3 md:mb-3">
                         <Checkbox
                             v-model="pizza"
@@ -86,7 +90,9 @@ export default {
                 </div>
 
                 <!-- Input -->
-                <div class="flex flex-column justify-content-between mt-5 gap-3 sm:flex-row md:flex-column lg:flex-row">
+                <div
+                    class="flex flex-column justify-content-between mt-5 gap-3 sm:flex-row md:flex-column lg:flex-row"
+                >
                     <InputText
                         type="text"
                         class="w-20rem sm:w-full md:w-20rem"
@@ -108,6 +114,7 @@ export default {
             <div class="flex flex-wrap justify-content-center row-gap-4">
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('karoserija')"
                 >
                     <img
                         src="/images/car-body.jpeg"
@@ -117,6 +124,7 @@ export default {
                 </div>
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('dijelovi-za-popravak-vozila')"
                 >
                     <img
                         src="/images/car-parts.jpeg"
@@ -126,6 +134,7 @@ export default {
                 </div>
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('auto-akustika-i-elektronika')"
                 >
                     <img
                         src="/images/car-sound-electronics.jpeg"
@@ -135,6 +144,7 @@ export default {
                 </div>
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('sve-za-auto')"
                 >
                     <img
                         src="/images/car-all.jpeg"
@@ -144,6 +154,7 @@ export default {
                 </div>
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('sve-za-radionu')"
                 >
                     <img
                         src="/images/car-garage.jpeg"
@@ -153,6 +164,7 @@ export default {
                 </div>
                 <div
                     class="flex flex-column align-items-center w-11rem cursor-pointer"
+                    @click="handleCategoryClick('akcijska-ponuda')"
                 >
                     <img
                         src="/images/car-sale.png"
@@ -260,8 +272,7 @@ export default {
                     OTP banka d.d. <br />
                     SWIFT:OTPVHR2X <br />
                     Varaždin. IBAN: HR9824070001100504805
-                    </span
-                >
+                </span>
             </div>
 
             <!-- Footer: Contact Us  -->
@@ -299,12 +310,6 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-}
-
-.p-breadcrumb {
-    border: none;
-    background-color: transparent;
-    padding-left: 0;
 }
 
 .category {

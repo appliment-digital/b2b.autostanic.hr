@@ -27,6 +27,21 @@
     box-sizing: border-box;
 }
 
+
 body {
     font-family: 'Manrope';
+}
+
+.p-breadcrumb {
+    border: none;
+    background-color: transparent;
+    padding-left: 0;
+}
+
+.p-tabmenu .p-tabmenu-nav {
+    background: none !important;
+}
+
+.p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link  {
+    background: none !important;
 }

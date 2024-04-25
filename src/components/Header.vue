@@ -1,4 +1,7 @@
 <script>
+// router
+import router from '@/router';
+
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -25,6 +28,10 @@ export default {
         ...mapStores(useUserStore),
     },
     methods: {
+        handleLogoClick() {
+            this.$router.push('/');
+        },
+
         logout() {
             userService.logout().then((response) => {
                 this.$router.push('/login');
@@ -39,13 +46,17 @@ export default {
         class="flex flex-wrap row-gap-2 align-items-end sm:flex-row sm:grid sm:flex-row sm:flex-nowrap"
     >
         <!-- Header: Logo -->
-        <div class="p-0 col-6 sm:col p-0" style="height: 48px">
-            <img src="images/as-logo.png" class="logo" />
+        <div
+            class="p-0 col-6 sm:col p-0 cursor-pointer"
+            style="height: 48px"
+            @click="handleLogoClick"
+        >
+            <img src="/images/as-logo.png" class="logo" />
         </div>
 
         <!-- Header: Search Bar -->
         <div
-            class="p-0 mt-2 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6 "
+            class="p-0 mt-2 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
@@ -72,6 +83,6 @@ export default {
 
 <style scoped>
 .logo {
-    max-height: 100%
+    max-height: 100%;
 }
 </style>

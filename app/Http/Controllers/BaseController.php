@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
 
@@ -40,5 +41,16 @@ class BaseController extends Controller
         }
 
         return response()->json($response, $code);
+    }
+    /**
+     * return object keys converted to camel case.
+     */
+    public function convertKeysToCamelCase($data)
+    {
+        return collect($data)->map(function ($item) {
+            return collect($item)->mapWithKeys(function ($value, $key) {
+                return [Str::camel($key) => $value];
+            })->toArray();
+        })->toArray();
     }
 }
