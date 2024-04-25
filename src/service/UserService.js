@@ -41,8 +41,12 @@ export default class UserService {
         return Axios.post('/api/reset-password', object);
     }
 
-    async getAll(object) {
-        return Axios.post(this.apiResourceEndpoint + '/getAll', object);
+    async getAll() {
+        return Axios.post(this.apiResourceEndpoint + '/getAll');
+    }
+
+    async getAllWithRelations() {
+        return Axios.post(this.apiResourceEndpoint + '/getAllWithRelations');
     }
 
     async add(object) {

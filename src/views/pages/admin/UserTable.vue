@@ -37,7 +37,22 @@ export default {
             discountTypes: [],
         };
     },
-    computed: {},
+    computed: {
+        showSaveButton() {
+            if (
+                this.user.name &&
+                this.user.last_name &&
+                this.user.email &&
+                this.user.password &&
+                this.user.roles &&
+                this.user.bitrix_company_id
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+    },
     methods: {
         closeDialog() {
             this.isDialogVisible = false;
@@ -106,7 +121,7 @@ export default {
             }
         },
         getAll() {
-            userService.getAll().then((response) => {
+            userService.getAllWithRelations().then((response) => {
                 this.users = response.data.data;
             });
         },
@@ -183,19 +198,20 @@ export default {
         :style="{ width: '30rem' }"
         @update:visible="closeDialog"
     >
+        <p class="text-red-500">Polja označena s zvijezdicom(*) su obavezna!</p>
         <!-- Dialog Input: First Name -->
-        <label>Ime</label>
+        <label>Ime<span class="text-red-500">*</span></label>
         <InputText v-model="user.name" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: Last Name -->
-        <label>Prezime</label>
+        <label>Prezime<span class="text-red-500">*</span></label>
         <InputText v-model="user.last_name" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: E-mai -->
-        <label>E-mail</label>
+        <label>E-mail<span class="text-red-500">*</span></label>
         <InputText v-model="user.email" class="w-full mt-2 mb-3" />
 
-        <label>Lozinka</label>
+        <label>Lozinka<span class="text-red-500">*</span></label>
         <Password
             v-model="user.password"
             class="w-full mt-2 mb-3"
@@ -203,7 +219,7 @@ export default {
             :feedback="false"
         />
 
-        <label>Uloga</label>
+        <label>Uloga<span class="text-red-500">*</span></label>
         <Dropdown
             v-model="user.roles"
             class="w-full mt-2 mb-3"
@@ -231,8 +247,8 @@ export default {
         </Dropdown>
 
         <label>Tip rabata</label>
-        <MultiSelect
-            v-model="user.discount_types"
+        <Dropdown
+            v-model="user.discount_type"
             display="chip"
             :options="discountTypes"
             optionLabel="name"
@@ -245,10 +261,10 @@ export default {
                     {{ slotProps.option.name }}
                 </span>
             </template>
-        </MultiSelect>
+        </Dropdown>
 
         <!-- Dialog Input: Bitrix Company ID -->
-        <label>Bitrix Company ID</label>
+        <label>Bitrix Company ID<span class="text-red-500">*</span></label>
         <InputNumber
             v-model="user.bitrix_company_id"
             class="w-full mt-2 mb-3"
@@ -272,6 +288,7 @@ export default {
                 @click="closeDialog()"
             />
             <Button
+                v-if="showSaveButton"
                 class="block mt-5"
                 severity="success"
                 label="Spremi"
@@ -317,18 +334,12 @@ export default {
                 <Column field="name" header="Ime" sortable></Column>
                 <Column field="last_name" header="Prezime" sortable></Column>
                 <Column field="email" header="E-mail" sortable></Column>
-                <Column field="discount_types" header="Tip rabata" sortable>
+                <Column field="discount_type" header="Tip rabata" sortable>
                     <template #body="{ data }">
-                        <span
-                            v-for="(discountType, index) in data.discount_types"
-                            :key="discountType.id"
-                        >
-                            {{ discountType.name }}
-                            <template
-                                v-if="index !== data.discount_types.length - 1"
-                                >,
-                            </template>
-                        </span>
+                        <span v-if="data.discount_type_id">{{
+                            data.discount_type.name
+                        }}</span>
+                        <span v-else> - </span>
                     </template>
                 </Column>
                 <Column field="roles" header="Uloga" sortable>
@@ -337,9 +348,11 @@ export default {
                             <span v-if="data.roles[0].name === 'admin'">
                                 Administrator
                             </span>
-                            <span v-else> Korisnik </span>
+                            <span v-if="data.roles[0].name === 'customer'">
+                                Korisnik
+                            </span>
                         </span>
-                        <span v-else> Korisnik </span>
+                        <span v-else> - </span>
                     </template>
                 </Column>
                 <Column

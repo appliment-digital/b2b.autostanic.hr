@@ -27,7 +27,6 @@ export default {
     mounted() {
         this.getAll();
         this.getAllUsers();
-        this.test();
     },
     data() {
         return {
@@ -35,20 +34,70 @@ export default {
             discountTypes: [],
             discountType: {},
             discountTypeDialog: false,
-            users: [],
             expandedRows: [],
+            users: [],
+            usersWithDiscountType: [],
         };
+    },
+    watch: {
+        discountTypeDialog() {
+            if (this.discountTypeDialog) {
+                this.getAllUsers();
+                if (this.discountType.id) {
+                    this.discountTypes.forEach((discount) => {
+                        discount.users.forEach((user) => {
+                            if (user.discount_type_id == this.discountType.id) {
+                                user.disabled = false;
+                                delete user.updated_at;
+                            }
+                            if (
+                                user.discount_type_id > 0 &&
+                                user.discount_type_id != this.discountType.id
+                            ) {
+                                user.disabled = true;
+                                delete user.updated_at;
+                            }
+                        });
+                    });
+                    this.users.forEach((user) => {
+                        if (user.discount_type_id == this.discountType.id) {
+                            user.disabled = false;
+                            delete user.updated_at;
+                        }
+                        if (
+                            user.discount_type_id > 0 &&
+                            user.discount_type_id != this.discountType.id
+                        ) {
+                            user.disabled = true;
+                            delete user.updated_at;
+                        }
+                    });
+                } else {
+                    this.discountTypes.forEach((discount) => {
+                        discount.users.forEach((user) => {
+                            if (user.discount_type_id > 0) {
+                                user.disabled = true;
+                                delete user.updated_at;
+                            }
+                        });
+                    });
+                }
+            }
+        },
     },
     computed: {},
     methods: {
-        test() {
-            webDatabaseService.test().then((response) => {
-                console.log(response);
-            });
-        },
         getAll() {
             discountTypeService.getAll().then((response) => {
                 this.discountTypes = response.data.data;
+                this.discountTypes.forEach((discount) => {
+                    discount.users.forEach((user) => {
+                        if (user.discount_type_id > 0) {
+                            user.disabled = true;
+                            delete user.updated_at;
+                        }
+                    });
+                });
             });
         },
         openDialog(selectedType) {
@@ -107,13 +156,27 @@ export default {
                     });
             }
         },
+
         getAllUsers() {
             userService.getAll().then((response) => {
-                response.data.data.forEach((v) => delete v.discount_types);
-                response.data.data.forEach((v) => delete v.pivot);
-                response.data.data.forEach((v) => delete v.roles);
-
+                response.data.data.forEach((user) => {
+                    delete user.updated_at;
+                });
                 this.users = response.data.data;
+
+                this.users.forEach((user) => {
+                    if (user.discount_type_id == this.discountType.id) {
+                        user.disabled = false;
+                        delete user.updated_at;
+                    }
+                    if (
+                        user.discount_type_id > 0 &&
+                        user.discount_type_id != this.discountType.id
+                    ) {
+                        user.disabled = true;
+                        delete user.updated_at;
+                    }
+                });
             });
         },
         expandAll() {
@@ -337,14 +400,14 @@ export default {
         </div>
 
         <div class="field">
-            <label>Korisnici<span class="text-red-500">*</span></label>
+            <label>Korisnici</label>
             <MultiSelect
                 v-model="discountType.users"
                 display="chip"
                 :options="users"
+                optionDisabled="disabled"
                 optionLabel="name"
                 placeholder="Odaberite korisnika"
-                :maxSelectedLabels="3"
                 class="w-full"
             >
                 <template #option="slotProps">
@@ -364,11 +427,7 @@ export default {
                 raised
             />
             <Button
-                v-if="
-                    discountType.name &&
-                    discountType.discount &&
-                    discountType.users
-                "
+                v-if="discountType.name && discountType.discount"
                 label="Spremi"
                 icon="pi pi-check"
                 class="p-button-text"

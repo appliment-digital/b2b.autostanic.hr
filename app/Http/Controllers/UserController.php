@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DiscountType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -11,32 +12,44 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
 use Illuminate\Support\Facades\Mail;
 
-
 class UserController extends BaseController
 {
-
     public function get($id)
     {
         try {
-
             return User::find($id);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
         }
     }
 
     public function getAll()
     {
         try {
-            //ovdje treba dohvatiti sa vezom na tablicu kategorija popusta
-            $userData = User::with('discountTypes')
-                ->with('roles')
+            $userData = User::orderBy('users.id', 'DESC')->get();
+
+            return response()->json(['data' => $userData]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getAllWithRelations()
+    {
+        try {
+            $userData = User::with('roles', 'DiscountType')
                 ->orderBy('users.id', 'DESC')
                 ->get();
 
             return response()->json(['data' => $userData]);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
         }
     }
 
@@ -44,16 +57,27 @@ class UserController extends BaseController
     {
         try {
             $user = User::add($request);
-            if ($user === "Lozinka treba imati bar 6 znakova.") {
+            if ($user === 'Lozinka treba imati bar 6 znakova.') {
                 return $this->sendError(['error' => $user]);
             } elseif (isset($user['error'])) {
-                return $this->sendError($user, 'Greška prilikom dodavanja korisnika.');
+                return $this->sendError(
+                    $user,
+                    'Greška prilikom dodavanja korisnika.'
+                );
             }
 
-            $success['user'] =  $user;
+            $success['user'] = $user;
             return $this->sendResponse($success, 'Korisnik je uspješno dodan.');
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage() . ' on line ' . $e->getLine() . ' in file ' . $e->getFile()]);
+            return response()->json([
+                'error' =>
+                    'Exception: ' .
+                    $e->getMessage() .
+                    ' on line ' .
+                    $e->getLine() .
+                    ' in file ' .
+                    $e->getFile(),
+            ]);
         }
     }
 
@@ -63,33 +87,40 @@ class UserController extends BaseController
             $user = User::updateUser($id, $request);
 
             if ($user) {
-                $success['user'] =  $user;
+                $success['user'] = $user;
 
                 return $this->sendResponse($success, 'ažuriran korisnik.');
             } else {
-                return $this->sendError(['error' => 'Ažuriranje korisnika nije uspjelo.']);
+                return $this->sendError([
+                    'error' => 'Ažuriranje korisnika nije uspjelo.',
+                ]);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
         }
     }
 
     public function changeStatus(Request $request)
     {
         try {
-
             $user = User::changeStatus($request->id, $request->active);
             if ($user->active) {
-                $success['user'] =  $user;
+                $success['user'] = $user;
                 return $this->sendResponse($success, 'aktiviran korisnik.');
-            } else if (!$user->active) {
-                $success['user'] =  $user;
+            } elseif (!$user->active) {
+                $success['user'] = $user;
                 return $this->sendResponse($success, 'deaktiviran korisnik.');
             } else {
-                return $this->sendError(['error' => 'Izmjena statusa korisnika nije uspjela.']);
+                return $this->sendError([
+                    'error' => 'Izmjena statusa korisnika nije uspjela.',
+                ]);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
         }
     }
 
@@ -103,7 +134,9 @@ class UserController extends BaseController
         try {
             return response()->json(\Spatie\Permission\Models\Role::all());
         } catch (Exception $e) {
-            return response()->json(['error' => 'Exception: ' . $e->getMessage()]);
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
         }
     }
 }

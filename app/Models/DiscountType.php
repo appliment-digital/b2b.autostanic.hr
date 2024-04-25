@@ -4,19 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class DiscountType extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'discount'
-    ];
+    protected $fillable = ['name', 'discount'];
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->hasMany(User::class);
     }
 
     public static function add($data)
@@ -27,8 +25,16 @@ class DiscountType extends Model
 
         $discountType->save();
 
-        $userIds = array_column($data['users'], 'id');
-        $discountType->users()->attach($userIds);
+        if (isset($data['users']) && is_array($data['users'])) {
+            $userIds = array_column($data['users'], 'id');
+            foreach ($userIds as $userId) {
+                $user = User::find($userId);
+                if ($user) {
+                    $user->discount_type_id = $discountType->id;
+                    $user->save();
+                }
+            }
+        }
 
         return $discountType;
     }
@@ -42,11 +48,31 @@ class DiscountType extends Model
 
         $discountType->save();
 
-        // Detach all existing users
-        $discountType->users()->detach();
+        $usersWithDiscount = User::getWithDiscoutTypeId($id);
+
+        $usersWithDiscountIds = $usersWithDiscount->pluck('id')->toArray();
 
         $userIds = array_column($data['users'], 'id');
-        $discountType->users()->attach($userIds);
+
+        $usersForDeletingDiscoutTypeIds = array_diff(
+            $usersWithDiscountIds,
+            $userIds
+        );
+
+        foreach ($usersForDeletingDiscoutTypeIds as $id) {
+            User::removeDiscoutType($id);
+        }
+
+        if (isset($data['users']) && is_array($data['users'])) {
+            $userIds = array_column($data['users'], 'id');
+            foreach ($userIds as $userId) {
+                $user = User::find($userId);
+                if ($user) {
+                    $user->discount_type_id = $discountType->id;
+                    $user->save();
+                }
+            }
+        }
 
         return $discountType;
     }
