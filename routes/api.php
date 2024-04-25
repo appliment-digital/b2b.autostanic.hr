@@ -24,6 +24,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'forgotPassword']);
 
+Route::get('/test', [WebDatabaseController::class, 'test']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -40,6 +42,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discountType/add', [DiscountTypeController::class, 'add']);
     Route::put('/discountType/update/{id}', [DiscountTypeController::class, 'update']);
     Route::delete('/discountType/delete/{id}', [DiscountTypeController::class, 'delete']);
-
-    Route::get('/test', [WebDatabaseController::class, 'test']);
 });
