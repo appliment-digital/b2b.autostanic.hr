@@ -1,17 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+// components
 import Layout from '@/components/Layout.vue';
 import AdminLayout from '@/components/AdminLayout.vue';
+
+// pages
 import Login from '@/views/pages/Login.vue';
 import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
 import Home from '@/views/pages/Home.vue';
-
-// admin pages
-import UserTable from '@/views/pages/admin/UserTable.vue'
-import DiscountTable from '@/views/pages/admin/DiscountTable.vue'
+import UserTable from '@/views/pages/admin/UserTable.vue';
+import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
+import Category from '@/views/pages/Category.vue';
+import Product from '@/views/pages/Product.vue'
 
 // pinia
 import { useUserStore } from '@/store/userStore';
+
+const categories = [
+    { path: 'karoserija' },
+    { path: 'dijelovi-za-popravak-vozila' },
+    { path: 'auto-akustika-i-elektronika' },
+    { path: 'sve-za-auto' },
+    { path: 'sve-za-radionu' },
+    { path: 'akcijska-ponuda' },
+];
 
 const routes = [
     {
@@ -35,8 +48,27 @@ const routes = [
                 path: '/reset',
                 component: ResetPassword,
             },
+
+            // create routes for all top-level categories
+            ...categories.map((c) => ({
+                path: `/${c.path}`,
+                component: Category,
+                children: [
+                    {
+                        path: `/${c.path}/:subcategory(.*)`,
+                        component: Category,
+                    },
+                ],
+            })),
+
+            // product
+            {
+                path: '/:product',
+                component: Product,
+            }
         ],
     },
+
     {
         path: '/admin',
         component: AdminLayout,
