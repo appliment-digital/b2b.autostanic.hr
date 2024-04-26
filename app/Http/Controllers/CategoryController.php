@@ -10,7 +10,7 @@ class CategoryController extends BaseController
     public function getMainCategories()
     {
         try {
-            $query = DB::connection('webDb')
+            $query = DB::connection('webshopdb')
                 ->table('dbo.Category')
                 ->select(
                     'Id',
@@ -33,7 +33,7 @@ class CategoryController extends BaseController
     public function getSubcategories($id)
     {
         try {
-            $query = DB::connection('webDb')
+            $query = DB::connection('webshopdb')
                 ->table('dbo.Category')
                 ->select(
                     'Id',

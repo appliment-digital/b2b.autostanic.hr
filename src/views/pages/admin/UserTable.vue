@@ -55,6 +55,7 @@ export default {
     },
     methods: {
         closeDialog() {
+            this.getAll();
             this.isDialogVisible = false;
             this.user = {};
         },
@@ -175,7 +176,12 @@ export default {
                         // deaktiviranje korisnika
                         this.changeStatus(user, 0);
                     },
-                    reject: () => {},
+                    reject: () => {
+                        this.getAll();
+                    },
+                    onHide: () => {
+                        this.getAll();
+                    },
                 });
             } else if (user.active == false) {
                 // aktiviranje korisnika
