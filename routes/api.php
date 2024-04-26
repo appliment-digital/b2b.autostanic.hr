@@ -4,9 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DiscountTypeController;
-use App\Http\Controllers\CategoryContorller;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,5 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/discountType/delete/{id}', [
         DiscountTypeController::class,
         'delete',
+    ]);
+
+    //****************   CATEGORY CONTOLLER ******************
+    Route::get('/category/categories', [
+        CategoryController::class,
+        'getMainCategories',
     ]);
 });

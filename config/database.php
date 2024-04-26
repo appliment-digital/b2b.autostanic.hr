@@ -88,8 +88,8 @@ return [
             'password' => env('WEB_DB_PASSWORD'),
             'charset' => 'utf8',
             'prefix' => '',
+            'trust_server_certificate' => true
         ],
-
     ],
 
     /*

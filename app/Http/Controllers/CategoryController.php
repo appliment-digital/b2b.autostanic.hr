@@ -10,7 +10,7 @@ class CategoryController extends BaseController
     public function getMainCategories()
     {
         try {
-            $query = DB::connection('webDb')
+            $query = DB::connection('webshopdb')
                 ->table('dbo.Category')
                 ->select(
                     'Id',
@@ -22,7 +22,7 @@ class CategoryController extends BaseController
                 ->where('ParentCategoryId', 0)
                 ->get();
 
-            return $query;
+            return $this->convertKeysToCamelCase($query);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),
@@ -33,7 +33,7 @@ class CategoryController extends BaseController
     public function getSubcategories($id)
     {
         try {
-            $query = DB::connection('webDb')
+            $query = DB::connection('webshopdb')
                 ->table('dbo.Category')
                 ->select(
                     'Id',
