@@ -17,9 +17,15 @@ class CategoryController extends BaseController
                     'Name',
                     'Description',
                     'ParentCategoryId',
-                    'ProductCount'
+                    'ProductCount',
+                    'PictureId',
+                    'Breadcrumb'
                 )
                 ->where('ParentCategoryId', 0)
+                ->where('ShowOnHomePage', 1)
+                ->where('Deleted', 0)
+                ->where('Published', 1)
+                ->orderBy('DisplayOrder')
                 ->get();
 
             return $this->convertKeysToCamelCase($query);
@@ -40,9 +46,13 @@ class CategoryController extends BaseController
                     'Name',
                     'Description',
                     'ParentCategoryId',
-                    'ProductCount'
+                    'ProductCount',
+                    'PictureId',
+                    'Breadcrumb'
                 )
                 ->where('ParentCategoryId', $id)
+                ->where('Deleted', 0)
+                ->where('Published', 1)
                 ->get();
 
             return $query;
