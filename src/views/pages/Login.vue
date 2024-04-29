@@ -1,7 +1,7 @@
 <script>
 // vue-router
 import router from '@/router';
-import axios from 'axios';
+
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -22,10 +22,6 @@ export default {
         ...mapStores(useUserStore),
     },
     methods: {
-        changeMessage() {
-            this.message = 'Vue.js is awesome!';
-        },
-
         handleForgotPasswordClick() {
             router.push('/forgot');
         },
@@ -33,7 +29,6 @@ export default {
             userService
                 .login(this.email, this.password)
                 .then((data) => {
-                    console.log('then', data);
                     if (data.error) {
                         this.$toast.add({
                             severity: 'error',
@@ -61,7 +56,7 @@ export default {
                     }
                 })
                 .catch((error) => {
-                    //console.log(error.data);
+                    console.log({ error });
                     this.$toast.add({
                         severity: 'error',
                         summary: 'Greška',

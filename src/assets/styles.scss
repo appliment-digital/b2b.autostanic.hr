@@ -45,3 +45,19 @@ body {
 .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link  {
     background: none !important;
 }
+
+#dialog-category  {
+    box-shadow: none;
+
+    .p-dialog {
+        background: none;
+    }
+
+    .p-dialog-header {
+        background: none;
+    }
+
+    .p-dialog-content {
+        background: none;
+    }
+}

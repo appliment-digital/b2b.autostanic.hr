@@ -1,4 +1,3 @@
-
 import Axios from 'axios';
 
 export default class CategoryService {
@@ -8,7 +7,7 @@ export default class CategoryService {
         return Axios.get(this.apiResourceEndpoint + '/categories');
     }
 
-    static async getSubcategories() {
-        return Axios.get(this.apiResourceEndpoint + '/subcategories');
+    static async getSubcategories(id) {
+        return Axios.get(`${this.apiResourceEndpoint}/subcategories/${id}`);
     }
 }

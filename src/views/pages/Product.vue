@@ -1,6 +1,4 @@
 <script>
-import Header from '@/components/Header.vue';
-
 // utils
 import { capitalizeFirstLetter } from '@/utils';
 
@@ -8,12 +6,17 @@ import { capitalizeFirstLetter } from '@/utils';
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 
+// components
+import Header from '@/components/Header.vue';
+
 // services
 import ProductService from '@/service/ProductService.js';
+import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 export default {
     components: {
         Header,
+        Breadcrumbs,
     },
     data() {
         return {
@@ -25,23 +28,20 @@ export default {
                 items: [],
             },
 
-            subcategories: ['user 1', 'user 2', 'user 3'],
-
             tabMenuItems: [
                 { label: 'Informacije 1', icon: 'pi pi-home' },
                 { label: 'Informacije 2', icon: 'pi pi-chart-line' },
                 { label: 'Informacije 3', icon: 'pi pi-list' },
             ],
 
-            itemQuantity: '3',
+            itemQuantity: '1',
 
-            // Inquiry (Pošalji upit)
             inquiry: {
-                subject: 'Inquiry 1',
-                isSending: false,
+                product: 'Product 1',
+                isSending: false, // toggle <Dialog />
                 name: 'Hello',
-                lastName: "Test",
-                text: "",
+                lastName: 'Test',
+                text: '',
             },
         };
     },
@@ -58,12 +58,6 @@ export default {
         ...mapStores(useUserStore),
     },
     mounted() {
-        const previousUrl = window.history.state.back;
-        console.log({ previousUrl });
-        this.handleNavigatingCategories(previousUrl);
-
-        console.log({ robohas: this.userStore.robohashName });
-
         // get some data to display as a product
         ProductService.getTestProduct()
             .then((response) => {
@@ -73,32 +67,12 @@ export default {
             .catch((err) => console.error(err));
     },
     updated() {
-        console.log(this.placeholderData);
+        const [name, lastName] = this.userStore.fullName.split(' ');
+
+        this.inquiry.name = name;
+        this.inquiry.lastName = lastName;
     },
     methods: {
-        handleNavigatingCategories(previousUrl) {
-            console.log(this.$route.path);
-
-            let parts;
-            parts = previousUrl
-                .split('/')
-                .concat([this.$route.path.replace('/', '')]);
-
-            console.log({ parts });
-
-            parts = parts.filter((part) => part !== '');
-
-            let url = '';
-
-            this.breadcrumbs.items = parts.map((part, i) => {
-                url += `/${part}`;
-
-                return {
-                    label: capitalizeFirstLetter(part.replaceAll('-', ' ')),
-                    route: url,
-                };
-            });
-        },
 
         handleSendInquiry() {
             this.inquiry.isSending = true;
@@ -111,33 +85,7 @@ export default {
 <template>
     <Header />
 
-    <Breadcrumb
-        :home="breadcrumbs.home"
-        :model="breadcrumbs.items"
-        class="mt-5"
-    >
-        <template #item="{ item, props }">
-            <RouterLink
-                v-if="item.route"
-                v-slot="{ href, navigate }"
-                :to="item.route"
-                custom
-            >
-                <a :href="href" v-bind="props.action" @click="navigate">
-                    <span :class="[item.icon, 'text-800']" />
-                    <span class="text-800">{{ item.label }}</span>
-                </a>
-            </RouterLink>
-            <a
-                v-else
-                :href="item.url"
-                :target="item.target"
-                v-bind="props.action"
-            >
-                <span class="text-color">{{ item.label }}</span>
-            </a>
-        </template>
-    </Breadcrumb>
+    <Breadcrumbs />
 
     <!-- Prodcut: Image & Description -->
     <div class="mt-4 grid column-gap-6">
@@ -216,7 +164,7 @@ export default {
                         <Button
                             class="button--no-shadow mr-2 text-sm"
                             label="Dodaj u košaricu"
-                            severity="secondary"
+                            severity="primary"
                         />
                         <Button
                             class="button--no-shadow text-sm"
@@ -241,37 +189,54 @@ export default {
         modal
         closeOnEscape
         dismissableMask
+        :closable="false"
         :visible="inquiry.isSending"
         @update:visible="inquiry.isSending = false"
         class="w-30rem"
     >
+        <template #header>
+            <h2 class="text-center w-full pt-4">Pošalji upit</h2>
+        </template>
 
         <!-- Dialog Input: Subject -->
-        <label>Subjekt</label>
-        <InputText v-model="inquiry.subject" class="w-full mt-2 mb-3" />
+        <label>Proizvod</label>
+        <InputText
+            v-model="inquiry.product"
+            class="w-full mt-2 mb-3"
+            disabled
+        />
 
         <!-- Dialog Input: Name -->
         <label>Ime</label>
-        <InputText v-model="inquiry.name" class="w-full mt-2 mb-3" />
+        <InputText v-model="inquiry.name" class="w-full mt-2 mb-3" disabled />
 
         <!-- Dialog Input: Last Name -->
         <label>Prezime</label>
-        <InputText v-model="inquiry.lastName" class="w-full mt-2 mb-3" />
+        <InputText
+            v-model="inquiry.lastName"
+            class="w-full mt-2 mb-3"
+            disabled
+        />
 
         <!-- Dialog Input: Text -->
         <label>Upit</label>
-        <Textarea v-model="inquiry.text" rows="5" class="w-full mt-2 mb-6" />
+        <Textarea v-model="inquiry.text" rows="7" class="w-full mt-2 mb-6" />
 
         <div class="flex justify-content-end gap-2">
             <Button
                 type="button"
-                label="Cancel"
-                severity="secondary"
+                label="Odustani"
+                severity="danger"
                 @click="inquiry.isSending = false"
-            ></Button>
+            />
+            <Button
+                type="button"
+                label="Pošalji"
+                severity="success"
+                @click="inquiry.isSending = false"
+            />
         </div>
     </Dialog>
-
 </template>
 
 <style scoped>

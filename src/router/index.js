@@ -1,4 +1,8 @@
+// vue router
 import { createRouter, createWebHistory } from 'vue-router';
+
+// utils
+import { makeUrl } from '@/utils';
 
 // components
 import Layout from '@/components/Layout.vue';
@@ -12,19 +16,26 @@ import Home from '@/views/pages/Home.vue';
 import UserTable from '@/views/pages/admin/UserTable.vue';
 import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
 import Category from '@/views/pages/Category.vue';
-import Product from '@/views/pages/Product.vue'
+import Product from '@/views/pages/Product.vue';
 
 // pinia
 import { useUserStore } from '@/store/userStore';
 
-const categories = [
-    { path: 'karoserija' },
-    { path: 'dijelovi-za-popravak-vozila' },
-    { path: 'auto-akustika-i-elektronika' },
-    { path: 'sve-za-auto' },
-    { path: 'sve-za-radionu' },
-    { path: 'akcijska-ponuda' },
-];
+// service
+import CategoryService from '../service/CategoryService';                      
+
+/**
+ * Fetch main categories to add them as routes.
+ */
+const makeCategoryRoutes = async () => {
+    const { data } = await CategoryService.getMainCategories();
+
+    if (data.length) {
+        return data;
+    }
+};
+
+const categoryRoutes = await makeCategoryRoutes();
 
 const routes = [
     {
@@ -34,7 +45,7 @@ const routes = [
             {
                 path: '/',
                 component: Home,
-                meta: { requiresAuth: true },
+                meta: { requiresAuth: true },                                  
             },
             {
                 path: '/login',
@@ -48,27 +59,28 @@ const routes = [
                 path: '/reset',
                 component: ResetPassword,
             },
-
-            // create routes for all top-level categories
-            ...categories.map((c) => ({
-                path: `/${c.path}`,
-                component: Category,
-                children: [
-                    {
-                        path: `/${c.path}/:subcategory(.*)`,
-                        component: Category,
-                    },
-                ],
-            })),
-
-            // product
             {
                 path: '/:product',
                 component: Product,
-            }
+                meta: { requiresAuth: true },                                  
+            },
+
+            // create routes for all top-level categories
+            ...categoryRoutes.map((category) => {
+                return {
+                    path: `/${makeUrl(category.name)}`,
+                    component: Category,
+                    meta: { requiresAuth: true },                                  
+                    children: [
+                        {
+                            path: `/${makeUrl(category.name)}/:subcategory(.*)`,
+                            component: Category,
+                        },
+                    ],
+                };
+            }),
         ],
     },
-
     {
         path: '/admin',
         component: AdminLayout,
@@ -97,6 +109,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore();
     const storedIsUserLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
+
+    console.log({ to });
 
     if (to.meta.requiresAuth && storedIsUserLoggedIn) {
         next();

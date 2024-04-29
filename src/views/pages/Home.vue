@@ -1,6 +1,16 @@
 <script>
-import router from '@/router';
+// utils
+import { makeUrl } from '@/utils';
+
+// pinia
+import { mapStores } from 'pinia';
+import { useCategoryStore } from '@/store/categoryStore.js';
+
+// components
 import Header from '@/components/Header.vue';
+
+// services
+import CategoryService from '@/service/CategoryService.js';
 
 export default {
     components: {
@@ -8,18 +18,30 @@ export default {
     },
     data() {
         return {
-            home: {
-                icon: 'pi pi-home',
-            },
-            items: [{ label: 'Naslovna' }],
+            categories: null,
         };
+    },
+    beforeMount() {
+        CategoryService.getMainCategories()
+            .then((response) => {
+                if (response.data.length) {
+                    this.categories = response.data;
+                }
+            })
+            .catch((err) => console.error(err));
+    },
+    computed: {
+        ...mapStores(useCategoryStore),
     },
     methods: {
         handleCategoryClick(category) {
-            this.$router.push(`/${category}`);
+            this.categoryStore.addHistory(category);
+
+            this.$router.push({
+                path: `/${makeUrl(category.name)}`,
+            });
         },
     },
-    computed: {},
 };
 </script>
 
@@ -35,7 +57,7 @@ export default {
     </div>
 
     <!-- Home Page: Search & Categories -->
-    <div class="w-full mx-auto grid mt-3 gap-3">
+    <div class="w-full mx-auto mt-3 grid gap-3">
         <!-- Search -->
         <div
             class="col-12 py-8 flex flex-column align-items-center justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"
@@ -111,73 +133,27 @@ export default {
         <div
             class="col-12 flex flex-column py-8 surface-100 bg-white border-100 border-round border-1 justify-content-center align-items-center md:col"
         >
-            <div class="flex flex-wrap justify-content-center row-gap-4">
+            <div
+                class="grid justify-content-center row-gap-4 column-gap-3 px-8"
+            >
+                <!-- prettier-ignore -->
                 <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('karoserija')"
+                    v-for="category in categories"
+                    class="col-3 h-6rem flex justify-content-center            
+                    align-items-center cursor-pointer border-1 border-100 
+                    border-round shadow-1 hover:bg-blue-50"
+                    @click="handleCategoryClick(category)"
                 >
-                    <img
-                        src="/images/car-body.jpeg"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm">Karoserija</span>
-                </div>
-                <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('dijelovi-za-popravak-vozila')"
-                >
-                    <img
-                        src="/images/car-parts.jpeg"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm text-center">Autodijelovi</span>
-                </div>
-                <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('auto-akustika-i-elektronika')"
-                >
-                    <img
-                        src="/images/car-sound-electronics.jpeg"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm">Auto akustika i elektronika</span>
-                </div>
-                <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('sve-za-auto')"
-                >
-                    <img
-                        src="/images/car-all.jpeg"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm">Sve za auto</span>
-                </div>
-                <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('sve-za-radionu')"
-                >
-                    <img
-                        src="/images/car-garage.jpeg"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm">Sve za radionu</span>
-                </div>
-                <div
-                    class="flex flex-column align-items-center w-11rem cursor-pointer"
-                    @click="handleCategoryClick('akcijska-ponuda')"
-                >
-                    <img
-                        src="/images/car-sale.png"
-                        class="p-2 border-round mb-1 img--category"
-                    />
-                    <span class="text-sm">Akcijska ponuda</span>
+                    <span class="text-sm text-center">{{ category.name }}</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Home Page: News -->
-    <div class="grid mt-6 row-gap-6 md:column-gap-0 lg:column-gap-3">
+    <div
+        class="mt-6 grid grid-nogutter row-gap-6 md:column-gap-0 lg:column-gap-3"
+    >
         <div class="mx-auto col-12 sm:col-8 md:col">
             <Card style="overflow: hidden" class="my-card cursor-pointer">
                 <template #header>
@@ -214,6 +190,7 @@ export default {
                         nemo inventore neque corporis ea voluptas dolorem culpa!
                     </p>
                 </template>
+                hello
             </Card>
         </div>
         <div class="mx-auto col-12 sm:col-8 md:col">
@@ -312,13 +289,6 @@ export default {
     background-position: center;
 }
 
-.category {
-    width: 42px;
-    height: 42px;
-    border: 1px solid lightslategray;
-    border-radius: 4px;
-}
-
 .img--placeholder {
     position: relative;
     width: 100%;
@@ -338,11 +308,6 @@ export default {
 
 .my-card:hover {
     box-shadow: 2px 2px 4px 2px rgba(0, 0, 0, 0.1);
-}
-
-.img--category {
-    width: 100px;
-    height: 100px;
 }
 
 .button--submit {

@@ -1,143 +1,136 @@
 <script>
-// vue-router
-import { RouterLink } from 'vue-router';
+// utils
+import { makeUrl } from '@/utils';
 
 // components
 import Header from '@/components/Header.vue';
+import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
+import { useCategoryStore } from '@/store/CategoryStore.js';
 
-// utils
-import { capitalizeFirstLetter } from '@/utils';
+// services
+import CategoryService from '@/service/CategoryService.js';
 
 export default {
     components: {
         Header,
+        Breadcrumbs,
     },
     data() {
         return {
-            breadcrumbs: {
-                home: {
-                    icon: 'pi pi-home',
-                    route: '/',
-                },
-                items: [],
-            },
-
-            subcategories: ['user 1', 'user 2', 'user 3'],
-
-            users: null,
+            subcategories: null,
+            isDataLoading: null,
         };
     },
     watch: {
-        '$route.path': function () {
-            this.handleNavigatingCategories();
+        '$route.path': function (newPath) {
+            this.handleNavigation(newPath);
         },
     },
     computed: {
-        ...mapStores(useUserStore),
+        ...mapStores(useUserStore, useCategoryStore),
     },
     mounted() {
-        this.handleNavigatingCategories();
-
-        fetch('https://jsonplaceholder.typicode.com/users/')
-            .then((response) => response.json())
-            .then((json) => {
-                const users = json.slice(0, 7);
-                this.users = users;
-            });
-
+        this.setIsDataLoading(false);
+        console.log('mounted', this.categoryStore.history);
+        this.handleNavigation(this.$route.path);
     },
     methods: {
-        handleSubcategoryClick(subcategory) {
-            // test pinia
-            this.userStore.robohash(subcategory);
-            // testing product
-            subcategory = subcategory.replaceAll(' ', '-');
-            subcategory = subcategory.toLowerCase();
+        handleNavigation(path) {
+            const history = this.categoryStore.history;
+            console.log({ history });
 
-            if (subcategory === 'kurtis-weissnat') {
-                return this.$router.push({
-                    path: `/${subcategory}`,
-                });
-                console.log('yes');
+            const freshUrl = path
+                .slice(1)
+                .split('/')
+                .map((entry) => decodeURIComponent(entry))
+                .pop();
+
+            console.log({ freshUrl });
+
+            const freshUrlData = history.find(
+                (entry) => entry.url === freshUrl,
+            );
+
+            console.log({ freshUrlData });
+
+            if (!freshUrlData) {
+                this.subcategories = null;
             }
 
-            const route = `${this.$route.path}/${subcategory}`;
-            this.$router.push(route);
+            this.getSubcategories(freshUrlData.id);
         },
 
-        handleNavigatingCategories() {
+        getSubcategories(id) {
+            this.setIsDataLoading(true);
+            // console.log('getting subcategories');
+
+            CategoryService.getSubcategories(id)
+                .then((response) => {
+                    // console.log({ subcategories: response.data });
+
+                    if (response.data.length) {
+                        this.setIsDataLoading(false);
+
+                        this.subcategories = response.data;
+                    } else {
+                        this.subcategories = null;
+                    }
+                })
+                .catch((err) => console.error(err));
+        },
+
+        handleSubcategoryClick(subcategory) {
+            if (this.isDataLoading) return;
+
             const { path } = this.$route;
 
-            let parts;
-            parts = path.split('/');
-            parts = parts.filter((part) => part !== '');
+            this.categoryStore.addHistory(subcategory);
 
-            let url = '';
+            this.$router.push(`${path}/${makeUrl(subcategory.name)}`);
+        },
 
-            this.breadcrumbs.items = parts.map((part, i) => {
-                url += `/${part}`;
-
-                return {
-                    label: capitalizeFirstLetter(part.replaceAll('-', ' ')),
-                    route: url,
-                };
-            });
+        setIsDataLoading(val) {
+            this.isDataLoading = val;
         },
     },
 };
 </script>
 
 <template>
-    <Header />
+    <div id="test-styles">
+        <Header />
 
-    <Breadcrumb
-        :home="breadcrumbs.home"
-        :model="breadcrumbs.items"
-        class="mt-5"
-    >
-        <template #item="{ item, props }">
-            <RouterLink
-                v-if="item.route"
-                v-slot="{ href, navigate }"
-                :to="item.route"
-                custom
-            >
-                <a :href="href" v-bind="props.action" @click="navigate">
-                    <span :class="[item.icon, 'text-800']" />
-                    <span class="text-800">{{ item.label }}</span>
-                </a>
-            </RouterLink>
-            <a
-                v-else
-                :href="item.url"
-                :target="item.target"
-                v-bind="props.action"
-            >
-                <span class="text-color">{{ item.label }}</span>
-            </a>
-        </template>
-    </Breadcrumb>
+        <Breadcrumbs />
 
-    <h3>Ostale kategorije</h3>
-    <div class="grid gap-3 mt-4">
-        <div
-            v-for="user in users"
-            class="col border-1 border-100 border-round p-2 cursor-pointer"
-            @click="handleSubcategoryClick(user.name)"
-        >
-            <img :src="'https://robohash.org/' + user.name" />
-            <span class="block text-center mt-2">{{ user.name }}</span>
+        <div v-if="subcategories" class="grid grid-nogutter gap-3 mt-4">
+            <!-- prettier-ignore -->
+            <div
+                v-for="subcategory in subcategories"
+                class="col-2 h-10rem border-1 border-100 border-round p-2 
+                cursor-pointer flex justify-content-center align-items-center 
+                shadow-1 hover:bg-green-100 transition-ease-in transition-colors"
+                @click="handleSubcategoryClick(subcategory)"
+            >
+                <span class="text-center">{{ subcategory.name }}</span>
+            </div>
         </div>
+
+        <div v-if="!subcategories">Nema podkategorija</div>
+
+        <Dialog
+            id="dialog-category"
+            :visible="isDataLoading"
+            style="transition: none"
+            :closable="false"
+        >
+            <ProgressSpinner />
+        </Dialog>
     </div>
 </template>
 
 <style scoped>
-img {
-    display: block;
-    max-width: 100%;
-}
 </style>

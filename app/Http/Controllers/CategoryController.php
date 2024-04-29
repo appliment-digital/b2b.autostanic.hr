@@ -55,7 +55,37 @@ class CategoryController extends BaseController
                 ->where('Published', 1)
                 ->get();
 
-            return $query;
+            return $this->convertKeysToCamelCase($query);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getSubcategoriesByName($name)
+    {
+        try {
+            $query = DB::connection('webshopdb')
+                ->table('dbo.Category')
+                ->select(
+                    'Id',
+                    'Name',
+                    'Description',
+                    'ParentCategoryId',
+                    'ProductCount',
+                    'PictureId',
+                    'Breadcrumb'
+                )
+                // ->where('Name', $name)
+                ->whereRaw('LOWER(REPLACE(Name, "-", " ")) = ?', [strtolower(str_replace('-', ' ', $name))])
+
+                ->where('ParentCategoryId', 0)
+                ->where('Deleted', 0)
+                ->where('Published', 1)
+                ->get();
+
+            return $this->convertKeysToCamelCase($query);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),
