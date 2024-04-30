@@ -43,7 +43,6 @@ export default {
                 this.user.name &&
                 this.user.last_name &&
                 this.user.email &&
-                this.user.password &&
                 this.user.roles &&
                 this.user.bitrix_company_id
             ) {
@@ -300,6 +299,15 @@ export default {
                 label="Spremi"
                 style="min-width: 100px"
                 @click="saveUser()"
+            />
+
+            <Button
+                v-else
+                class="block mt-5"
+                severity="success"
+                label="Spremi"
+                style="min-width: 100px"
+                disabled
             />
         </div>
     </Dialog>
