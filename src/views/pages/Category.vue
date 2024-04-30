@@ -13,6 +13,7 @@ import { useCategoryStore } from '@/store/CategoryStore.js';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
+import ProductService from '@/service/ProductService.js';
 
 export default {
     components: {
@@ -23,6 +24,7 @@ export default {
         return {
             subcategories: null,
             isDataLoading: null,
+            products: [],
         };
     },
     watch: {
@@ -77,8 +79,18 @@ export default {
 
                         this.subcategories = response.data;
                     } else {
-                        this.subcategories = null;
+                        this.getProductsByCategoryId(id);
                     }
+                })
+                .catch((err) => console.error(err));
+        },
+
+        getProductsByCategoryId(id) {
+            this.setIsDataLoading(true);
+
+            ProductService.getProductsByCategoryId(id, 1)
+                .then((response) => {
+                    console.log(response.data);
                 })
                 .catch((err) => console.error(err));
         },
@@ -115,6 +127,7 @@ export default {
                 shadow-1 hover:bg-green-100 transition-ease-in transition-colors"
                 @click="handleSubcategoryClick(subcategory)"
             >
+            <img :src="subcategory.pictureUrls[0]" style="width:30px"/>
                 <span class="text-center">{{ subcategory.name }}</span>
             </div>
         </div>
@@ -132,5 +145,4 @@ export default {
     </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

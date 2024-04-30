@@ -153,7 +153,6 @@ class CategoryController extends BaseController
                         '0',
                         STR_PAD_LEFT
                     );
-
                     $mimeType = $category->MimeType;
                     $extension = explode('/', $mimeType);
                     $fileExtension = end($extension);
@@ -175,6 +174,7 @@ class CategoryController extends BaseController
 
     public function test()
     {
+        $id = 39596;
         $query = DB::connection('webshopdb')
             ->table('dbo.Category')
             ->select(
@@ -200,8 +200,7 @@ class CategoryController extends BaseController
                 '=',
                 'Picture.Id'
             )
-            ->where('Category.ParentCategoryId', 0)
-            ->where('Category.ShowOnHomePage', 1)
+            ->where('Category.ParentCategoryId', $id)
             ->where('Category.Deleted', 0)
             ->where('Category.Published', 1)
             ->orderBy('Category.DisplayOrder')
@@ -209,6 +208,44 @@ class CategoryController extends BaseController
             ->distinct()
             ->get()
             ->toArray();
-        return $query;
+
+        $response = [];
+
+        $categoriesById = collect($query)->groupBy('Id');
+
+        foreach ($categoriesById as $categoryId => $categories) {
+            $categoryData = [
+                'Id' => $categoryId,
+                'Name' => $categories[0]->Name,
+                'ParentCategoryId' => $categories[0]->ParentCategoryId,
+                'ProductCount' => $categories[0]->ProductCount,
+                'PictureId' => $categories[0]->PictureId,
+                'Breadcrumb' => $categories[0]->Breadcrumb,
+                'DisplayOrder' => $categories[0]->DisplayOrder,
+                'SeoFilename' => $categories[0]->SeoFilename,
+                'MimeType' => $categories[0]->MimeType,
+            ];
+
+            $pictureUrls = [];
+
+            foreach ($categories as $category) {
+                $paddedPictureId = str_pad(
+                    $category->PictureId,
+                    7,
+                    '0',
+                    STR_PAD_LEFT
+                );
+                $mimeType = $category->MimeType;
+                $extension = explode('/', $mimeType);
+                $fileExtension = end($extension);
+                $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
+            }
+
+            $categoryData['picture_urls'] = $pictureUrls;
+
+            $response[] = $categoryData;
+        }
+
+        return $this->convertKeysToCamelCase($response);
     }
 }

@@ -24,15 +24,8 @@ use App\Http\Controllers\ProductController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'forgotPassword']);
-//Route::get('/test', [ProductController::class, 'test']);
-Route::get('/test', [CategoryController::class, 'test']);
-
-Route::get('/category/subcategoriesByName/{name}', [
-    CategoryController::class,
-    'getSubcategoriesByName',
-]);
-
-//**************** TEST ******************
+Route::get('/test', [ProductController::class, 'test']);
+//Route::get('/test', [CategoryController::class, 'test']);
 
 //**************** MIDDLEWARE ******************
 Route::middleware('auth:sanctum')->group(function () {
@@ -76,5 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/category/subcategories/{id}', [
         CategoryController::class,
         'getSubcategories',
+    ]);
+
+    //****************   PRODUCT CONTOLLER ******************
+    Route::get('/product/getProductsByCategoryId/{categoryId}/{page}', [
+        ProductController::class,
+        'getProductsByCategoryId',
     ]);
 });
