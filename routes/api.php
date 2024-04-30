@@ -24,6 +24,13 @@ use App\Http\Controllers\ProductController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'forgotPassword']);
+
+//****************   CATEGORY CONTOLLER ******************
+Route::get('/category/categories', [
+    CategoryController::class,
+    'getMainCategories',
+]);
+
 Route::get('/test', [ProductController::class, 'test']);
 //Route::get('/test', [CategoryController::class, 'test']);
 
@@ -62,10 +69,6 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
     //****************   CATEGORY CONTOLLER ******************
-    Route::get('/category/categories', [
-        CategoryController::class,
-        'getMainCategories',
-    ]);
     Route::get('/category/subcategories/{id}', [
         CategoryController::class,
         'getSubcategories',
