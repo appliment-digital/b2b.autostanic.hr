@@ -50,7 +50,7 @@ export default {
 
     <!-- Home Page: Banner -->
     <div
-        class="banner mt-6 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
+        class="banner mt-3 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
     >
         <h3 class="text-white uppercase text-5xl m-0">B2B Auto Stanić</h3>
         <span class="text-white text-xl mt-2">Sve na jednom mjestu</span>
@@ -134,18 +134,19 @@ export default {
             class="col-12 flex flex-column py-8 surface-100 bg-white border-100 border-round border-1 justify-content-center align-items-center md:col"
         >
             <div
-                class="grid justify-content-center row-gap-4 column-gap-3 px-8"
+                class="grid justify-content-center row-gap-4 column-gap-3 px-2"
             >
                 <!-- prettier-ignore -->
                 <div
                     v-for="category in categories"
-                    class="col-3 h-6rem flex justify-content-center            
-                    align-items-center cursor-pointer border-1 border-100 
-                    border-round shadow-1 hover:bg-blue-50"
+                    class="col-4 flex flex-column justify-content-center            
+                    row-gap-2 p-4
+                    align-items-center cursor-pointer 
+                    border-round border-1 border-100 hover:shadow-3" 
                     @click="handleCategoryClick(category)"
                 >
-                    <img :src="category.pictureUrls[0]" style="width:30px"/>
-                    <span class="text-sm text-center">{{ category.name }}</span>
+                    <img :src="category.pictureUrls[0]" style="width:64px" class="block mx-auto" >
+                    <span class="text-base text-center">{{ category.name }}</span>
                 </div>
             </div>
         </div>
