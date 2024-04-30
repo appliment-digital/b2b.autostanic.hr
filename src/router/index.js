@@ -17,12 +17,14 @@ import UserTable from '@/views/pages/admin/UserTable.vue';
 import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
 import Category from '@/views/pages/Category.vue';
 import Product from '@/views/pages/Product.vue';
+import SearchResults from '@/views/pages/SearchResults.vue';
+import ShoppingCart from '@/views/pages/ShoppingCart.vue';
 
 // pinia
 import { useUserStore } from '@/store/userStore';
 
 // service
-import CategoryService from '../service/CategoryService';                      
+import CategoryService from '../service/CategoryService';
 
 /**
  * Fetch main categories to add them as routes.
@@ -45,7 +47,7 @@ const routes = [
             {
                 path: '/',
                 component: Home,
-                meta: { requiresAuth: true },                                  
+                meta: { requiresAuth: true },
             },
             {
                 path: '/login',
@@ -60,9 +62,24 @@ const routes = [
                 component: ResetPassword,
             },
             {
+                path: '/cart',
+                component: ShoppingCart,
+            },
+            {
+                path: '/results',
+                component: SearchResults,
+                meta: { requiresAuth: true },
+                children: [
+                    {
+                        path: `/:subcategory(.*)`,
+                        component: SearchResults,
+                    },
+                ],
+            },
+            {
                 path: '/:product',
                 component: Product,
-                meta: { requiresAuth: true },                                  
+                meta: { requiresAuth: true },
             },
 
             // create routes for all top-level categories
@@ -70,7 +87,7 @@ const routes = [
                 return {
                     path: `/${makeUrl(category.name)}`,
                     component: Category,
-                    meta: { requiresAuth: true },                                  
+                    meta: { requiresAuth: true },
                     children: [
                         {
                             path: `/${makeUrl(category.name)}/:subcategory(.*)`,

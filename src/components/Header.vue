@@ -32,6 +32,10 @@ export default {
             this.$router.push('/');
         },
 
+        handleShoppingCartClick() {
+            this.$router.push('/cart')
+        },
+
         logout() {
             userService.logout().then((response) => {
                 this.$router.push('/login');
@@ -71,6 +75,7 @@ export default {
                     class="mr-2"
                     severity="secondary"
                     icon="pi pi-shopping-cart"
+                    @click="handleShoppingCartClick"
                     rounded
                     raised
                     text
