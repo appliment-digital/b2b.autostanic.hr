@@ -20,7 +20,7 @@ class CategoryController extends BaseController
                     'Category.PictureId',
                     'Category.Breadcrumb',
                     'Category.DisplayOrder',
-                    'Picture.SeoFilename'
+                    'Picture.SeoFilename' // Add the SeoFilename column from the Picture table
                 )
                 ->leftJoin(
                     'dbo.Category_Picture_Mapping',
@@ -39,20 +39,35 @@ class CategoryController extends BaseController
                 ->where('Category.Deleted', 0)
                 ->where('Category.Published', 1)
                 ->orderBy('Category.DisplayOrder')
-                ->get();
+                ->orderBy('Category.Id') // Add additional order by statement
+                ->distinct()
+                ->get()
+                ->toArray(); // Convert the collection of objects to array
 
-            $categoryDataWithPictureUrls = [];
+            // Initialize an empty array to store the final response
+            $response = [];
 
-            $categoriesById = $query->groupBy('Id');
+            // Group categories by ID
+            $categoriesById = collect($query)->groupBy('Id');
 
+            // Iterate over categories
             foreach ($categoriesById as $categoryId => $categories) {
-                $categoryData = [];
+                // Initialize an array to store category data
+                $categoryData = [
+                    'Id' => $categoryId,
+                    'Name' => $categories[0]->Name,
+                    'ParentCategoryId' => $categories[0]->ParentCategoryId,
+                    'ProductCount' => $categories[0]->ProductCount,
+                    'PictureId' => $categories[0]->PictureId,
+                    'Breadcrumb' => $categories[0]->Breadcrumb,
+                    'DisplayOrder' => $categories[0]->DisplayOrder,
+                    'SeoFilename' => $categories[0]->SeoFilename,
+                ];
 
-                $categoryData['id'] = $categories[0]->Id;
-                $categoryData['name'] = $categories[0]->Name;
+                // Initialize an array to store picture URLs for this category
+                $pictureUrls = [];
 
-                $categoryPictureUrls = [];
-
+                // Construct URLs for each picture of the category
                 foreach ($categories as $category) {
                     $paddedPictureId = str_pad(
                         $category->PictureId,
@@ -60,42 +75,17 @@ class CategoryController extends BaseController
                         '0',
                         STR_PAD_LEFT
                     );
-                    $categoryPictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.jpg";
+                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.jpg";
                 }
 
-                $categoryData['picture_urls'] = $categoryPictureUrls;
+                // Add picture URLs array to category data
+                $categoryData['picture_urls'] = $pictureUrls;
 
-                $categoryDataWithPictureUrls[$categoryId] = $categoryData;
+                // Add category data to the final response
+                $response[] = $categoryData;
             }
 
-            return $this->convertKeysToCamelCase($categoryDataWithPictureUrls);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Exception: ' . $e->getMessage(),
-            ]);
-        }
-    }
-
-    public function getSubcategories($id)
-    {
-        try {
-            $query = DB::connection('webshopdb')
-                ->table('dbo.Category')
-                ->select(
-                    'Id',
-                    'Name',
-                    'Description',
-                    'ParentCategoryId',
-                    'ProductCount',
-                    'PictureId',
-                    'Breadcrumb'
-                )
-                ->where('ParentCategoryId', $id)
-                ->where('Deleted', 0)
-                ->where('Published', 1)
-                ->get();
-
-            return $this->convertKeysToCamelCase($query);
+            return $this->convertKeysToCamelCase($response);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),
@@ -137,5 +127,81 @@ class CategoryController extends BaseController
 
     public function test()
     {
+        $query = DB::connection('webshopdb')
+            ->table('dbo.Category')
+            ->select(
+                'Category.Id',
+                'Category.Name',
+                'Category.ParentCategoryId',
+                'Category.ProductCount',
+                'Category.PictureId',
+                'Category.Breadcrumb',
+                'Category.DisplayOrder',
+                'Picture.SeoFilename' // Add the SeoFilename column from the Picture table
+            )
+            ->leftJoin(
+                'dbo.Category_Picture_Mapping',
+                'Category_Picture_Mapping.CategoryId',
+                '=',
+                'Category.Id'
+            )
+            ->leftJoin(
+                'dbo.Picture',
+                'Category_Picture_Mapping.PictureId',
+                '=',
+                'Picture.Id'
+            )
+            ->where('Category.ParentCategoryId', 0)
+            ->where('Category.ShowOnHomePage', 1)
+            ->where('Category.Deleted', 0)
+            ->where('Category.Published', 1)
+            ->orderBy('Category.DisplayOrder')
+            ->orderBy('Category.Id') // Add additional order by statement
+            ->distinct()
+            ->get()
+            ->toArray(); // Convert the collection of objects to array
+
+        // Initialize an empty array to store the final response
+        $response = [];
+
+        // Group categories by ID
+        $categoriesById = collect($query)->groupBy('Id');
+
+        // Iterate over categories
+        foreach ($categoriesById as $categoryId => $categories) {
+            // Initialize an array to store category data
+            $categoryData = [
+                'Id' => $categoryId,
+                'Name' => $categories[0]->Name,
+                'ParentCategoryId' => $categories[0]->ParentCategoryId,
+                'ProductCount' => $categories[0]->ProductCount,
+                'PictureId' => $categories[0]->PictureId,
+                'Breadcrumb' => $categories[0]->Breadcrumb,
+                'DisplayOrder' => $categories[0]->DisplayOrder,
+                'SeoFilename' => $categories[0]->SeoFilename,
+            ];
+
+            // Initialize an array to store picture URLs for this category
+            $pictureUrls = [];
+
+            // Construct URLs for each picture of the category
+            foreach ($categories as $category) {
+                $paddedPictureId = str_pad(
+                    $category->PictureId,
+                    7,
+                    '0',
+                    STR_PAD_LEFT
+                );
+                $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.jpg";
+            }
+
+            // Add picture URLs array to category data
+            $categoryData['picture_urls'] = $pictureUrls;
+
+            // Add category data to the final response
+            $response[] = $categoryData;
+        }
+
+        return $response;
     }
 }
