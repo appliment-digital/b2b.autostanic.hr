@@ -14,4 +14,8 @@ export default class ProductService {
                 pageSize,
         );
     }
+
+    static async getProductById(id) {
+        return Axios.get(this.apiResourceEndpoint + '/getProductById/' + id);
+    }
 }

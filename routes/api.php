@@ -76,4 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
         '/product/getProductsByCategoryId/{categoryId}/{page}/{pageSize}',
         [ProductController::class, 'getProductsByCategoryId']
     );
+
+    Route::get('/product/getProductById/{id}', [
+        ProductController::class,
+        'getProductById',
+    ]);
 });
