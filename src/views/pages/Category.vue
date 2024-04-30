@@ -9,7 +9,8 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
-import { useCategoryStore } from '@/store/CategoryStore.js';
+import { useCategoryStore } from '@/store/categoryStore.js';
+import { useResultsStore } from '@/store/resultsStore.js';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
@@ -33,17 +34,19 @@ export default {
         },
     },
     computed: {
-        ...mapStores(useUserStore, useCategoryStore),
+        ...mapStores(useUserStore, useCategoryStore, useResultsStore),
     },
     mounted() {
         this.setIsDataLoading(false);
-        console.log('mounted', this.categoryStore.history);
+        // console.log('mounted', this.categoryStore.history);
+
         this.handleNavigation(this.$route.path);
+
     },
     methods: {
         handleNavigation(path) {
             const history = this.categoryStore.history;
-            console.log({ history });
+            // console.log({ history });
 
             const freshUrl = path
                 .slice(1)
@@ -51,13 +54,13 @@ export default {
                 .map((entry) => decodeURIComponent(entry))
                 .pop();
 
-            console.log({ freshUrl });
+            // console.log({ freshUrl });
 
             const freshUrlData = history.find(
                 (entry) => entry.url === freshUrl,
             );
 
-            console.log({ freshUrlData });
+            // console.log({ freshUrlData });
 
             if (!freshUrlData) {
                 this.subcategories = null;
@@ -88,9 +91,13 @@ export default {
         getProductsByCategoryId(id) {
             this.setIsDataLoading(true);
 
-            ProductService.getProductsByCategoryId(id, 1)
+            ProductService.getProductsByCategoryId(id, 1, 10)
                 .then((response) => {
-                    console.log(response.data);
+                    const {data} = response;
+                    console.log({results: data});
+
+                    this.resultsStore.addResults(data)
+                    this.$router.push(`/results`)
                 })
                 .catch((err) => console.error(err));
         },
@@ -113,36 +120,41 @@ export default {
 </script>
 
 <template>
-    <div id="test-styles">
         <Header />
 
         <Breadcrumbs />
 
-        <div v-if="subcategories" class="grid grid-nogutter gap-3 mt-4">
-            <!-- prettier-ignore -->
-            <div
-                v-for="subcategory in subcategories"
-                class="col-2 h-10rem border-1 border-100 border-round p-2 
-                cursor-pointer flex justify-content-center align-items-center 
-                shadow-1 hover:bg-green-100 transition-ease-in transition-colors"
-                @click="handleSubcategoryClick(subcategory)"
-            >
-            <img :src="subcategory.pictureUrls[0]" style="width:30px"/>
-                <span class="text-center">{{ subcategory.name }}</span>
-            </div>
-        </div>
-
-        <div v-if="!subcategories">Nema podkategorija</div>
-
-        <Dialog
-            id="dialog-category"
-            :visible="isDataLoading"
-            style="transition: none"
-            :closable="false"
+        <div v-if="subcategories" class="grid mt-4">
+        <!-- prettier-ignore -->
+        <div
+            v-for="subcategory in subcategories"
+            class="col-3
+            cursor-pointer 
+            "
+            @click="handleSubcategoryClick(subcategory)"
         >
-            <ProgressSpinner />
-        </Dialog>
+                <!-- prettier-ignore -->
+                <div class="w-full h-full border-1 border-100 p-4 
+                flex flex-column justify-content-center align-items-center 
+                border-round bg-white transition-ease-in transition-colors
+                row-gap-3
+                hover:shadow-3">
+                    <img :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
+                    <span class="text-center">{{ subcategory.name }}</span>
+                </div>
+        </div>
     </div>
+
+    <div v-if="!subcategories">Nema podkategorija</div>
+
+    <Dialog
+        id="dialog-category"
+        :visible="isDataLoading"
+        style="transition: none;"
+        :closable="false"
+    >
+        <ProgressSpinner />
+    </Dialog>
 </template>
 
 <style scoped></style>
