@@ -136,22 +136,10 @@ class ProductController extends BaseController
 
     public function getProductPictures($id)
     {
-        $id = 44038;
         $productPictures = DB::connection('webshopdb')
-            ->table('Product_Picture_Mapping')
+            ->table('dbo.Product_Picture_Mapping')
             ->select('Picture.*')
-            ->join(
-                'Picture',
-                'Product_Picture_Mapping.PictureId',
-                '=',
-                'Picture.Id'
-            )
-            ->join(
-                'Product',
-                'Product_Picture_Mapping.ProductId',
-                '=',
-                'Product.Id'
-            )
+            ->join('Picture', 'Product_Picture_Mapping', '=', 'Picture.Id')
             ->where('Product_Picture_Mapping.ProductId', $id)
             ->get();
 
