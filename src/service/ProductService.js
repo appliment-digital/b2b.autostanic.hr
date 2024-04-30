@@ -9,7 +9,9 @@ export default class ProductService {
                 '/getProductsByCategoryId/' +
                 categoryId +
                 '/' +
-                page,
+                page +
+                '/' +
+                pageSize,
         );
     }
 }

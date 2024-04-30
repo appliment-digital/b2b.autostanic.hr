@@ -8,11 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends BaseController
 {
-    public function getProductsByCategoryId($categoryId, $page)
+    public function getProductsByCategoryId($categoryId, $page, $pageSize)
     {
         try {
-            $pageSize = 10;
-
             $offset = ($page - 1) * $pageSize;
 
             $query = DB::connection('webshopdb')
