@@ -144,6 +144,7 @@ export default {
                     border-round shadow-1 hover:bg-blue-50"
                     @click="handleCategoryClick(category)"
                 >
+                    <img :src="category.pictureUrls[0]" style="width:30px"/>
                     <span class="text-sm text-center">{{ category.name }}</span>
                 </div>
             </div>
