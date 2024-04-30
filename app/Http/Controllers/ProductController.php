@@ -11,7 +11,7 @@ class ProductController extends BaseController
     public function getProductsByCategoryId()
     {
         try {
-            $categoryId = 39884;
+            $categoryId = 39877;
             $query = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
@@ -25,31 +25,13 @@ class ProductController extends BaseController
                     'dbo.Product.OldPrice',
                     'dbo.Product.IsNewPart',
                     'dbo.Product.IsUsedPart',
-                    'dbo.Product.ManufacturerName',
-                    DB::raw(
-                        "STRING_AGG(dbo.OEMCode.OEMCodeDenormalized, ',') AS OEMCodes"
-                    ), // Concatenating OEMCodeDenormalized values
-                    DB::raw(
-                        "STRING_AGG(dbo.SpecificationAttributeOption.Name, ',') AS SpecificationAttributeNames"
-                    ) // Concatenating specification attribute names
+                    'dbo.Product.ManufacturerName'
                 )
                 ->join(
                     'dbo.Product_Category_Mapping',
                     'dbo.Product.Id',
                     '=',
                     'dbo.Product_Category_Mapping.ProductId'
-                )
-                ->join(
-                    'dbo.Product_OEMCode_Mapping',
-                    'dbo.Product.Id',
-                    '=',
-                    'dbo.Product_OEMCode_Mapping.ProductId'
-                )
-                ->join(
-                    'dbo.OEMCode',
-                    'dbo.Product_OEMCode_Mapping.OEMCodeId',
-                    '=',
-                    'dbo.OEMCode.Id'
                 )
                 ->where('dbo.Product_Category_Mapping.CategoryId', $categoryId)
                 ->where('dbo.Product.Deleted', 0)
@@ -114,5 +96,52 @@ class ProductController extends BaseController
                 ->back()
                 ->with('error', 'Error fetching records: ' . $e->getMessage());
         }
+    }
+
+    public function test()
+    {
+        $categoryId = 39877;
+        $query = DB::connection('webshopdb')
+            ->table('dbo.Product')
+            ->select(
+                'dbo.Product.Id',
+                'dbo.Product.Name',
+                'dbo.Product.ShortDescription',
+                'dbo.Product.FullDescription',
+                'dbo.Product.Sku',
+                'dbo.Product.StockQuantity',
+                'dbo.Product.Price',
+                'dbo.Product.OldPrice',
+                'dbo.Product.IsNewPart',
+                'dbo.Product.IsUsedPart',
+                'dbo.Product.ManufacturerName'
+            )
+            ->join(
+                'dbo.Product_Category_Mapping',
+                'dbo.Product.Id',
+                '=',
+                'dbo.Product_Category_Mapping.ProductId'
+            )
+            ->where('dbo.Product_Category_Mapping.CategoryId', $categoryId)
+            ->where('dbo.Product.Deleted', 0)
+            ->where('dbo.Product.Published', 1)
+            ->groupBy(
+                'dbo.Product.Id',
+                'dbo.Product.Name',
+                'dbo.Product.ShortDescription',
+                'dbo.Product.FullDescription',
+                'dbo.Product.Sku',
+                'dbo.Product.StockQuantity',
+                'dbo.Product.Price',
+                'dbo.Product.OldPrice',
+                'dbo.Product.IsNewPart',
+                'dbo.Product.IsUsedPart',
+                'dbo.Product.ManufacturerName'
+            )
+            ->take(10)
+            ->orderBy('DisplayOrder')
+            ->get();
+
+        return $query;
     }
 }
