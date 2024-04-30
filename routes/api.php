@@ -24,16 +24,9 @@ use App\Http\Controllers\ProductController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'forgotPassword']);
+//Route::get('/test', [ProductController::class, 'test']);
 Route::get('/test', [CategoryController::class, 'test']);
-//****************   CATEGORY CONTOLLER ******************
-Route::get('/category/categories', [
-    CategoryController::class,
-    'getMainCategories',
-]);
-Route::get('/category/subcategories/{id}', [
-    CategoryController::class,
-    'getSubcategories',
-]);
+
 Route::get('/category/subcategoriesByName/{name}', [
     CategoryController::class,
     'getSubcategoriesByName',
@@ -73,5 +66,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/discountType/delete/{id}', [
         DiscountTypeController::class,
         'delete',
+    ]);
+
+    //****************   CATEGORY CONTOLLER ******************
+    Route::get('/category/categories', [
+        CategoryController::class,
+        'getMainCategories',
+    ]);
+    Route::get('/category/subcategories/{id}', [
+        CategoryController::class,
+        'getSubcategories',
     ]);
 });

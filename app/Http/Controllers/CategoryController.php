@@ -20,7 +20,8 @@ class CategoryController extends BaseController
                     'Category.PictureId',
                     'Category.Breadcrumb',
                     'Category.DisplayOrder',
-                    'Picture.SeoFilename'
+                    'Picture.SeoFilename',
+                    'Picture.MimeType'
                 )
                 ->leftJoin(
                     'dbo.Category_Picture_Mapping',
@@ -58,6 +59,7 @@ class CategoryController extends BaseController
                     'Breadcrumb' => $categories[0]->Breadcrumb,
                     'DisplayOrder' => $categories[0]->DisplayOrder,
                     'SeoFilename' => $categories[0]->SeoFilename,
+                    'MimeType' => $categories[0]->MimeType,
                 ];
 
                 $pictureUrls = [];
@@ -69,7 +71,10 @@ class CategoryController extends BaseController
                         '0',
                         STR_PAD_LEFT
                     );
-                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.jpg";
+                    $mimeType = $category->MimeType;
+                    $extension = explode('/', $mimeType);
+                    $fileExtension = end($extension);
+                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
                 }
 
                 $categoryData['picture_urls'] = $pictureUrls;
@@ -85,31 +90,82 @@ class CategoryController extends BaseController
         }
     }
 
-    public function getSubcategoriesByName($name)
+    public function getSubcategories($id)
     {
         try {
             $query = DB::connection('webshopdb')
                 ->table('dbo.Category')
                 ->select(
-                    'Id',
-                    'Name',
-                    'Description',
-                    'ParentCategoryId',
-                    'ProductCount',
-                    'PictureId',
-                    'Breadcrumb'
+                    'Category.Id',
+                    'Category.Name',
+                    'Category.ParentCategoryId',
+                    'Category.ProductCount',
+                    'Category.PictureId',
+                    'Category.Breadcrumb',
+                    'Category.DisplayOrder',
+                    'Picture.SeoFilename',
+                    'Picture.MimeType'
                 )
-                // ->where('Name', $name)
-                ->whereRaw('LOWER(REPLACE(Name, "-", " ")) = ?', [
-                    strtolower(str_replace('-', ' ', $name)),
-                ])
+                ->leftJoin(
+                    'dbo.Category_Picture_Mapping',
+                    'Category_Picture_Mapping.CategoryId',
+                    '=',
+                    'Category.Id'
+                )
+                ->leftJoin(
+                    'dbo.Picture',
+                    'Category_Picture_Mapping.PictureId',
+                    '=',
+                    'Picture.Id'
+                )
+                ->where('Category.ParentCategoryId', $id)
+                ->where('Category.Deleted', 0)
+                ->where('Category.Published', 1)
+                ->orderBy('Category.DisplayOrder')
+                ->orderBy('Category.Id')
+                ->distinct()
+                ->get()
+                ->toArray();
 
-                ->where('ParentCategoryId', 0)
-                ->where('Deleted', 0)
-                ->where('Published', 1)
-                ->get();
+            $response = [];
 
-            return $this->convertKeysToCamelCase($query);
+            $categoriesById = collect($query)->groupBy('Id');
+
+            foreach ($categoriesById as $categoryId => $categories) {
+                $categoryData = [
+                    'Id' => $categoryId,
+                    'Name' => $categories[0]->Name,
+                    'ParentCategoryId' => $categories[0]->ParentCategoryId,
+                    'ProductCount' => $categories[0]->ProductCount,
+                    'PictureId' => $categories[0]->PictureId,
+                    'Breadcrumb' => $categories[0]->Breadcrumb,
+                    'DisplayOrder' => $categories[0]->DisplayOrder,
+                    'SeoFilename' => $categories[0]->SeoFilename,
+                    'MimeType' => $categories[0]->MimeType,
+                ];
+
+                $pictureUrls = [];
+
+                foreach ($categories as $category) {
+                    $paddedPictureId = str_pad(
+                        $category->PictureId,
+                        7,
+                        '0',
+                        STR_PAD_LEFT
+                    );
+
+                    $mimeType = $category->MimeType;
+                    $extension = explode('/', $mimeType);
+                    $fileExtension = end($extension);
+                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
+                }
+
+                $categoryData['picture_urls'] = $pictureUrls;
+
+                $response[] = $categoryData;
+            }
+
+            return $this->convertKeysToCamelCase($response);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),
@@ -119,5 +175,40 @@ class CategoryController extends BaseController
 
     public function test()
     {
+        $query = DB::connection('webshopdb')
+            ->table('dbo.Category')
+            ->select(
+                'Category.Id',
+                'Category.Name',
+                'Category.ParentCategoryId',
+                'Category.ProductCount',
+                'Category.PictureId',
+                'Category.Breadcrumb',
+                'Category.DisplayOrder',
+                'Picture.SeoFilename',
+                'Picture.MimeType'
+            )
+            ->leftJoin(
+                'dbo.Category_Picture_Mapping',
+                'Category_Picture_Mapping.CategoryId',
+                '=',
+                'Category.Id'
+            )
+            ->leftJoin(
+                'dbo.Picture',
+                'Category_Picture_Mapping.PictureId',
+                '=',
+                'Picture.Id'
+            )
+            ->where('Category.ParentCategoryId', 0)
+            ->where('Category.ShowOnHomePage', 1)
+            ->where('Category.Deleted', 0)
+            ->where('Category.Published', 1)
+            ->orderBy('Category.DisplayOrder')
+            ->orderBy('Category.Id')
+            ->distinct()
+            ->get()
+            ->toArray();
+        return $query;
     }
 }
