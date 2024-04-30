@@ -104,8 +104,6 @@ class ProductController extends BaseController
     public function getProductById($id)
     {
         try {
-            $id = 1982906;
-
             $productData = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
@@ -122,11 +120,16 @@ class ProductController extends BaseController
                     'Product.ManufacturerName'
                 )
                 ->where('Product.Id', $id)
-                ->get();
+                ->first();
 
-            //return $productData;
+            $productData->pictures = $this->getProductPictures($id);
+            $productData->oem_codes = $this->getOEMCodeForProduct($id);
+            $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
+                $id
+            );
+            $productData->car_types = $this->getCarTypesForProduct($id);
 
-            $productPictures = $this->getProductPictures($id);
+            return $productData;
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -138,29 +141,95 @@ class ProductController extends BaseController
     {
         $productPictures = DB::connection('webshopdb')
             ->table('dbo.Product_Picture_Mapping')
-            ->select('Picture.*')
-            ->join('Picture', 'Product_Picture_Mapping', '=', 'Picture.Id')
+            ->select(
+                'Picture.Id as PictureId',
+                'Picture.MimeType',
+                'Picture.SeoFilename'
+            )
+            ->join(
+                'Picture',
+                'Product_Picture_Mapping.PictureId',
+                '=',
+                'Picture.Id'
+            )
             ->where('Product_Picture_Mapping.ProductId', $id)
             ->get();
+
+        // Generate URLs
+        $productPictures->transform(function ($picture) {
+            $pictureId = str_pad($picture->PictureId, 7, '0', STR_PAD_LEFT);
+            $fileExtension = substr(
+                $picture->MimeType,
+                strpos($picture->MimeType, '/') + 1
+            );
+            $picture->url = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_280.{$fileExtension}";
+            return $picture;
+        });
 
         return $productPictures;
     }
 
-    public function getCarTypesForProduct()
+    public function getOEMCodeForProduct($id)
     {
-        $productId = 44038;
-        $carTypes = DB::connection('webshopdb')
-            ->table('dbo.Product_CarType_Mapping')
-            ->select('CarType.*')
+        $OEMCodes = DB::connection('webshopdb')
+            ->table('dbo.Product_OEMCode_Mapping')
+            ->select('OEMCode.*')
             ->join(
-                'CarType',
-                'Product_CarType_Mapping.CarTypeId',
+                'OEMCode',
+                'Product_OEMCode_Mapping.OEMCodeId',
                 '=',
-                'CarType.Id'
+                'OEMCode.Id'
             )
-            ->where('Product_CarType_Mapping.ProductId', $productId)
-            ->where('CarType.Deleted', 0)
-            ->where('CarType.Published', 1)
+            ->where('Product_OEMCode_Mapping.ProductId', $id)
+            ->where('OEMCode.Published', 1)
+            ->get();
+
+        return $OEMCodes;
+    }
+
+    public function getSpecificationAttributeForProduct($id)
+    {
+        $specificationAttributes = DB::connection('webshopdb')
+            ->table('dbo.Product_SpecificationAttribute_Mapping')
+            ->select('SpecificationAttributeOption.*')
+            ->join(
+                'SpecificationAttributeOption',
+                'Product_SpecificationAttribute_Mapping.SpecificationAttributeOptionId',
+                '=',
+                'SpecificationAttributeOption.Id'
+            )
+            ->where('Product_SpecificationAttribute_Mapping.ProductId', $id)
+            ->get();
+
+        return $specificationAttributes;
+    }
+
+    public function getCarTypesForProduct($id)
+    {
+        $carTypes = DB::connection('webshopdb')
+            ->table('dbo.Product_CarType_Mapping as pcm')
+            ->select(
+                // CarType
+                'ct.Id as CarTypeId',
+                'ct.Name as CarTypeName',
+                'ct.kW as kW',
+                'ct.EngineType as EngineType',
+                // CarModel
+                'cm.Id as CarModelId',
+                'cm.Name as CarModelName',
+                'cm.ModelYearFrom as CarModelYearFrom',
+                'cm.ModelYearTO as CarModelYearTO',
+                'cm.CarMakeId',
+                // CarMake
+                'mk.Id as CarMakeId',
+                'mk.Name as CarMakeName'
+            )
+            ->join('CarType as ct', 'pcm.CarTypeId', '=', 'ct.Id')
+            ->join('CarModel as cm', 'ct.CarModelId', '=', 'cm.Id')
+            ->join('CarMake as mk', 'cm.CarMakeId', '=', 'mk.Id')
+            ->where('pcm.ProductId', $id)
+            ->where('ct.Deleted', 0)
+            ->where('ct.Published', 1)
             ->get();
 
         return $carTypes;
@@ -170,6 +239,6 @@ class ProductController extends BaseController
     {
         $id = 1982906;
 
-        return $this->getProductPictures($id);
+        return $this->getProductById($id);
     }
 }
