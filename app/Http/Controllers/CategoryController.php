@@ -103,7 +103,8 @@ class CategoryController extends BaseController
                     'Category.PictureId',
                     'Category.Breadcrumb',
                     'Category.DisplayOrder',
-                    'Picture.SeoFilename'
+                    'Picture.SeoFilename',
+                    'Picture.MimeType'
                 )
                 ->leftJoin(
                     'dbo.Category_Picture_Mapping',
@@ -140,6 +141,7 @@ class CategoryController extends BaseController
                     'Breadcrumb' => $categories[0]->Breadcrumb,
                     'DisplayOrder' => $categories[0]->DisplayOrder,
                     'SeoFilename' => $categories[0]->SeoFilename,
+                    'MimeType' => $categories[0]->MimeType,
                 ];
 
                 $pictureUrls = [];
@@ -151,7 +153,11 @@ class CategoryController extends BaseController
                         '0',
                         STR_PAD_LEFT
                     );
-                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.jpg";
+
+                    $mimeType = $category->MimeType;
+                    $extension = explode('/', $mimeType);
+                    $fileExtension = end($extension);
+                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
                 }
 
                 $categoryData['picture_urls'] = $pictureUrls;
