@@ -62,6 +62,10 @@ const routes = [
                 component: ResetPassword,
             },
             {
+                path: '/cart',
+                component: ShoppingCart,
+            },
+            {
                 path: '/results',
                 component: SearchResults,
                 meta: { requiresAuth: true },
