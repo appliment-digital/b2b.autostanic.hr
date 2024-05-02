@@ -4,7 +4,7 @@ import { makeBreadcrumb } from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
-import { useCategoryStore } from '@/store/CategoryStore.js';
+import { useCategoryStore } from '@/store/categoryStore.js';
 
 export default {
     components: {},
