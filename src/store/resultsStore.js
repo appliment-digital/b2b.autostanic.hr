@@ -4,6 +4,7 @@ export const useResultsStore = defineStore('results', {
     state: () => {
         return {
             currentResults: [],
+            currentProduct: null,
         };
     },
     getters: {
@@ -14,12 +15,24 @@ export const useResultsStore = defineStore('results', {
                 return JSON.parse(sessionStorage.getItem('search-results'));
             }
         },
+        product: (state) => {
+            if (state.currentProduct) {
+                return state.currentProduct;
+            } else {
+                return JSON.parse(sessionStorage.getItem('current-product'));
+            }
+        },
     },
     actions: {
         addResults(results) {
             this.currentResults = results;
 
-            sessionStorage.setItem('search-results', JSON.stringify(results));
+            sessionStorage.setItem('search-results', JSON.stringify(results)); 
         },
+        addCurrentProduct(product) {
+            this.currentProduct = product;
+
+            sessionStorage.setItem('current-product', JSON.stringify(product)); 
+        }
     },
 });

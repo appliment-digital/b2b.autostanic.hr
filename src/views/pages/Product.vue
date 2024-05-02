@@ -5,12 +5,11 @@ import { capitalizeFirstLetter } from '@/utils';
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
+import { useResultsStore } from '@/store/resultsStore.js';
+import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
 // components
 import Header from '@/components/Header.vue';
-
-// services
-import ProductService from '@/service/ProductService.js';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 export default {
@@ -49,23 +48,31 @@ export default {
         itemQuantity(newVal, oldVal) {
             console.log({ newVal, oldVal });
 
-            if (newVal <= 0) {
-                this.itemQuantity = '0';
+            if (newVal < 1) {
+                this.itemQuantity = '1';
             }
         },
     },
     computed: {
-        ...mapStores(useUserStore),
+        ...mapStores(useUserStore, useResultsStore, useShoppingCartStore),
+
+        productName() {
+            return capitalizeFirstLetter(this.resultsStore.product.name);
+        },
+
+        productShortDescription() {
+            console.log(this.resultsStore.product.shortDescription);
+            return capitalizeFirstLetter(
+                this.resultsStore.product.shortDescription,
+            );
+        },
     },
+
     mounted() {
-        // get some data to display as a product
-        ProductService.getTestProduct()
-            .then((response) => {
-                console.log({ response });
-                this.placeholderData = response.data;
-            })
-            .catch((err) => console.error(err));
+        console.log(capitalizeFirstLetter);
+        console.log('current product:', this.resultsStore.product);
     },
+
     updated() {
         const [name, lastName] = this.userStore.fullName.split(' ');
 
@@ -73,11 +80,14 @@ export default {
         this.inquiry.lastName = lastName;
     },
     methods: {
-
         handleSendInquiry() {
             this.inquiry.isSending = true;
             console.log('sending inquiry...');
         },
+
+        handleAddProdcutToShoppingCart(product) {
+            this.shoppingCartStore.addProduct(product)
+        }
     },
 };
 </script>
@@ -90,36 +100,37 @@ export default {
     <!-- Prodcut: Image & Description -->
     <div class="mt-4 grid column-gap-6">
         <div class="col-12 h-20rem md:col-6 md:h-auto">
-            <img
+            <!-- <img
                 src="https://source.unsplash.com/random/?Car&10"
+                class="image--product"
+            /> -->
+            <img
+                :src="this.resultsStore.product.pictureUrls[0]"
                 class="image--product"
             />
         </div>
 
         <div class="col">
-            <h2 class="mt-4 md:mt-0">Product Title</h2>
+            <h2 class="mt-4 md:mt-0">{{ productName }}</h2>
             <span class="font-bold"
-                >SKU: <span class="font-normal">123883482130-AKVC</span></span
+                >SKU:
+                <span class="font-normal">{{
+                    this.resultsStore.product.sku
+                }}</span></span
             >
 
             <hr />
 
-            <p class="mt-3">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dicta
-                ea nulla voluptatibus dolorem incidunt vitae animi earum
-                necessitatibus tempore dolore! Hic ratione amet reiciendis
-                maiores incidunt similique iste culpa repellat!
-            </p>
-            <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Necessitatibus velit sequi ex repellat, qui officia at nam nobis
-                numquam eius nostrum error explicabo minus a sint alias enim
-                nihil deleniti.
-            </p>
+            <p class="mt-3" v-html="productShortDescription" />
 
             <!-- Stock -->
             <span class="block mt-5"
-                ><span class="font-bold">5</span> na stanju.</span
+                ><span
+                    class="font-bold"
+                    :class="this.resultsStore.product.stockQuantity == 0 ? 'text-red-500' : 'text-green-500'"
+                    >{{ this.resultsStore.product.stockQuantity }}</span
+                >
+                na stanju.</span
             >
 
             <div
@@ -127,11 +138,11 @@ export default {
             >
                 <div>
                     <span class="mb-0 mr-2 mb-2 text-lg">Cijena</span>
-                    <span class="font-bold">289,00 €</span>
+                    <span class="font-bold">{{resultsStore.product.price}} €</span>
                 </div>
                 <div>
                     <span class="m-0 mr-2 mb-2 text-lg">Cijena s popustom</span>
-                    <span class="font-bold">259,00 €</span>
+                    <span class="font-bold">{{ resultsStore.product.price }} €</span>
                 </div>
             </div>
 
@@ -140,10 +151,10 @@ export default {
             <Toolbar class="mt-4 bg-white-alpha-40">
                 <template #start>
                     <Button
-                        icon="pi pi-plus"
                         class="button--no-shadow mr-1"
+                        icon="pi pi-minus"
                         severity="secondary"
-                        @click="itemQuantity++"
+                        @click="itemQuantity--"
                     />
                     <Button
                         class="mr-1"
@@ -152,10 +163,10 @@ export default {
                         disabled
                     />
                     <Button
+                        icon="pi pi-plus"
                         class="button--no-shadow"
-                        icon="pi pi-minus"
                         severity="secondary"
-                        @click="itemQuantity--"
+                        @click="itemQuantity++"
                     />
                 </template>
 
@@ -165,6 +176,8 @@ export default {
                             class="button--no-shadow mr-2 text-sm"
                             label="Dodaj u košaricu"
                             severity="primary"
+                            :disabled="this.resultsStore.product.stockQuantity == 0"
+                            @click="handleAddProdcutToShoppingCart(resultsStore.product)"
                         />
                         <Button
                             class="button--no-shadow text-sm"
@@ -243,7 +256,7 @@ export default {
 .image--product {
     display: block;
     width: 100%;
-    height: 500px;
+    height: 300px;
     object-fit: cover;
     object-position: center;
     border-radius: 4px;
