@@ -11,6 +11,9 @@ use Exception;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+
+use function Laravel\Prompts\password;
 
 class UserController extends BaseController
 {
@@ -53,21 +56,54 @@ class UserController extends BaseController
         }
     }
 
+    private function generateRandomPassword($length = 12)
+    {
+        $characters =
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_';
+        $password = '';
+        $charactersLength = strlen($characters);
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $password;
+    }
+
     public function add(Request $request)
     {
         try {
+            $password = $this->generateRandomPassword();
+
+            $request->request->add(['password' => Hash::make($password)]);
+
             $user = User::add($request);
-            if ($user === 'Lozinka treba imati bar 6 znakova.') {
-                return $this->sendError(['error' => $user]);
-            } elseif (isset($user['error'])) {
+
+            if (isset($user['error'])) {
                 return $this->sendError(
                     $user,
                     'Greška prilikom dodavanja korisnika.'
                 );
             }
 
+            $userData = [
+                'email' => $user->email,
+                'full_name' => $user->name . ' ' . $user->last_name,
+                'password' => $password,
+            ];
+
+            Mail::send('emails.access_data', $userData, function (
+                $message
+            ) use ($userData) {
+                $message->from('sales@autostanic.hr', 'Pristupni podaci');
+                $message->to($userData['email'], $userData['full_name']);
+                $message->subject('Pristupni podaci');
+            });
+
             $success['user'] = $user;
-            return $this->sendResponse($success, 'Korisnik je uspješno dodan.');
+
+            return $this->sendResponse(
+                $success,
+                'dodan korisnik i poslani pristupni podaci.'
+            );
         } catch (Exception $e) {
             return response()->json([
                 'error' =>

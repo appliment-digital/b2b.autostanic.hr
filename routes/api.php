@@ -23,7 +23,7 @@ use App\Http\Controllers\ProductController;
 //****************  AUTH CONTOLLER  ******************
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 //****************   CATEGORY CONTOLLER ******************
 Route::get('/category/categories', [

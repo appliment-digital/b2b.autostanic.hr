@@ -99,8 +99,8 @@ class AuthController extends BaseController
             if (!$user) {
                 return response()->json(
                     [
-                        'message' => 'Wrong email adress',
-                        'status_code' => 200,
+                        'error' =>
+                            'E-mail koji ste unjeli ne postoji u našoj bazi.',
                     ],
                     200
                 );
@@ -114,7 +114,7 @@ class AuthController extends BaseController
                         'full_name' => $user->name . ' ' . $user->last_name,
                         'random' => $random,
                     ];
-                    // return $userData;
+
                     Mail::send('emails.reset_password', $userData, function (
                         $message
                     ) use ($userData) {
@@ -133,7 +133,7 @@ class AuthController extends BaseController
                     return response()->json(
                         [
                             'message' =>
-                                'We have sent a verification code to your email address',
+                                'je poslan verifikacijski kod na vašu e-mail adresu',
                             'status_code' => 200,
                         ],
                         200
@@ -141,9 +141,8 @@ class AuthController extends BaseController
                 } else {
                     return response()->json(
                         [
-                            'message' =>
-                                'Some error occurred, Please try again',
-                            'status_code' => 200,
+                            'error' =>
+                                'Došlo je do greške, molim vas pokušajte ponovo.',
                         ],
                         200
                     );
@@ -152,58 +151,60 @@ class AuthController extends BaseController
         } catch (\Exception $e) {
             return response()->json(
                 [
-                    'message' =>
-                        'Some error occurred while sending the email: ' .
+                    'error' =>
+                        'Došlo je do pogreške pri slanju emaila: ' .
                         $e->getMessage(),
-                    'status_code' => 500,
                 ],
-                500
+                200
             );
         }
     }
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'verification_code' => 'required|integer',
-            'password' => 'required|confirmed|min:6',
-        ]);
-
-        $user = User::where('email', $request->email)
-            ->where('verification_code', $request->verification_code)
-            ->first();
-        if (!$user) {
-            return response()->json(
-                [
-                    'error' => 'error',
-                    'message' => 'User not found/Invalid code',
-                    'status_code' => 401,
-                ],
-                401
-            );
-        } else {
-            $user->password = bcrypt(trim($request->password));
-            $user->verification_code = null;
-
-            if ($user->save()) {
+        try {
+            $user = User::where('email', $request->email)
+                ->where('verification_code', $request->verification_code)
+                ->first();
+            if (!$user) {
                 return response()->json(
                     [
-                        'message' => 'Password updated successfully!',
-                        'status_code' => 200,
+                        'error' =>
+                            'E-mail ili verifikacijski kod nisu ispravni.',
                     ],
                     200
                 );
             } else {
-                return response()->json(
-                    [
-                        'error' => 'error',
-                        'message' => 'Some error occurred, Please try again',
-                        'status_code' => 500,
-                    ],
-                    500
-                );
+                $user->password = bcrypt(trim($request->password));
+                $user->verification_code = null;
+
+                if ($user->save()) {
+                    return response()->json(
+                        [
+                            'message' => 'resetirana lozinka.',
+                            'status_code' => 200,
+                        ],
+                        200
+                    );
+                } else {
+                    return response()->json(
+                        [
+                            'error' =>
+                                'Došlo je do greške, molim vas pokušajte ponovo.',
+                        ],
+                        200
+                    );
+                }
             }
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'error' =>
+                        'Došlo je do pogreške pri slanju emaila: ' .
+                        $e->getMessage(),
+                ],
+                200
+            );
         }
     }
 }
