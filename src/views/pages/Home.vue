@@ -145,7 +145,7 @@ export default {
                     border-round border-1 border-100 hover:shadow-3" 
                     @click="handleCategoryClick(category)"
                 >
-                    <img :src="category.pictureUrls[0]" style="width:64px" class="block mx-auto" >
+                    <img :src="category.pictureUrls[0]" style="width:82px" class="block mx-auto" >
                     <span class="text-base text-center">{{ category.name }}</span>
                 </div>
             </div>
