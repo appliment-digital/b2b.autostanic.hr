@@ -13,10 +13,33 @@ export default {
         forgotPassword() {
             userService
                 .forgotPassword({ email: this.email })
-                .then((data) => {
-                    router.push('/reset');
+                .then((response) => {
+                    if (response.data.error) {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: response.data.error,
+                            life: 3000,
+                        });
+                    }
+                    if (response.data.message) {
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: response.data.message,
+                            life: 3000,
+                        });
+                        router.push('/reset');
+                    }
                 })
-                .catch((response) => {});
+                .catch((response) => {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Greška',
+                        detail: response.data.error,
+                        life: 3000,
+                    });
+                });
         },
     },
 };
@@ -24,7 +47,7 @@ export default {
 
 <template>
     <div class="flex flex-column sm:w-4 mx-auto">
-        <h2>Resetiranje Lozinke</h2>
+        <h2>Resetiranje lozinke</h2>
         <p>
             Molim vas unesite svoju e-mail adresu kako bi vam poslali
             verifikacijski kod za ponovno postavljenje lozinke.
@@ -40,7 +63,7 @@ export default {
 
             <Button
                 @click="forgotPassword()"
-                label="Submit"
+                label="Pošalji"
                 class="login-button"
             />
         </div>

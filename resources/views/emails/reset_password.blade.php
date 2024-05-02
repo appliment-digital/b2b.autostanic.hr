@@ -89,7 +89,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;" mc:edit="fm-41" valign="top" align="left">
-                                                                    <multiline>Dobili smo zahtjev za resetiranjem lozinke, ako niste poslali zahtjev molimo ignorirajte dobivenu email poruku. Recetirajte svoju loziku uz pomoć verifikacijskog koda u nastavku: </multiline>
+                                                                    <multiline>Dobili smo zahtjev za resetiranjem lozinke, ako niste poslali zahtjev molimo ignorirajte dobivenu email poruku. Resetirajte svoju loziku uz pomoć verifikacijskog koda u nastavku: </multiline>
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -100,7 +100,7 @@
                                                                 <td>
                                                                     <table style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;">
                                                                         <tr>
-                                                                            <td>Your verification code:
+                                                                            <td>Vaš verifikacijski kod:
                                                                                 <strong>{{ $random }}</strong>
                                                                             </td>
                                                                         </tr>
