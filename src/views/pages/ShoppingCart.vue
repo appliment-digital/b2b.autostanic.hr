@@ -3,6 +3,10 @@
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
+// pinia
+import { mapStores } from 'pinia';
+import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
+
 export default {
     components: {
         Header,
@@ -46,6 +50,14 @@ export default {
             products: null,
         };
     },
+    computed: {
+        ...mapStores(useShoppingCartStore),
+    },
+
+    mounted() {
+        console.log('cart mounted', this.shoppingCartStore.cart);
+
+    }
 };
 </script>
 
@@ -59,10 +71,10 @@ export default {
     <div class="grid grid-nogutter justify-content-between column-gap-3">
         <div class="col">
             <div class="card mb-0">
-                <DataTable :value="mock.products" tableStyle="min-width: 50rem">
+                <DataTable :value="shoppingCartStore.cart" tableStyle="min-width: 50rem">
                     <Column field="image" header="Slika">
                         <template #body="{ data }">
-                            <img :src="data.image" />
+                            <img :src="data.pictureUrls[0]" class="table-image"/>
                         </template>
                     </Column>
 
@@ -102,3 +114,11 @@ export default {
         </div>
     </div>
 </template>
+
+<style scoped>
+.table-image {
+    width: 100px;
+    object-fit: cover;
+    height: 60px;
+}
+</style>
