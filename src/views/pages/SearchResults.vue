@@ -3,6 +3,10 @@
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
+// pinia
+import { mapStores } from 'pinia';
+import { useResultsStore } from '@/store/resultsStore.js';
+
 // generate random 12-digit SKU
 function generateRandomDigits() {
     let sku = '';
@@ -111,10 +115,13 @@ export default {
                 checkboxes: { condition: false },
             },
 
+            searchResults: null,
+
             // paginate results
             currentPage: 1,
             itemsPerPage: 3,
             totalItems: 10,
+
         };
     },
     beforeMount() {
@@ -128,7 +135,7 @@ export default {
         );
     },
     mounted() {
-        console.log(this);
+        console.log('results store', this.resultsStore.searchResults);
     },
 
     computed: {
@@ -137,6 +144,8 @@ export default {
             const endIndex = startIndex + this.itemsPerPage;
             return this.mock.searchResults.slice(startIndex, endIndex);
         },
+
+        ...mapStores(useResultsStore),
     },
     methods: {
         onPageChange(event) {
@@ -202,7 +211,7 @@ export default {
 
         <!-- Results -->
         <div class="col grid">
-            <div v-for="product in paginatedData" class="col-4">
+            <div v-for="product in resultsStore.searchResults" class="col-4">
                 <!-- Product -->
                 <!-- prettier-ignore -->
                 <div
@@ -212,14 +221,15 @@ export default {
                     @click="handleProductClick(product)"
                 >
                     <div class="product-image border-200" />
+                    <!-- <img :src="product.pictureUrls[0]" class="product-image border-200" /> -->
                     <!-- Product: Brand -->
-                    <span>{{product.brand}}</span>
+                    <span>{{product.manufacturerName}}</span>
 
                     <!-- Product: Description -->
-                    <span class="h-10rem">{{product.description}}</span>
+                    <span>{{product.name}}</span>
 
                     <!-- Product: SKU -->
-                    <span>{{product.SKU}}</span>
+                    <span>{{product.sku}}</span>
 
                     <!-- Product: Price -->
                     <span>{{product.price}}</span>
