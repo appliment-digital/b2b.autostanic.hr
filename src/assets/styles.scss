@@ -65,3 +65,9 @@ body {
 .p-paginator {
     background: none;
 }
+
+#search-results {
+    .p-card-content {
+        padding-top: 0;
+    }
+}

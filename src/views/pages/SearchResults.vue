@@ -1,4 +1,7 @@
 <script>
+// lib
+import slugify from 'slugify';
+
 // components
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
@@ -6,6 +9,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 // pinia
 import { mapStores } from 'pinia';
 import { useResultsStore } from '@/store/resultsStore.js';
+import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
 // generate random 12-digit SKU
 function generateRandomDigits() {
@@ -23,139 +27,65 @@ export default {
     },
     data() {
         return {
-            mock: {
-                numOfResults: 8,
-                searchResults: [
-                    {
-                        brand: 'TechNova',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Experience the future with our TechNova series. Built with cutting-edge technology, these products offer unparalleled performance and reliability. Elevate your digital experience with TechNova.',
-                        price: 1299.99,
-                        condition: 'new',
-                    },
-                    {
-                        brand: 'AeroGlide',
-                        SKU: generateRandomDigits(),
-                        description:
-                            "Introducing AeroGlide, where innovation meets comfort. Our products are designed to provide a seamless experience, whether you're on the go or relaxing at home. Explore the world in style with AeroGlide.",
-                        price: 899.95,
-                        condition: 'old',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'ElectraTech brings you the latest in electronic excellence. Our products combine sleek design with advanced functionality to enhance your everyday life. Discover a new level of convenience with ElectraTech.',
-                        price: 599.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Xcelerate your productivity with our powerful line of products. Engineered for peak performance, Xcelerate devices are your ultimate tool for success. Get ahead of the competition with Xcelerate.',
-                        price: 1599.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Immerse yourself in sound with DreamWave. Our audio solutions deliver crystal-clear quality and immersive experiences. Transform your space into an auditory oasis with DreamWave.',
-                        price: 299.95,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'AeroGlide',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Step into the future with NexGen. Our innovative products redefine industry standards, offering unmatched performance and reliability. Experience the next generation of technology with NexGen.',
-                        price: 999.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Illuminate your world with LumiTech. Our lighting solutions combine style and functionality to enhance any environment. Brighten up your life with LumiTech.',
-                        price: 79.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Go green with EcoBlend. Our eco-friendly products are designed to reduce environmental impact without sacrificing performance. Join the movement towards sustainability with EcoBlend.',
-                        price: 49.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Sync up with SwiftSync. Our synchronization solutions keep you connected across all your devices, ensuring seamless communication and collaboration. Stay in sync with SwiftSync.',
-                        price: 199.99,
-                        condition: 'repaired',
-                    },
-                    {
-                        brand: 'DreamWave',
-                        SKU: generateRandomDigits(),
-                        description:
-                            'Boost your vitality with VitaBoost. Our health and wellness products are formulated to support your well-being and vitality. Experience the benefits of holistic living with VitaBoost.',
-                        price: 149.99,
-                        condition: 'repaired',
-                    },
-                ],
-
-                // filters
-                filters: {},
-
-                // checkboxes
-                checkboxes: { condition: false },
-            },
-
             searchResults: null,
 
             // paginate results
             currentPage: 1,
-            itemsPerPage: 3,
+            itemsPerPage: 9,
             totalItems: 10,
 
-        };
-    },
-    beforeMount() {
-        // set filters
+            filters: {},
 
-        this.mock.filters.condition = new Set(
-            this.mock.searchResults.map((entry) => entry.condition),
-        );
-        this.mock.filters.brand = new Set(
-            this.mock.searchResults.map((entry) => entry.brand),
-        );
+            // display `add to cart` button on mouse over card
+            mouseOverCard: {}, // e.g ([id]: true)
+        };
     },
     mounted() {
         console.log('results store', this.resultsStore.searchResults);
+        console.log({ paginatedData: this.paginatedData });
+
+        this.filters.brand = new Set(
+            this.resultsStore.searchResults.map(
+                (product) => product.manufacturerName,
+            ),
+        );
     },
 
     computed: {
         paginatedData() {
             const startIndex = (this.currentPage - 1) * this.itemsPerPage;
             const endIndex = startIndex + this.itemsPerPage;
-            return this.mock.searchResults.slice(startIndex, endIndex);
+            return this.resultsStore.searchResults.slice(startIndex, endIndex);
         },
 
-        ...mapStores(useResultsStore),
+        ...mapStores(useResultsStore, useShoppingCartStore),
     },
     methods: {
         onPageChange(event) {
-            console.log('page change...');
             this.currentPage = event.page + 1;
         },
 
         handleProductClick(product) {
-            console.log('clicking product', {product});
-            this.$router.push(`/${product.brand}`)
+            console.log('clicking product', { product });
+
+            const productSlug = slugify(product.name, {
+                lower: false,
+            });
+
+            this.resultsStore.addCurrentProduct(product);
+            this.$router.push(`/${productSlug}`);
+        },
+
+        handleMouseEntersCard(product) {
+            this.mouseOverCard[product.id] = true
+        },
+
+        handleMouseLeavesCard(product) {
+            delete this.mouseOverCard[product.id];
+        },
+
+        handleAddProdcutToShoppingCart(product) {
+            this.shoppingCartStore.addProduct(product)
         }
     },
 };
@@ -166,38 +96,39 @@ export default {
 
     <Breadcrumbs />
 
-    <div class="mt-4 grid">
+    <div class="mt-4 grid column-gap-4">
         <!-- Filters -->
         <div class="col-2">
-            <div class="h-30rem flex flex-column pl-4">
-                <!-- Filters: Condition -->
+            <div class="h-30rem flex flex-column">
                 <span class="mb-2">Stanje</span>
 
-                <div
-                    v-for="condition in mock.filters.condition"
-                    class="flex align-items-center mb-1"
-                >
-                    <!-- Checkbox -->
+                <div class="flex align-items-center mb-1">
                     <Checkbox
-                        v-model="mock.checkboxes.condition"
+                        :v-model="false"
                         inputId="ingredient2"
                         name="pizza"
                         value="Mushroom"
                     />
-                    <label for="ingredient2" class="ml-2">
-                        {{ condition }}
-                    </label>
+                    <label for="ingredient2" class="ml-2"> Novo </label>
+                </div>
+                <div class="flex align-items-center mb-1">
+                    <Checkbox
+                        :v-model="false"
+                        inputId="ingredient2"
+                        name="pizza"
+                        value="Mushroom"
+                    />
+                    <label for="ingredient2" class="ml-2"> Rabljeno </label>
                 </div>
 
-                <!-- Filters: Brand -->
-                <span class="mt-3 mb-2">Brand</span>
+                <span class="mt-3 mb-2">Brend</span>
                 <div
-                    v-for="brand in mock.filters.brand"
+                    v-for="brand in filters.brand"
                     class="flex align-items-center mb-1"
                 >
                     <!-- Checkbox -->
                     <Checkbox
-                        v-model="mock.checkboxes.condition"
+                        :v-model="false"
                         inputId="ingredient2"
                         name="pizza"
                         value="Mushroom"
@@ -210,30 +141,51 @@ export default {
         </div>
 
         <!-- Results -->
-        <div class="col grid">
-            <div v-for="product in resultsStore.searchResults" class="col-4">
+        <div id="search-results" class="col grid">
+            <div v-for="product in paginatedData" class="col-4">
                 <!-- Product -->
-                <!-- prettier-ignore -->
-                <div
-                    class="p-4 border-1 border-round cursor-pointer flex 
-                    flex-column justify-content-center align-items-center 
-                    row-gap-2 hover:shadow-3 text-left border-200"
+                <Card
+                    style="overflow: hidden"
+                    class="cursor-pointer shadow-1 hover:shadow-5"
                     @click="handleProductClick(product)"
+                    @mouseenter="handleMouseEntersCard(product)" 
+                    @mouseleave="handleMouseLeavesCard(product)" 
                 >
-                    <div class="product-image border-200" />
-                    <!-- <img :src="product.pictureUrls[0]" class="product-image border-200" /> -->
-                    <!-- Product: Brand -->
-                    <span>{{product.manufacturerName}}</span>
-
-                    <!-- Product: Description -->
-                    <span>{{product.name}}</span>
-
-                    <!-- Product: SKU -->
-                    <span>{{product.sku}}</span>
-
-                    <!-- Product: Price -->
-                    <span>{{product.price}}</span>
-                </div>
+                    <template #header>
+                        <img
+                            v-if="product.pictureUrls[0]"
+                            :src="product.pictureUrls[0]"
+                            class="product-image border-200"
+                        />
+                    </template>
+                    <template #title>
+                        <span class="text-sm">{{
+                            product.manufacturerName
+                        }}</span>
+                    </template>
+                    <template #subtitle>
+                        <span class="block text-sm h-4rem">
+                            {{ product.name }}
+                            <span class="block mt-1 text-sm"
+                                >SKU: {{ product.sku }}</span
+                            >
+                        </span>
+                    </template>
+                    <template #content>
+                        <div class="flex align-items-center justify-content-between h-3rem">
+                            <span>{{ product.price.slice(0, 5) }} €</span>
+                            <Button
+                                v-if="mouseOverCard[product.id] "
+                                icon="pi pi-cart-plus"
+                                severity="secondary"
+                                label="Dodaj u košaricu"
+                                class="text-xs"
+                                raised
+                                @click.stop="handleAddProdcutToShoppingCart(product)"
+                            />
+                        </div>
+                    </template>
+                </Card>
             </div>
         </div>
     </div>
@@ -245,15 +197,14 @@ export default {
         v-model="currentPage"
         @page="onPageChange"
         class="mt-4"
-        style="background: none;"
+        style="background: none"
     />
 </template>
 
 <style scoped>
 .product-image {
     width: 100%;
-    height: 130px;
-    border: 1px solid black;
-    border-radius: 4px;
+    height: 160px;
+    object-fit: cover;
 }
 </style>
