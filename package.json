@@ -1,6 +1,7 @@
 {
     "name": "b2b-autostanic-hr",
     "version": "5.2.0",
+    "type": "module",
     "private": true,
     "scripts": {
         "dev": "vite",
