@@ -50,16 +50,11 @@ class User extends Authenticatable
         $user->name = $data['name'];
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
+        $user->password = $data['password'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
         $user->delivery_point = $data['delivery_point'];
         $user->payment_method = $data['payment_method'];
         $user->discount_type_id = $data['discount_type_id'] ?? null;
-
-        if (strlen($data['password']) >= 6) {
-            $user->password = Hash::make($data['password']);
-        } else {
-            return 'Lozinka treba imati bar 6 znakova.';
-        }
 
         if (!empty($data['roles'])) {
             $user->syncRoles($data['roles']['id']);
@@ -82,14 +77,6 @@ class User extends Authenticatable
         $user->delivery_point = $data['delivery_point'];
         $user->payment_method = $data['payment_method'];
         $user->discount_type_id = $data['discount_type_id'];
-
-        if (isset($data['password']) && strlen($data['password']) >= 6) {
-            $user->password = Hash::make($data['password']);
-        } elseif (!isset($data['password']) || strlen($data['password']) == 0) {
-            // Keep the old password
-        } else {
-            return 'Lozinka treba imati bar 6 znakova.';
-        }
 
         if (!empty($data['roles'])) {
             $user->syncRoles($data['roles']['id']);

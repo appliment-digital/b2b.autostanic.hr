@@ -216,14 +216,6 @@ export default {
         <label>E-mail<span class="text-red-500">*</span></label>
         <InputText v-model="user.email" class="w-full mt-2 mb-3" />
 
-        <label>Lozinka<span class="text-red-500">*</span></label>
-        <Password
-            v-model="user.password"
-            class="w-full mt-2 mb-3"
-            inputClass="w-full"
-            :feedback="false"
-        />
-
         <label>Uloga<span class="text-red-500">*</span></label>
         <Dropdown
             v-model="user.roles"

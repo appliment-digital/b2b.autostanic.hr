@@ -84,7 +84,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;" mc:edit="fm-41" valign="top" align="left">
-                                                                    <strong>Poštovani {{ ucfirst($full_name) }}, </strong>
+                                                                    <strong>Poštovan/a {{ ucfirst($full_name) }}, </strong>
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -100,7 +100,7 @@
                                                                 <td>
                                                                     <table style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;">
                                                                         <tr>
-                                                                            <td>Korisničko ime/Vaš e-mail:
+                                                                            <td>Korisničko ime:
                                                                                 <strong>{{ $email }}</strong>
                                                                             </td>
                                                                         </tr>
