@@ -7,6 +7,7 @@ export const useUserStore = defineStore('user', {
             user: null,
             isLoggedIn: false,
             robohashName: '',
+            isAdmin: false,
         };
     },
     getters: {
@@ -17,11 +18,10 @@ export const useUserStore = defineStore('user', {
                 return `${name.charAt(0)}${lastName.charAt(0)}`;
             }
 
-            const storedInitials = localStorage.getItem('userInitials')
+            const storedInitials = localStorage.getItem('userInitials');
             if (storedInitials) {
-                return storedInitials
+                return storedInitials;
             }
-            
         },
         fullName: (state) => {
             if (state.user) {
@@ -29,9 +29,17 @@ export const useUserStore = defineStore('user', {
                 return `${name} ${lastName}`;
             }
 
-            const storedFullName = localStorage.getItem('userFullName')
+            const storedFullName = localStorage.getItem('userFullName');
             if (storedFullName) {
-                return storedFullName
+                return storedFullName;
+            }
+        },
+        admin: (state) => {
+            console.log(state);
+            if (state.isAdmin) {
+                return state.isAdmin;
+            } else {
+                return JSON.parse(sessionStorage.getItem('user-isAdmin'));
             }
         },
     },
@@ -41,24 +49,42 @@ export const useUserStore = defineStore('user', {
             this.count++;
         },
         addUser(data) {
-            console.log('adding user to the store...', { userData: data });
             this.user = data;
+
+            this.setIsAdmin(false);
+
+            if (data.role && data.role.length) {
+                const isAdmin = data.role[0].name === 'admin';
+                isAdmin && this.setIsAdmin(true)
+            }
 
             // add initials to the local storage
             const { name, last_name: lastName } = data;
-            localStorage.setItem('userInitials', `${name.charAt(0)}${lastName.charAt(0)}`)
-            localStorage.setItem('userFullName', `${name} ${lastName}`)
+
+            localStorage.setItem(
+                'userInitials',
+                `${name.charAt(0)}${lastName.charAt(0)}`,
+            );
+
+            localStorage.setItem('userFullName', `${name} ${lastName}`);
         },
         login() {
             this.isLoggedIn = true;
-            localStorage.setItem('isLoggedIn', true) 
+            localStorage.setItem('isLoggedIn', true);
         },
         logout() {
             this.isLoggedIn = false;
-            localStorage.setItem('isLoggedIn', false) 
+            this.setIsAdmin(false) 
+
+            localStorage.setItem('isLoggedIn', false);
         },
         robohash(name) {
             this.robohashName = name;
-        }
+        },
+        setIsAdmin(val) {
+            this.isAdmin = Boolean(val);
+
+            sessionStorage.setItem('user-isAdmin', this.isAdmin);
+        },
     },
 });
