@@ -151,7 +151,7 @@ export default {
 
         <!-- Categories -->
         <div
-            class="py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center"
+            class="categories py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center justify-content-center"
         >
             <div
                 class="grid justify-content-center row-gap-1 column-gap-1 px-2 align-items-start"
