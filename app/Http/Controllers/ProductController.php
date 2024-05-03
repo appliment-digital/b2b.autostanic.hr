@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends BaseController
 {
-    public function getProductsByCategoryId($categoryId, $page, $pageSize)
-    {
+    public function getProductsByCategoryId(
+        $categoryId,
+        $page,
+        $pageSize,
+        Request $request
+    ) {
         try {
             $offset = ($page - 1) * $pageSize;
 
@@ -50,6 +54,31 @@ class ProductController extends BaseController
                     'Picture.Id'
                 )
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
+                //filters
+                ->when($request->has('ManufacturerName'), function (
+                    $query
+                ) use ($request) {
+                    return $query->where(
+                        'Product.ManufacturerName',
+                        $request->ManufacturerName
+                    );
+                })
+                ->when($request->has('IsUsedPart'), function ($query) use (
+                    $request
+                ) {
+                    return $query->where(
+                        'Product.IsUsedPart',
+                        $request->IsUsedPart
+                    );
+                })
+                ->when($request->has('IsNewPart'), function ($query) use (
+                    $request
+                ) {
+                    return $query->where(
+                        'Product.IsNewPart',
+                        $request->IsNewPart
+                    );
+                })
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->groupBy(
@@ -71,7 +100,28 @@ class ProductController extends BaseController
                 ->offset($offset)
                 ->limit($pageSize)
                 ->get();
-            $response = [];
+
+            $manufacturersQuery = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->select('ManufacturerName')
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->where('Product_Category_Mapping.CategoryId', $categoryId)
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->groupBy('ManufacturerName');
+
+            $response = [
+                'products' => [],
+                'manufacturers' => $manufacturersQuery->pluck(
+                    'ManufacturerName'
+                ),
+            ];
+
             $productsById = collect($query)->groupBy('Id');
 
             foreach ($productsById as $productId => $products) {
@@ -109,7 +159,7 @@ class ProductController extends BaseController
                     }
                 }
 
-                $response[] = $productData;
+                $response['products'][] = $productData;
             }
 
             return $this->convertKeysToCamelCase($response);

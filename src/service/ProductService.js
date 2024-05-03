@@ -3,8 +3,8 @@ import Axios from 'axios';
 export default class ProductService {
     static apiResourceEndpoint = '/api/product';
 
-    static async getProductsByCategoryId(categoryId, page, pageSize) {
-        return Axios.get(
+    static async getProductsByCategoryId(categoryId, page, pageSize, filter) {
+        return Axios.post(
             this.apiResourceEndpoint +
                 '/getProductsByCategoryId/' +
                 categoryId +
@@ -12,6 +12,7 @@ export default class ProductService {
                 page +
                 '/' +
                 pageSize,
+            filter,
         );
     }
 
