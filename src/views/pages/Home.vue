@@ -355,4 +355,5 @@ export default {
 .categories {
     min-height: 390.5px;
 }
+
 </style>
