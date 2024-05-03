@@ -41,8 +41,8 @@ export default {
         };
     },
     mounted() {
-        console.log('results store', this.resultsStore.searchResults);
-        console.log({ paginatedData: this.paginatedData });
+        // console.log('results store', this.resultsStore.searchResults);
+        // console.log({ paginatedData: this.paginatedData });
 
         this.filters.brand = new Set(
             this.resultsStore.searchResults.map(
@@ -66,7 +66,7 @@ export default {
         },
 
         handleProductClick(product) {
-            console.log('clicking product', { product });
+            // console.log('clicking product', { product });
 
             const productSlug = slugify(product.name, {
                 lower: false,
@@ -96,7 +96,7 @@ export default {
 
     <Breadcrumbs />
 
-    <div class="mt-4 grid column-gap-4">
+    <div class="mt-0 grid column-gap-4">
         <!-- Filters -->
         <div class="col-2">
             <div class="h-30rem flex flex-column">
