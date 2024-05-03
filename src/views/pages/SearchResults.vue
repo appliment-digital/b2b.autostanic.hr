@@ -77,7 +77,7 @@ export default {
         },
 
         handleMouseEntersCard(product) {
-            this.mouseOverCard[product.id] = true
+            this.mouseOverCard[product.id] = true;
         },
 
         handleMouseLeavesCard(product) {
@@ -85,8 +85,8 @@ export default {
         },
 
         handleAddProdcutToShoppingCart(product) {
-            this.shoppingCartStore.addProduct(product)
-        }
+            this.shoppingCartStore.addProduct(product);
+        },
     },
 };
 </script>
@@ -148,8 +148,8 @@ export default {
                     style="overflow: hidden"
                     class="cursor-pointer shadow-1 hover:shadow-5"
                     @click="handleProductClick(product)"
-                    @mouseenter="handleMouseEntersCard(product)" 
-                    @mouseleave="handleMouseLeavesCard(product)" 
+                    @mouseenter="handleMouseEntersCard(product)"
+                    @mouseleave="handleMouseLeavesCard(product)"
                 >
                     <template #header>
                         <img
@@ -172,16 +172,20 @@ export default {
                         </span>
                     </template>
                     <template #content>
-                        <div class="flex align-items-center justify-content-between h-3rem">
-                            <span>{{ product.price.slice(0, 5) }} €</span>
+                        <div
+                            class="flex align-items-center justify-content-between h-3rem"
+                        >
+                            <span>{{ product.price }} €</span>
                             <Button
-                                v-if="mouseOverCard[product.id] "
+                                v-if="mouseOverCard[product.id]"
                                 icon="pi pi-cart-plus"
                                 severity="secondary"
                                 label="Dodaj u košaricu"
                                 class="text-xs"
                                 raised
-                                @click.stop="handleAddProdcutToShoppingCart(product)"
+                                @click.stop="
+                                    handleAddProdcutToShoppingCart(product)
+                                "
                             />
                         </div>
                     </template>
