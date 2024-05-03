@@ -92,6 +92,10 @@ class DiscountType extends Model
         $discountType = self::find($id);
 
         if ($discountType) {
+            User::where('discount_type_id', $id)->update([
+                'discount_type_id' => null,
+            ]);
+
             return $discountType->delete();
         }
     }

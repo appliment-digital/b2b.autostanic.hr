@@ -52,9 +52,12 @@ class User extends Authenticatable
         $user->email = $data['email'];
         $user->password = $data['password'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
-        $user->delivery_point = $data['delivery_point'];
-        $user->payment_method = $data['payment_method'];
-        $user->discount_type_id = $data['discount_type_id'] ?? null;
+        $user->delivery_point = $data['delivery_point'] ?? null;
+        $user->payment_method = $data['payment_method'] ?? null;
+
+        if (!empty($data['discount_type'])) {
+            $user->discount_type_id = $data['discount_type']['id'];
+        }
 
         if (!empty($data['roles'])) {
             $user->syncRoles($data['roles']['id']);
@@ -74,9 +77,11 @@ class User extends Authenticatable
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
-        $user->delivery_point = $data['delivery_point'];
-        $user->payment_method = $data['payment_method'];
-        $user->discount_type_id = $data['discount_type_id'];
+        $user->delivery_point = $data['delivery_point'] ?? null;
+        $user->payment_method = $data['payment_method'] ?? null;
+        if (!empty($data['discount_type'])) {
+            $user->discount_type_id = $data['discount_type']['id'];
+        }
 
         if (!empty($data['roles'])) {
             $user->syncRoles($data['roles']['id']);

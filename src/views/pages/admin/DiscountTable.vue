@@ -243,8 +243,8 @@ export default {
                 @rowExpand="onRowExpand"
                 @rowCollapse="onRowCollapse"
                 :paginator="true"
-                :rows="5"
-                :rowsPerPageOptions="[5, 10, 20, 50]"
+                :rows="10"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 :filters="filters"
                 responsiveLayout="scroll"
             >

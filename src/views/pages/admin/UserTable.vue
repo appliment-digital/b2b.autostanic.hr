@@ -80,6 +80,7 @@ export default {
         saveUser() {
             if (!this.user.id) {
                 userService.add(this.user).then((response) => {
+                    console.log(response.data);
                     if (response.data.success) {
                         this.$toast.add({
                             severity: 'success',
@@ -311,8 +312,8 @@ export default {
                 paginator
                 dataKey="id"
                 :value="users"
-                :rows="5"
-                :rowsPerPageOptions="[5, 10, 20, 50]"
+                :rows="10"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 :selection="selectedUser"
             >
                 <template #header>

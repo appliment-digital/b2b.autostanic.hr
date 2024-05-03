@@ -77,7 +77,7 @@ class UserController extends BaseController
 
             $user = User::add($request);
 
-            if (isset($user['error'])) {
+            if (!isset($user['id'])) {
                 return $this->sendError(
                     $user,
                     'Greška prilikom dodavanja korisnika.'
