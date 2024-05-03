@@ -35,7 +35,6 @@ export const useUserStore = defineStore('user', {
             }
         },
         admin: (state) => {
-            console.log(state);
             if (state.isAdmin) {
                 return state.isAdmin;
             } else {

@@ -127,7 +127,7 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore();
     const storedIsUserLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
 
-    console.log({ to });
+    // console.log({ to });
 
     if (to.meta.requiresAuth && storedIsUserLoggedIn) {
         next();
