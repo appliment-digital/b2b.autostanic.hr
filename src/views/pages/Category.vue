@@ -41,7 +41,6 @@ export default {
         // console.log('mounted', this.categoryStore.history);
 
         this.handleNavigation(this.$route.path);
-
     },
     methods: {
         handleNavigation(path) {
@@ -93,11 +92,11 @@ export default {
 
             ProductService.getProductsByCategoryId(id, 1, 10)
                 .then((response) => {
-                    const {data} = response;
-                    console.log({results: data});
+                    const { data } = response;
+                    console.log({ results: data });
 
-                    this.resultsStore.addResults(data)
-                    this.$router.push(`/results`)
+                    this.resultsStore.addResults(data);
+                    this.$router.push(`/results`);
                 })
                 .catch((err) => console.error(err));
         },
@@ -120,11 +119,11 @@ export default {
 </script>
 
 <template>
-        <Header />
+    <Header />
 
-        <Breadcrumbs />
+    <Breadcrumbs />
 
-        <div v-if="subcategories" class="grid">
+    <div v-if="subcategories" class="grid">
         <!-- prettier-ignore -->
         <div
             v-for="subcategory in subcategories"
@@ -139,6 +138,7 @@ export default {
                 border-round bg-white transition-ease-in transition-colors
                 row-gap-3
                 hover:shadow-3">
+                <span class="text-center">({{ subcategory.productCount }})</span>
                     <img :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
                     <span class="text-center">{{ subcategory.name }}</span>
                 </div>
@@ -150,7 +150,7 @@ export default {
     <Dialog
         id="dialog-category"
         :visible="isDataLoading"
-        style="transition: none;"
+        style="transition: none"
         :closable="false"
     >
         <ProgressSpinner />
