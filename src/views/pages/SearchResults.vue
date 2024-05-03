@@ -175,7 +175,7 @@ export default {
                         <div
                             class="flex align-items-center justify-content-between h-3rem"
                         >
-                            <span>{{ product.price }} €</span>
+                            <span>{{ product.price.slice(0, 5) }} €</span>
                             <Button
                                 v-if="mouseOverCard[product.id]"
                                 icon="pi pi-cart-plus"
