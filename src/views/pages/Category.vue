@@ -122,7 +122,10 @@ export default {
 <template>
         <Header />
 
-        <Breadcrumbs />
+        <div class="mt-3 flex justify-content-between align-items-center">
+            <Breadcrumbs /> 
+            <div v-if="isDataLoading" class="flex align-items-center column-gap-2"><ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" /> učitavanje podataka...</div>
+        </div>
 
         <div v-if="subcategories" class="grid">
         <!-- prettier-ignore -->
@@ -144,17 +147,6 @@ export default {
                 </div>
         </div>
     </div>
-
-    <div v-if="!subcategories">Nema podkategorija</div>
-
-    <Dialog
-        id="dialog-category"
-        :visible="isDataLoading"
-        style="transition: none;"
-        :closable="false"
-    >
-        <ProgressSpinner />
-    </Dialog>
 </template>
 
 <style scoped></style>
