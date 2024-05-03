@@ -34,7 +34,7 @@ export const useUserStore = defineStore('user', {
                 return storedFullName;
             }
         },
-        admin: (state) => {
+        isUserAdmin: (state) => {
             if (state.isAdmin) {
                 return state.isAdmin;
             } else {
@@ -43,18 +43,17 @@ export const useUserStore = defineStore('user', {
         },
     },
     actions: {
-        increment() {
-            console.log('incrementing...');
-            this.count++;
-        },
         addUser(data) {
             this.user = data;
 
             this.setIsAdmin(false);
 
-            if (data.role && data.role.length) {
-                const isAdmin = data.role[0].name === 'admin';
-                isAdmin && this.setIsAdmin(true)
+            if (
+                data.role &&
+                data.role.length &&
+                data.role[0].name === 'admin'
+            ) {
+                this.setIsAdmin(true);
             }
 
             // add initials to the local storage
@@ -73,7 +72,7 @@ export const useUserStore = defineStore('user', {
         },
         logout() {
             this.isLoggedIn = false;
-            this.setIsAdmin(false) 
+            this.setIsAdmin(false);
 
             localStorage.setItem('isLoggedIn', false);
         },
@@ -81,9 +80,9 @@ export const useUserStore = defineStore('user', {
             this.robohashName = name;
         },
         setIsAdmin(val) {
-            this.isAdmin = Boolean(val);
+            this.isAdmin = val;
 
-            sessionStorage.setItem('user-isAdmin', this.isAdmin);
+            sessionStorage.setItem('user-isAdmin', val);
         },
     },
 });
