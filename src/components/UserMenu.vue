@@ -73,7 +73,7 @@ export default {
                         <span>{{ userStore.fullName }}</span>
                     </span>
                 </li>
-                <li v-if="userStore.admin" role="menuitem" class="m-0 mb-3">
+                <li v-if="userStore.isUserAdmin" role="menuitem" class="m-0 mb-3">
                     <a
                         href="#"
                         @click="handleAdminIconClick"
