@@ -41,7 +41,6 @@ export default {
         // console.log('mounted', this.categoryStore.history);
 
         this.handleNavigation(this.$route.path);
-
     },
     methods: {
         handleNavigation(path) {
@@ -93,11 +92,11 @@ export default {
 
             ProductService.getProductsByCategoryId(id, 1, 10)
                 .then((response) => {
-                    const {data} = response;
-                    console.log({results: data});
+                    const { data } = response;
+                    console.log({ results: data });
 
-                    this.resultsStore.addResults(data)
-                    this.$router.push(`/results`)
+                    this.resultsStore.addResults(data);
+                    this.$router.push(`/results`);
                 })
                 .catch((err) => console.error(err));
         },
@@ -120,14 +119,14 @@ export default {
 </script>
 
 <template>
-        <Header />
+    <Header />
 
         <div class="mt-3 flex justify-content-between align-items-center">
             <Breadcrumbs /> 
             <div v-if="isDataLoading" class="flex align-items-center column-gap-2"><ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" /> učitavanje podataka...</div>
         </div>
 
-        <div v-if="subcategories" class="grid">
+    <div v-if="subcategories" class="grid">
         <!-- prettier-ignore -->
         <div
             v-for="subcategory in subcategories"
@@ -142,11 +141,23 @@ export default {
                 border-round bg-white transition-ease-in transition-colors
                 row-gap-3
                 hover:shadow-3">
+                <span class="text-center">({{ subcategory.productCount }})</span>
                     <img :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
                     <span class="text-center">{{ subcategory.name }}</span>
                 </div>
         </div>
     </div>
+
+    <div v-if="!subcategories">Nema podkategorija</div>
+
+    <Dialog
+        id="dialog-category"
+        :visible="isDataLoading"
+        style="transition: none"
+        :closable="false"
+    >
+        <ProgressSpinner />
+    </Dialog>
 </template>
 
 <style scoped></style>

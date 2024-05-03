@@ -71,29 +71,48 @@ class ProductController extends BaseController
                 ->offset($offset)
                 ->limit($pageSize)
                 ->get();
+            $response = [];
+            $productsById = collect($query)->groupBy('Id');
 
-            // Format Picture URLs
-            foreach ($query as $product) {
-                $pictureUrls = [];
-                if (!is_null($product->PictureId)) {
-                    $fileExtension = explode('/', $product->MimeType)[1];
-                    $pictureIdPadded = str_pad(
-                        $product->PictureId,
-                        7,
-                        '0',
-                        STR_PAD_LEFT
-                    );
-                    $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$pictureIdPadded}_{$product->SeoFilename}_280.{$fileExtension}";
-                    $pictureUrls[] = $pictureUrl;
-                } else {
-                    $pictureUrl =
-                        'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
-                    $pictureUrls[] = $pictureUrl;
+            foreach ($productsById as $productId => $products) {
+                $productData = [
+                    'Id' => $productId,
+                    'Name' => $products[0]->Name,
+                    'ShortDescription' => $products[0]->ShortDescription,
+                    'FullDescription' => $products[0]->FullDescription,
+                    'Sku' => $products[0]->Sku,
+                    'StockQuantity' => $products[0]->StockQuantity,
+                    'Price' => $products[0]->Price,
+                    'OldPrice' => $products[0]->OldPrice,
+                    'IsNewPart' => $products[0]->IsNewPart,
+                    'IsUsedPart' => $products[0]->IsUsedPart,
+                    'ManufacturerName' => $products[0]->ManufacturerName,
+                    'picture_urls' => [],
+                ];
+
+                foreach ($products as $product) {
+                    if ($product->SeoFilename && $product->MimeType) {
+                        $paddedPictureId = str_pad(
+                            $product->PictureId,
+                            7,
+                            '0',
+                            STR_PAD_LEFT
+                        );
+                        $extension = explode('/', $product->MimeType);
+                        $fileExtension = end($extension);
+                        $productData[
+                            'picture_urls'
+                        ][] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$product->SeoFilename}_280.{$fileExtension}";
+                    } else {
+                        $productData['picture_urls'][] =
+                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
+                    }
                 }
-                $product->pictureUrls = $pictureUrls;
+
+                $response[] = $productData;
             }
 
-            return $this->convertKeysToCamelCase($query);
+            return $this->convertKeysToCamelCase($response);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),
