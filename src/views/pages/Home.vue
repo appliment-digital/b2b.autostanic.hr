@@ -131,7 +131,7 @@ export default {
 
         <!-- Categories -->
         <div
-            class="col-12 flex flex-column py-8 surface-100 bg-white border-100 border-round border-1 justify-content-center align-items-center md:col"
+            class="col-12 flex flex-column py-8 bg-white border-100 border-round border-1 justify-content-center align-items-center md:col"
         >
             <div
                 class="grid justify-content-center row-gap-4 column-gap-3 px-2"
@@ -140,9 +140,9 @@ export default {
                 <div
                     v-for="category in categories"
                     class="col-4 flex flex-column justify-content-center            
-                    row-gap-2 p-4
+                    row-gap-2 p-4 shadow-2
                     align-items-center cursor-pointer 
-                    border-round border-1 border-100 hover:shadow-3" 
+                    border-round hover:shadow-5" 
                     @click="handleCategoryClick(category)"
                 >
                     <img :src="category.pictureUrls[0]" style="width:82px" class="block mx-auto" >

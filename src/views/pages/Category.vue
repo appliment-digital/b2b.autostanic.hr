@@ -124,7 +124,7 @@ export default {
 
         <Breadcrumbs />
 
-        <div v-if="subcategories" class="grid mt-4">
+        <div v-if="subcategories" class="grid">
         <!-- prettier-ignore -->
         <div
             v-for="subcategory in subcategories"

@@ -47,13 +47,12 @@ export default {
                     hideOnOutsideClick: 'true',
                 }"
                 :label="userStore.initials"
-                style="width: 42px; height: 42px"
                 class="flex justify-content-center"
-                severity="primary"
-                rounded
+                severity="secondary"
+                v-ripple
+                icon="pi pi-user"
                 raised
                 text
-                v-ripple
             />
 
             <ul

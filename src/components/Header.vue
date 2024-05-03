@@ -59,8 +59,10 @@ export default {
         </div>
 
         <!-- Header: Search Bar -->
+        <!-- prettier-ignore -->
         <div
-            class="p-0 mt-2 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5 lg:col-6"
+            class="p-0 mt-2 flex-order-2 col-12 sm:col sm:flex-order-1 md:col-5
+            lg:col-6"
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
@@ -73,10 +75,10 @@ export default {
             <div class="flex relative">
                 <Button
                     class="mr-2"
+                    label="Košarica"
                     severity="secondary"
                     icon="pi pi-shopping-cart"
                     @click="handleShoppingCartClick"
-                    rounded
                     raised
                     text
                 />
