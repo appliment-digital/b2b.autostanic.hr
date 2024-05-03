@@ -19,12 +19,16 @@ export default {
     data() {
         return {
             categories: null,
+            isDataLoading: true,
         };
     },
     beforeMount() {
         CategoryService.getMainCategories()
             .then((response) => {
+
                 if (response.data.length) {
+                    this.setIsDataLoading(false);
+
                     this.categories = response.data;
 
                     // update category name to be shorter for better UX
@@ -41,6 +45,10 @@ export default {
         ...mapStores(useCategoryStore),
     },
     methods: {
+        setIsDataLoading(val) {
+            this.isDataLoading = val;
+        },
+
         handleCategoryClick(category) {
             this.categoryStore.addHistory(category);
 
@@ -77,7 +85,9 @@ export default {
                 >
 
                 <!-- Checkboxes -->
-                <div class="p-0 flex flex-column column-gap-3 sm:col sm:flex-row">
+                <div
+                    class="p-0 flex flex-column column-gap-3 sm:col sm:flex-row"
+                >
                     <div class="flex mb-3 md:mb-3 align-items-center">
                         <Checkbox
                             v-model="pizza"
@@ -141,13 +151,15 @@ export default {
 
         <!-- Categories -->
         <div
-            class="py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center"
+            class="categories py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center justify-content-center"
         >
             <div
                 class="grid justify-content-center row-gap-1 column-gap-1 px-2 align-items-start"
             >
                 <!-- prettier-ignore -->
+                <ProgressSpinner v-if="isDataLoading" class="mx-auto" strokeWidth="2"/>
                 <div
+                    v-else
                     v-for="category in categories"
                     class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center            
                     align-items-center cursor-pointer" 
@@ -164,14 +176,22 @@ export default {
 
     <!-- Home Page: News -->
     <section class="mt-2 bg-white border-1 border-100 border-round p-8">
-        <h3 class="text-700 mt-0 mb-2 text-center">Savjeti za Vas i Vaš automobil</h3>
-        <span class="block text-500 mb-7 text-center">Pročitajte kratke zanimljivosti vezane uz vašeg limenog ljubimca.</span>
+        <h3 class="text-700 mt-0 mb-2 text-center">
+            Savjeti za Vas i Vaš automobil
+        </h3>
+        <span class="block text-500 mb-7 text-center"
+            >Pročitajte kratke zanimljivosti vezane uz vašeg limenog
+            ljubimca.</span
+        >
 
         <div
             class="grid grid-nogutter row-gap-6 md:column-gap-0 lg:column-gap-3"
         >
             <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card style="overflow: hidden" class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5">
+                <Card
+                    style="overflow: hidden"
+                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                >
                     <template #header>
                         <img
                             src="https://source.unsplash.com/random/?Car&1"
@@ -191,7 +211,10 @@ export default {
                 </Card>
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card style="overflow: hidden" class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5">
+                <Card
+                    style="overflow: hidden"
+                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                >
                     <template #header>
                         <img
                             src="https://source.unsplash.com/random/?Car&2"
@@ -212,7 +235,10 @@ export default {
                 </Card>
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card style="overflow: hidden" class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5">
+                <Card
+                    style="overflow: hidden"
+                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                >
                     <template #header>
                         <img
                             src="https://source.unsplash.com/random/?Car&3"
@@ -324,5 +350,9 @@ export default {
 .button--submit {
     background-color: #123649;
     border: none;
+}
+
+.categories {
+    min-height: 390.5px;
 }
 </style>
