@@ -53,7 +53,10 @@ class User extends Authenticatable
         $user->password = $data['password'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
         $user->delivery_point = $data['delivery_point'] ?? null;
-        $user->payment_method = $data['payment_method'] ?? null;
+
+        if (!empty($data['payment_method'])) {
+            $user->payment_method = $data['payment_method']['name'];
+        }
 
         if (!empty($data['discount_type'])) {
             $user->discount_type_id = $data['discount_type']['id'];
@@ -78,7 +81,9 @@ class User extends Authenticatable
         $user->email = $data['email'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
         $user->delivery_point = $data['delivery_point'] ?? null;
-        $user->payment_method = $data['payment_method'] ?? null;
+        if (!empty($data['payment_method'])) {
+            $user->payment_method = $data['payment_method']['name'];
+        }
         if (!empty($data['discount_type'])) {
             $user->discount_type_id = $data['discount_type']['id'];
         }

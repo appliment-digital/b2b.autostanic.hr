@@ -35,6 +35,52 @@ export default {
             selectedUser: null,
             roles: [],
             discountTypes: [],
+            paymentMethods: [
+                {
+                    id: 1,
+                    name: 'Nepoznato',
+                },
+                {
+                    id: 2,
+                    name: 'Transakcijski račun',
+                },
+                {
+                    id: 3,
+                    name: 'Gotovina (novčanice)',
+                },
+                {
+                    id: 4,
+                    name: 'Kartica - MasterCard',
+                },
+                {
+                    id: 5,
+                    name: 'Kartica - Visa',
+                },
+                {
+                    id: 6,
+                    name: 'Kartica - Amex',
+                },
+                {
+                    id: 7,
+                    name: 'Kartica - Diners',
+                },
+                {
+                    id: 8,
+                    name: 'Kartica - Maestro',
+                },
+                {
+                    id: 9,
+                    name: 'Kartica',
+                },
+                {
+                    id: 10,
+                    name: 'Plaćanje pouzećem (kurirska služba)',
+                },
+                {
+                    id: 11,
+                    name: 'Kompenzacija',
+                },
+            ],
         };
     },
     computed: {
@@ -124,6 +170,12 @@ export default {
         getAll() {
             userService.getAllWithRelations().then((response) => {
                 this.users = response.data.data;
+                this.users.forEach(
+                    (user) =>
+                        (user.payment_method = this.paymentMethods.find(
+                            (p) => p.name == user.payment_method,
+                        )),
+                );
             });
         },
         getDiscountTypes() {
@@ -275,7 +327,14 @@ export default {
 
         <!-- Dialog Input: Payment Type -->
         <label>Način plaćanja</label>
-        <InputText v-model="user.payment_method" class="w-full mt-2 mb-3" />
+        <Dropdown
+            :options="paymentMethods"
+            v-model="user.payment_method"
+            placeholder="Način plaćanja"
+            optionLabel="name"
+            :showClear="ture"
+            class="w-full mt-2 mb-3"
+        ></Dropdown>
 
         <div class="flex justify-content-end">
             <Button
@@ -372,11 +431,14 @@ export default {
                     header="Mjesto isporuke"
                     sortable
                 ></Column>
-                <Column
-                    field="payment_method"
-                    header="Način plaćanja"
-                    sortable
-                ></Column>
+                <Column field="payment_method" header="Način plaćanja" sortable
+                    ><template #body="{ data }">
+                        <span v-if="data.payment_method">{{
+                            data.payment_method.name
+                        }}</span>
+                        <span v-else> - </span>
+                    </template>
+                </Column>
 
                 <Column field="active" header="Aktivan">
                     <template #body="{ data }">
