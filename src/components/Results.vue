@@ -11,8 +11,8 @@ import { mapStores } from 'pinia';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
-
 export default {
+    props: ['data'],
     components: {
         Header,
         Breadcrumbs,
@@ -33,6 +33,7 @@ export default {
         };
     },
     mounted() {
+        console.log('results mounted', { resultsData: this.data });
         // console.log('results store', this.resultsStore.searchResults);
         // console.log({ paginatedData: this.paginatedData });
 
@@ -84,17 +85,7 @@ export default {
 </script>
 
 <template>
-    <Header />
-
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs />
-        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
-    <div class="mt-0 grid column-gap-4">
+    <div class="mt-1 grid column-gap-4">
         <!-- Filters -->
         <div class="col-2">
             <div class="h-30rem flex flex-column">
@@ -139,68 +130,69 @@ export default {
         </div>
 
         <!-- Results -->
-        <div id="search-results" class="col grid">
-            <div v-for="product in paginatedData" class="col-4">
-                <!-- Product -->
-                <Card
-                    style="overflow: hidden"
-                    class="cursor-pointer shadow-1 hover:shadow-5"
-                    @click="handleProductClick(product)"
-                    @mouseenter="handleMouseEntersCard(product)"
-                    @mouseleave="handleMouseLeavesCard(product)"
-                >
-                    <template #header>
-                        <img
-                            v-if="product.pictureUrls[0]"
-                            :src="product.pictureUrls[0]"
-                            class="product-image border-200"
-                        />
-                    </template>
-                    <template #title>
-                        <span class="text-sm">{{
-                            product.manufacturerName
-                        }}</span>
-                    </template>
-                    <template #subtitle>
-                        <span class="block text-sm h-4rem">
-                            {{ product.name }}
-                            <span class="block mt-1 text-sm"
-                                >SKU: {{ product.sku }}</span
-                            >
-                        </span>
-                    </template>
-                    <template #content>
-                        <div
-                            class="flex align-items-center justify-content-between h-3rem"
-                        >
-                            <span>{{ product.price }} €</span>
-                            <Button
-                                v-if="mouseOverCard[product.id]"
-                                icon="pi pi-cart-plus"
-                                severity="secondary"
-                                label="Dodaj u košaricu"
-                                class="text-xs"
-                                raised
-                                @click.stop="
-                                    handleAddProdcutToShoppingCart(product)
-                                "
+        <div class="col">
+            <div id="search-results" class="grid">
+                <div v-for="product in paginatedData" class="col-4">
+                    <!-- Product -->
+                    <Card
+                        style="overflow: hidden"
+                        class="cursor-pointer shadow-1 hover:shadow-5"
+                        @click="handleProductClick(product)"
+                        @mouseenter="handleMouseEntersCard(product)"
+                        @mouseleave="handleMouseLeavesCard(product)"
+                    >
+                        <template #header>
+                            <img
+                                v-if="product.picture_urls[0]"
+                                :src="product.picture_urls[0]"
+                                class="product-image border-200"
                             />
-                        </div>
-                    </template>
-                </Card>
+                        </template>
+                        <template #title>
+                            <span class="text-sm">{{
+                                product.manufacturerName
+                            }}</span>
+                        </template>
+                        <template #subtitle>
+                            <span class="block text-sm h-4rem">
+                                {{ product.name }}
+                                <span class="block mt-1 text-sm"
+                                    >SKU: {{ product.sku }}</span
+                                >
+                            </span>
+                        </template>
+                        <template #content>
+                            <div
+                                class="flex align-items-center justify-content-between h-3rem"
+                            >
+                                <span>{{ product.price }} €</span>
+                                <Button
+                                    v-if="mouseOverCard[product.id]"
+                                    icon="pi pi-cart-plus"
+                                    severity="secondary"
+                                    label="Dodaj u košaricu"
+                                    class="text-xs"
+                                    raised
+                                    @click.stop="
+                                        handleAddProdcutToShoppingCart(product)
+                                    "
+                                />
+                            </div>
+                        </template>
+                    </Card>
+                </div>
             </div>
+
+            <Paginator
+                :rows="itemsPerPage"
+                :totalRecords="totalItems"
+                v-model="currentPage"
+                @page="onPageChange"
+                class="mt-4"
+            />
+
         </div>
     </div>
-
-    <!-- Paginator -->
-    <Paginator
-        :rows="itemsPerPage"
-        :totalRecords="totalItems"
-        v-model="currentPage"
-        @page="onPageChange"
-        class="mt-4"
-        style="background: none"
-    />
 </template>
 
 <style scoped>

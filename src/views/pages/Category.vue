@@ -5,6 +5,7 @@ import { makeUrl } from '@/utils';
 // components
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import Results from '@/components/Results.vue';
 
 // pinia
 import { mapStores } from 'pinia';
@@ -20,12 +21,15 @@ export default {
     components: {
         Header,
         Breadcrumbs,
+        Results,
     },
     data() {
         return {
             subcategories: null,
             isDataLoading: null,
             products: [],
+
+            hasResults: false,
         };
     },
     watch: {
@@ -74,6 +78,7 @@ export default {
 
             CategoryService.getSubcategories(id)
                 .then((response) => {
+                    this.hasResults = false;
                     // console.log({ subcategories: response.data });
 
                     if (response.data.length) {
@@ -93,10 +98,12 @@ export default {
             ProductService.getProductsByCategoryId(id, 1, 10)
                 .then((response) => {
                     const { data } = response;
-                    console.log({ results: data });
+                    console.log('getting products', {response});
 
-                    this.resultsStore.addResults(data);
-                    this.$router.push(`/results`);
+                    this.resultsStore.addResults(data.products);
+                    this.subcategories = null;
+                    this.hasResults = true;
+                    this.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
         },
@@ -121,43 +128,35 @@ export default {
 <template>
     <Header />
 
-        <div class="mt-3 flex justify-content-between align-items-center">
-            <Breadcrumbs /> 
-            <div v-if="isDataLoading" class="flex align-items-center column-gap-2"><ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" /> učitavanje podataka...</div>
+    <div class="mt-3 flex justify-content-between align-items-center">
+        <Breadcrumbs />
+        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
+            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
+            učitavanje podataka...
         </div>
+    </div>
 
-    <div v-if="subcategories" class="grid">
-        <!-- prettier-ignore -->
+    <div v-if="!hasResults && subcategories" class="grid">
         <div
             v-for="subcategory in subcategories"
-            class="col-3
-            cursor-pointer 
-            "
+            class="col-3 cursor-pointer"
             @click="handleSubcategoryClick(subcategory)"
         >
                 <!-- prettier-ignore -->
                 <div class="w-full h-full border-1 border-100 p-4 
                 flex flex-column justify-content-center align-items-center 
-                border-round bg-white transition-ease-in transition-colors
-                row-gap-3
+                border-round bg-white transition-ease-in transition-color
                 hover:shadow-3">
-                <span class="text-center">({{ subcategory.productCount }})</span>
-                    <img :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
-                    <span class="text-center">{{ subcategory.name }}</span>
+                    <img class="mb-2" :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
+                    <span class="mb-1 text-center">{{ subcategory.name }}</span>
+                    <span class="text-center text-xs">({{ subcategory.productCount }})</span>
                 </div>
         </div>
     </div>
 
-    <div v-if="!subcategories">Nema podkategorija</div>
-
-    <Dialog
-        id="dialog-category"
-        :visible="isDataLoading"
-        style="transition: none"
-        :closable="false"
-    >
-        <ProgressSpinner />
-    </Dialog>
+    <div v-if="hasResults">
+        <Results :data="['1', '2']" />
+    </div>
 </template>
 
 <style scoped></style>

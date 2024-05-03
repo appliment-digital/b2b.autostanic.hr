@@ -26,6 +26,7 @@ export const useResultsStore = defineStore('results', {
     actions: {
         addResults(results) {
             this.currentResults = results;
+            console.log('adding results',{results});
 
             sessionStorage.setItem('search-results', JSON.stringify(results)); 
         },

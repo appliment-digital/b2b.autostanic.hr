@@ -126,18 +126,18 @@ class ProductController extends BaseController
 
             foreach ($productsById as $productId => $products) {
                 $productData = [
-                    'Id' => $productId,
-                    'Name' => $products[0]->Name,
-                    'ShortDescription' => $products[0]->ShortDescription,
-                    'FullDescription' => $products[0]->FullDescription,
-                    'Sku' => $products[0]->Sku,
-                    'StockQuantity' => $products[0]->StockQuantity,
-                    'Price' => $products[0]->Price,
-                    'OldPrice' => $products[0]->OldPrice,
-                    'IsNewPart' => $products[0]->IsNewPart,
-                    'IsUsedPart' => $products[0]->IsUsedPart,
-                    'ManufacturerName' => $products[0]->ManufacturerName,
-                    'picture_urls' => [],
+                    'id' => $productId,
+                    'name' => $products[0]->Name,
+                    'shortDescription' => $products[0]->ShortDescription,
+                    'fullDescription' => $products[0]->FullDescription,
+                    'sku' => $products[0]->Sku,
+                    'stockQuantity' => $products[0]->StockQuantity,
+                    'price' => $products[0]->Price,
+                    'oldPrice' => $products[0]->OldPrice,
+                    'isNewPart' => $products[0]->IsNewPart,
+                    'isUsedPart' => $products[0]->IsUsedPart,
+                    'manufacturerName' => $products[0]->ManufacturerName,
+                    'pictureUrls' => [],
                 ];
 
                 foreach ($products as $product) {

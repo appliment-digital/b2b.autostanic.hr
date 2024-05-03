@@ -59,7 +59,7 @@ export default {
 </script>
 
 <template>
-    <Breadcrumb :home="home" :model="items" class="mt-5">
+    <Breadcrumb :home="home"false :model="items">
         <template #item="{ item, props }">
             <RouterLink
                 v-if="item.route"

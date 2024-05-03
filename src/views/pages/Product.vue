@@ -95,6 +95,7 @@ export default {
 <template>
     <Header />
 
+    <div class="mt-3"/>
     <Breadcrumbs />
 
     <!-- Prodcut: Image & Description -->
@@ -105,7 +106,7 @@ export default {
                 class="image--product"
             /> -->
             <img
-                :src="this.resultsStore.product.pictureUrls[0]"
+                :src="this.resultsStore.product.picture_urls[0]"
                 class="image--product"
             />
         </div>
