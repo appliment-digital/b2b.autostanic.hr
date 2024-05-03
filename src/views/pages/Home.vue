@@ -75,10 +75,10 @@ export default {
     <div class="w-full mx-auto mt-2 grid gap-2">
         <!-- Search -->
         <div
-            class="col-12 flex justify-content-center align-items-center surface-100 bg-white border-100 border-round border-1 md:col"
+            class="col-12 pt-7 flex justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"
         >
             <div>
-                <h3 class="text-700 mt-0 mb-2">Pretraži prema kodu</h3>
+                <h3 class="text-700 mt-0 mb-2 pt-1">Pretraži prema kodu</h3>
                 <span class="block text-500 mb-6"
                     >Pretraži auto dijelove koristeći tvoj kod proizvoda za brzu
                     pretragu.</span
