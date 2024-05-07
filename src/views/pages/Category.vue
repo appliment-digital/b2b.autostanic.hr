@@ -188,7 +188,7 @@ export default {
 
             if (filters[0]) {
                 this.getProductsByCategoryId(this.selectedCategoryId, 1, 10, {
-                    ManufacturerName: filters[0],
+                    ManufacturerName: filters,
                 });
             }
         },
