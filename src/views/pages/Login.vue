@@ -88,7 +88,7 @@ export default {
         <Password
             class="w-full"
             inputClass="w-full"
-            placeholder="Password"
+            placeholder="Lozinka"
             :feedback="false"
             v-model="password"
         />

@@ -59,6 +59,12 @@ export default {
                 path: `/${makeUrl(category.name)}`,
             });
         },
+        goToCrmForm() {
+            window.open(
+                'https://b24-t1zfqc.bitrix24.site/crm_form_vks6q',
+                '_blank',
+            );
+        },
     },
 };
 </script>
@@ -319,6 +325,7 @@ export default {
                             icon="pi pi-envelope"
                             label="Pošalji upit"
                             class="button--submit block w-full"
+                            @click="goToCrmForm()"
                         />
                     </div>
                 </div>
