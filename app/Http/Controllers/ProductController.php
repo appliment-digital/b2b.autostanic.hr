@@ -58,7 +58,7 @@ class ProductController extends BaseController
                 ->when($filters->has('ManufacturerName'), function (
                     $query
                 ) use ($filters) {
-                    return $query->where(
+                    return $query->whereIn(
                         'Product.ManufacturerName',
                         $filters->ManufacturerName
                     );
