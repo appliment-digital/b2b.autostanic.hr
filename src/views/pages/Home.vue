@@ -1,6 +1,9 @@
 <script>
 // utils
-import { makeUrl } from '@/utils';
+import {
+    makeUrl,
+    shortenCarAcousticsAndElectronicsCategoryName,
+} from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
@@ -25,18 +28,17 @@ export default {
     beforeMount() {
         CategoryService.getMainCategories()
             .then((response) => {
-
                 if (response.data.length) {
                     this.setIsDataLoading(false);
 
                     this.categories = response.data;
 
                     // update category name to be shorter for better UX
-                    this.categories.forEach((category) => {
-                        if (category.id == '39597') {
-                            category.name = 'Akustika i elektronika';
-                        }
-                    });
+                    this.categories.forEach(
+                        shortenCarAcousticsAndElectronicsCategoryName,
+                    );
+
+                    console.log(this.categories);
                 }
             })
             .catch((err) => console.error(err));
@@ -51,6 +53,7 @@ export default {
 
         handleCategoryClick(category) {
             this.categoryStore.addHistory(category);
+            console.log({ category });
 
             this.$router.push({
                 path: `/${makeUrl(category.name)}`,
@@ -161,14 +164,21 @@ export default {
                 <div
                     v-else
                     v-for="category in categories"
-                    class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center            
-                    align-items-center cursor-pointer" 
+                    class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center align-items-center cursor-pointer"
                     @click="handleCategoryClick(category)"
                 >
-                    <div class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3">
-                        <img :src="category.pictureUrls[0]" style="width:62px" class="block mx-auto" >
+                    <div
+                        class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3"
+                    >
+                        <img
+                            :src="category.pictureUrls[0]"
+                            style="width: 62px"
+                            class="block mx-auto"
+                        />
                     </div>
-                    <span class="text-sm text-center mt-2">{{ category.name }}</span>
+                    <span class="text-sm text-center mt-2">{{
+                        category.name
+                    }}</span>
                 </div>
             </div>
         </div>
@@ -355,5 +365,4 @@ export default {
 .categories {
     min-height: 390.5px;
 }
-
 </style>

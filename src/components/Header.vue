@@ -33,7 +33,7 @@ export default {
         },
 
         handleShoppingCartClick() {
-            this.$router.push('/cart')
+            this.$router.push(encodeURI('/košarica'))
         },
 
         logout() {

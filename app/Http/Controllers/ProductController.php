@@ -12,7 +12,7 @@ class ProductController extends BaseController
         $categoryId,
         $page,
         $pageSize,
-        Request $request
+        Request $filters
     ) {
         try {
             $offset = ($page - 1) * $pageSize;
@@ -55,28 +55,28 @@ class ProductController extends BaseController
                 )
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
                 //filters
-                ->when($request->has('ManufacturerName'), function (
+                ->when($filters->has('ManufacturerName'), function (
                     $query
-                ) use ($request) {
+                ) use ($filters) {
                     return $query->where(
                         'Product.ManufacturerName',
-                        $request->ManufacturerName
+                        $filters->ManufacturerName
                     );
                 })
-                ->when($request->has('IsUsedPart'), function ($query) use (
-                    $request
+                ->when($filters->has('IsUsedPart'), function ($query) use (
+                    $filters
                 ) {
                     return $query->where(
                         'Product.IsUsedPart',
-                        $request->IsUsedPart
+                        $filters->IsUsedPart
                     );
                 })
-                ->when($request->has('IsNewPart'), function ($query) use (
-                    $request
+                ->when($filters->has('IsNewPart'), function ($query) use (
+                    $filters
                 ) {
                     return $query->where(
                         'Product.IsNewPart',
-                        $request->IsNewPart
+                        $filters->IsNewPart
                     );
                 })
                 ->where('Product.Deleted', 0)

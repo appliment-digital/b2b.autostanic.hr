@@ -26,11 +26,12 @@ export const useResultsStore = defineStore('results', {
     actions: {
         addResults(results) {
             this.currentResults = results;
-            console.log('adding results',{results});
+            // console.log('adding results',{results});
 
             sessionStorage.setItem('search-results', JSON.stringify(results)); 
         },
         addCurrentProduct(product) {
+            // console.log('adding current product to the store', {product});
             this.currentProduct = product;
 
             sessionStorage.setItem('current-product', JSON.stringify(product)); 

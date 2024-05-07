@@ -3,7 +3,7 @@ import Axios from 'axios';
 export default class ProductService {
     static apiResourceEndpoint = '/api/product';
 
-    static async getProductsByCategoryId(categoryId, page, pageSize, filter) {
+    static async getProductsByCategoryId(categoryId, page, pageSize, filter = {}) {
         return Axios.post(
             this.apiResourceEndpoint +
                 '/getProductsByCategoryId/' +

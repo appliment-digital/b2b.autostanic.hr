@@ -1,6 +1,9 @@
 <script>
 // lib
-import slugify from 'slugify';
+import slug from 'slug';
+
+// utils
+import { setSlugCharMap, formatNumber, formatPrice } from '@/utils';
 
 // components
 import Header from '@/components/Header.vue';
@@ -11,90 +14,82 @@ import { mapStores } from 'pinia';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
+// modify slug library (add croatian chars)
+setSlugCharMap(slug);
+
 export default {
-    props: ['data'],
+    props: ['results', 'resultsFilter', 'productCount'],
     components: {
         Header,
         Breadcrumbs,
     },
     data() {
         return {
-            searchResults: null,
-
-            // paginate results
-            currentPage: 1,
             itemsPerPage: 9,
-            totalItems: 10,
+            totalItems: Number(this.productCount),
+            isChecked: false,
+
+            checkboxesStates: {},
 
             filters: {},
-
-            // display `add to cart` button on mouse over card
-            mouseOverCard: {}, // e.g ([id]: true)
         };
     },
     mounted() {
-        console.log('results mounted', { resultsData: this.data });
-        // console.log('results store', this.resultsStore.searchResults);
-        // console.log({ paginatedData: this.paginatedData });
+        console.log('results component props: ', {
+            totalItems: this.totalItems,
+            resultsFilter: this.resultsFilter,
+        });
 
-        this.filters.brand = new Set(
-            this.resultsStore.searchResults.map(
-                (product) => product.manufacturerName,
-            ),
-        );
+        console.log(this.resultsFilter);
+        // create checkboxes states
+        this.resultsFilter.manufacturers.forEach((filter) => {
+            this.checkboxesStates[filter] = false;
+        });
+
+        console.log({ checkboxesStates: this.checkboxesStates });
     },
-
     computed: {
-        paginatedData() {
-            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-            const endIndex = startIndex + this.itemsPerPage;
-            return this.resultsStore.searchResults.slice(startIndex, endIndex);
-        },
-
         ...mapStores(useResultsStore, useShoppingCartStore),
     },
     methods: {
-        onPageChange(event) {
-            this.currentPage = event.page + 1;
-        },
-
         handleProductClick(product) {
-            // console.log('clicking product', { product });
-
-            const productSlug = slugify(product.name, {
-                lower: false,
-            });
+            const productSlug = slug(product.name, { lower: false });
 
             this.resultsStore.addCurrentProduct(product);
             this.$router.push(`/${productSlug}`);
         },
 
-        handleMouseEntersCard(product) {
-            this.mouseOverCard[product.id] = true;
+        handlePageChangeClick(event) {
+            this.$emit('on-page-change', event);
         },
 
-        handleMouseLeavesCard(product) {
-            delete this.mouseOverCard[product.id];
+        handleFilterSelect() {
+            this.$emit('on-filter-select', this.checkboxesStates);
         },
 
-        handleAddProdcutToShoppingCart(product) {
-            this.shoppingCartStore.addProduct(product);
+        formatProductStockQuantity(val) {
+            return formatNumber(val);
+        },
+
+        formatProductPrice(val) {
+            return formatPrice(val);
         },
     },
 };
 </script>
 
 <template>
-    <div class="mt-1 grid column-gap-4">
+    <div class="grid column-gap-4">
         <!-- Filters -->
         <div class="col-2">
-            <div class="h-30rem flex flex-column">
+            <div class="flex flex-column">
                 <span class="mb-2">Stanje</span>
 
                 <div class="flex align-items-center mb-1">
                     <Checkbox
-                        :v-model="false"
                         inputId="ingredient2"
+                        :v-model="false"
+                        :binary="true"
                         name="pizza"
                         value="Mushroom"
                     />
@@ -110,21 +105,29 @@ export default {
                     <label for="ingredient2" class="ml-2"> Rabljeno </label>
                 </div>
 
-                <span class="mt-3 mb-2">Brend</span>
-                <div
-                    v-for="brand in filters.brand"
-                    class="flex align-items-center mb-1"
-                >
-                    <!-- Checkbox -->
-                    <Checkbox
-                        :v-model="false"
-                        inputId="ingredient2"
-                        name="pizza"
-                        value="Mushroom"
-                    />
-                    <label for="ingredient2" class="ml-2">
-                        {{ brand }}
-                    </label>
+                <!-- manufacturer -->
+                <div class="mt-3 max-h-30rem overflow-y-scroll">
+                    <span class="block mt-3 mb-2">Proizvođači</span>
+                    <div
+                        v-for="manufacturer in resultsFilter.manufacturers"
+                        class="flex align-items-center mb-1 px-1"
+                    >
+                        <!-- Checkbox -->
+                        <Checkbox
+                            v-if="manufacturer"
+                            v-model="checkboxesStates[manufacturer]"
+                            @change="handleFilterSelect"
+                            :binary="true"
+                            :name="manufacturer"
+                        />
+                        <label
+                            v-if="manufacturer"
+                            for="ingredient2"
+                            class="ml-2"
+                        >
+                            {{ manufacturer }}
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,21 +135,44 @@ export default {
         <!-- Results -->
         <div class="col">
             <div id="search-results" class="grid">
-                <div v-for="product in paginatedData" class="col-4">
+                <div v-for="product in results" class="col-4">
                     <!-- Product -->
                     <Card
+                        :pt="{
+                            header: {
+                                style: 'padding: 1.25rem',
+                                id: 'myPanelHeader',
+                                class: [
+                                    {
+                                        '.card-header--fixed-height':
+                                            product.hasDefaultImage,
+                                    },
+                                ],
+                            },
+                        }"
                         style="overflow: hidden"
                         class="cursor-pointer shadow-1 hover:shadow-5"
                         @click="handleProductClick(product)"
-                        @mouseenter="handleMouseEntersCard(product)"
-                        @mouseleave="handleMouseLeavesCard(product)"
                     >
                         <template #header>
-                            <img
-                                v-if="product.picture_urls[0]"
-                                :src="product.picture_urls[0]"
-                                class="product-image border-200"
-                            />
+                            <div
+                                v-if="product.hasDefaultImage"
+                                class="card-header--fixed-height flex justify-content-center align-items-center"
+                                src="/images/as_logo_single.png"
+                            >
+                                <img
+                                    v-if="product.picture_urls[0]"
+                                    :src="product.picture_urls[0]"
+                                    class="product-image--default border-200"
+                                />
+                            </div>
+                            <div v-else>
+                                <img
+                                    v-if="product.picture_urls[0]"
+                                    :src="product.picture_urls[0]"
+                                    class="product-image border-200"
+                                />
+                            </div>
                         </template>
                         <template #title>
                             <span class="text-sm">{{
@@ -165,18 +191,39 @@ export default {
                             <div
                                 class="flex align-items-center justify-content-between h-3rem"
                             >
-                                <span>{{ product.price }} €</span>
+                                <span
+                                    >{{
+                                        formatProductPrice(product.price)
+                                    }}
+                                    €</span
+                                >
+                                <span class="block mt-1 text-sm"
+                                    >Stanje:
+                                    <span
+                                        :class="
+                                            product.stockQuantity == 0
+                                                ? 'text-red-500'
+                                                : 'text-green-500'
+                                        "
+                                        >{{
+                                            formatProductStockQuantity(
+                                                product.stockQuantity,
+                                            )
+                                        }}</span
+                                    ></span
+                                >
+                                <!--
                                 <Button
-                                    v-if="mouseOverCard[product.id]"
                                     icon="pi pi-cart-plus"
                                     severity="secondary"
-                                    label="Dodaj u košaricu"
-                                    class="text-xs"
-                                    raised
+                                    class="text-xs border-100"
+                                    outlined
+                                    rounded
                                     @click.stop="
                                         handleAddProdcutToShoppingCart(product)
                                     "
                                 />
+                                -->
                             </div>
                         </template>
                     </Card>
@@ -187,18 +234,32 @@ export default {
                 :rows="itemsPerPage"
                 :totalRecords="totalItems"
                 v-model="currentPage"
-                @page="onPageChange"
+                @page="handlePageChangeClick"
                 class="mt-4"
             />
-
         </div>
     </div>
 </template>
 
 <style scoped>
 .product-image {
+    display: block;
     width: 100%;
-    height: 160px;
+    height: 120px;
     object-fit: cover;
+    object-position: center;
+    border-radius: 5px;
+}
+
+.product-image--default {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 5px;
+    opacity: 0.1;
+}
+
+.card-header--fixed-height {
+    height: 120px;
 }
 </style>

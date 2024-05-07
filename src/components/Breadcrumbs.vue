@@ -5,8 +5,10 @@ import { makeBreadcrumb } from '@/utils';
 // pinia
 import { mapStores } from 'pinia';
 import { useCategoryStore } from '@/store/categoryStore.js';
+import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 
 export default {
+    props: ['crumbs'],
     components: {},
     data() {
         return {
@@ -18,31 +20,34 @@ export default {
         };
     },
     watch: {
-        '$route.path': function (newPath) {
-            // console.log(newPath);
+        '$route.path': function (newPath, oldPath) {
+            // console.log({newPath, oldPath});
 
             this.makeBreadcrumbs(newPath);
+
+            // console.log('this.items', this.items);
+
+            this.breadcrumbsStore.set(this.items);
         },
     },
     computed: {
-        ...mapStores(useCategoryStore),
+        ...mapStores(useCategoryStore, useBreadcrumbsStore),
     },
     mounted() {
-        const previousUrl = window.history.state.back;
+        // const previousUrl = window.history.state.back;
 
-        // TODO: handle users copying url
-        if (!previousUrl) return;
+        // if (!previousUrl) return;
 
         this.makeBreadcrumbs(this.$route.fullPath);
+
+        // console.log('breadcrumbs --> items:', this.items);
+
     },
     methods: {
         makeBreadcrumbs(path) {
-            // console.log('making breadcrumbs');
-
             const fullPath = decodeURIComponent(path);
 
             const parts = fullPath.slice(1).split('/');
-            // console.log({parts});
 
             let url = '';
             this.items = parts.map((part) => {
@@ -53,13 +58,18 @@ export default {
                     route: `${url}`,
                 };
             });
+
+            if (this.crumbs) {
+                this.items = [...this.crumbs, this.items[this.items.length - 1]];
+                return;
+            }
         },
     },
 };
 </script>
 
 <template>
-    <Breadcrumb :home="home"false :model="items">
+    <Breadcrumb :home="home" false :model="items">
         <template #item="{ item, props }">
             <RouterLink
                 v-if="item.route"

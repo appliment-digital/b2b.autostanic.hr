@@ -1,6 +1,9 @@
 <script>
+// lib
+import slug from 'slug';
+
 // utils
-import { makeUrl } from '@/utils';
+import { makeUrl, setSlugCharMap } from '@/utils';
 
 // components
 import Header from '@/components/Header.vue';
@@ -12,10 +15,14 @@ import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
+import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
 import ProductService from '@/service/ProductService.js';
+
+// modify slug library (add croatian chars)
+setSlugCharMap(slug);
 
 export default {
     components: {
@@ -28,17 +35,28 @@ export default {
             subcategories: null,
             isDataLoading: null,
             products: [],
+            productCount: null,
 
             hasResults: false,
+            results: null,
+            resultsFilter: {},
+
+            selectedCategory: null,
+            selectedCategoryId: null,
         };
     },
     watch: {
         '$route.path': function (newPath) {
-            this.handleNavigation(newPath);
+            this.handleNavigation(newPath, this.selectedCategory);
         },
     },
     computed: {
-        ...mapStores(useUserStore, useCategoryStore, useResultsStore),
+        ...mapStores(
+            useUserStore,
+            useCategoryStore,
+            useResultsStore,
+            useBreadcrumbsStore,
+        ),
     },
     mounted() {
         this.setIsDataLoading(false);
@@ -47,9 +65,13 @@ export default {
         this.handleNavigation(this.$route.path);
     },
     methods: {
-        handleNavigation(path) {
+        handleNavigation(path, selectedCategory) {
             const history = this.categoryStore.history;
-            // console.log({ history });
+
+            if (selectedCategory) {
+                this.getSubcategories(this.selectedCategory.id);
+                return;
+            }
 
             const freshUrl = path
                 .slice(1)
@@ -62,8 +84,6 @@ export default {
             const freshUrlData = history.find(
                 (entry) => entry.url === freshUrl,
             );
-
-            // console.log({ freshUrlData });
 
             if (!freshUrlData) {
                 this.subcategories = null;
@@ -83,24 +103,44 @@ export default {
 
                     if (response.data.length) {
                         this.setIsDataLoading(false);
+                        this.selectedCategory = null;
 
                         this.subcategories = response.data;
                     } else {
+                        this.selectedCategoryId = id;
                         this.getProductsByCategoryId(id);
                     }
                 })
                 .catch((err) => console.error(err));
         },
 
-        getProductsByCategoryId(id) {
+        getProductsByCategoryId(id, page = 1, pageSize = 9, filters = {}) {
             this.setIsDataLoading(true);
+            this.selectedCategory = null;
 
-            ProductService.getProductsByCategoryId(id, 1, 10)
+            ProductService.getProductsByCategoryId(id, page, pageSize, filters)
                 .then((response) => {
                     const { data } = response;
-                    console.log('getting products', {response});
 
+                    // add default image to products that have no image
+                    data.products.forEach((entry) => {
+                        if (
+                            entry.picture_urls[0] ===
+                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
+                        ) {
+                            entry.hasDefaultImage = 'true';
+                            entry.picture_urls[0] =
+                                '/images/as_logo_single.png';
+                        }
+                    });
+
+                    console.log('getting products', { response });
+
+                    // set produckjut results data
                     this.resultsStore.addResults(data.products);
+                    this.resultsFilter['manufacturers'] = data.manufacturers;
+                    this.results = data.products;
+
                     this.subcategories = null;
                     this.hasResults = true;
                     this.setIsDataLoading(false);
@@ -113,13 +153,44 @@ export default {
 
             const { path } = this.$route;
 
+            this.selectedCategory = subcategory;
+
+            // set product count to display on results page
+            this.productCount = subcategory.productCount;
+
             this.categoryStore.addHistory(subcategory);
 
-            this.$router.push(`${path}/${makeUrl(subcategory.name)}`);
+            this.$router.push(
+                `${path}/${slug(subcategory.name, { lower: true })}`,
+            );
         },
 
         setIsDataLoading(val) {
             this.isDataLoading = val;
+        },
+
+        handleResultsPageChange(event) {
+            console.log('changing page, hello', event);
+            this.getProductsByCategoryId(
+                this.selectedCategoryId,
+                event.page + 1,
+            );
+        },
+
+        handleResultsFilterSelect(states) {
+            const filters = Object.keys(states).filter((key) => states[key]);
+
+            console.log({ filters });
+            console.log({ states });
+
+            // console.log(this.selectedCategoryId);
+            // console.log('filter changes...', { manufacturer, val });
+
+            if (filters[0]) {
+                this.getProductsByCategoryId(this.selectedCategoryId, 1, 10, {
+                    ManufacturerName: filters[0],
+                });
+            }
         },
     },
 };
@@ -142,8 +213,8 @@ export default {
             class="col-3 cursor-pointer"
             @click="handleSubcategoryClick(subcategory)"
         >
-                <!-- prettier-ignore -->
-                <div class="w-full h-full border-1 border-100 p-4 
+            <!-- prettier-ignore -->
+            <div class="w-full h-full border-1 border-100 p-4 
                 flex flex-column justify-content-center align-items-center 
                 border-round bg-white transition-ease-in transition-color
                 hover:shadow-3">
@@ -155,8 +226,16 @@ export default {
     </div>
 
     <div v-if="hasResults">
-        <Results :data="['1', '2']" />
+        <Results
+            :productCount="productCount"
+            :results="results"
+            :resultsFilter="resultsFilter"
+            @on-page-change="handleResultsPageChange"
+            @on-filter-select="handleResultsFilterSelect"
+        />
     </div>
 </template>
 
 <style scoped></style>
+
+{ manufacturerName: 'Bosch' }

@@ -14,3 +14,48 @@ export const makeUrl = (text) => {
         .replaceAll(' ', '-')
         .replaceAll('!', '');
 };
+
+export const setSlugCharMap = (slug) => {
+    const chars = [
+        ['ž', 'ž'],
+        ['š', 'š'],
+        ['č', 'č'],
+        ['ć', 'ć'],
+        ['đ', 'đ'],
+
+        ['Ž', 'Ž'],
+        ['Š', 'Š'],
+        ['Č', 'Č'],
+        ['Ć', 'Ć'],
+        ['Đ', 'Đ'],
+
+        ['(', '('],
+        [')', ')'],
+        ['/', ' '],
+        [',', ' '],
+    ];
+
+    chars.forEach((charGroup) => {
+        slug.charmap[charGroup[0]] = charGroup[1];
+    });
+};
+
+export const shortenCarAcousticsAndElectronicsCategoryName = (category) => {
+    if (category.id == '39597') {
+        category.name = 'Akustika i elektronika';
+    }
+};
+
+export const formatPrice = (number) => {
+    return Number(number).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+}
+
+export const formatNumber = (number) => {
+    return Number(number).toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+}

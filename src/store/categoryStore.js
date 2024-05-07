@@ -1,14 +1,22 @@
 // pinia
 import { defineStore } from 'pinia';
 
+// lib
+import slug from 'slug';
+
 // utils
-import { makeUrl } from '@/utils';
+import { setSlugCharMap } from '@/utils';
+
+// modify slug library (add croatian chars)
+setSlugCharMap(slug);
 
 export const useCategoryStore = defineStore('category', {
     state: () => {
         return {
             categoryHistory:
                 JSON.parse(sessionStorage.getItem('category-history')) || [],
+
+            addMainCategoriesList: null,
         };
     },
     getters: {
@@ -31,10 +39,16 @@ export const useCategoryStore = defineStore('category', {
             );
         },
         addHistory(category) {
+            const entry = this.categoryHistory.find(
+                (entry) => entry.id == category.id,
+            );
+
+            if (entry) return;
+
             this.categoryHistory.push({
                 id: category.id,
                 name: category.name,
-                url: makeUrl(category.name),
+                url: slug(category.name, { lower: true }),
             });
 
             sessionStorage.setItem(
@@ -42,5 +56,7 @@ export const useCategoryStore = defineStore('category', {
                 JSON.stringify(this.categoryHistory),
             );
         },
+
+        addMainCategories(categories) {},
     },
 });

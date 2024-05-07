@@ -1,8 +1,14 @@
 // vue router
 import { createRouter, createWebHistory } from 'vue-router';
 
+// lib
+import slug from 'slug';
+
 // utils
-import { makeUrl } from '@/utils';
+import {
+    setSlugCharMap,
+    shortenCarAcousticsAndElectronicsCategoryName,
+} from '@/utils';
 
 // components
 import Layout from '@/components/Layout.vue';
@@ -17,14 +23,16 @@ import UserTable from '@/views/pages/admin/UserTable.vue';
 import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
 import Category from '@/views/pages/Category.vue';
 import Product from '@/views/pages/Product.vue';
-import SearchResults from '@/views/pages/SearchResults.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
+import ThankYou from '@/views/pages/ThankYou.vue'
 
 // pinia
 import { useUserStore } from '@/store/userStore';
 
 // service
 import CategoryService from '../service/CategoryService';
+
+setSlugCharMap(slug);
 
 /**
  * Fetch main categories to add them as routes.
@@ -38,6 +46,9 @@ const makeCategoryRoutes = async () => {
 };
 
 const categoryRoutes = await makeCategoryRoutes();
+
+// update category name to be shorter for better UX
+categoryRoutes.forEach(shortenCarAcousticsAndElectronicsCategoryName);
 
 const routes = [
     {
@@ -62,19 +73,13 @@ const routes = [
                 component: ResetPassword,
             },
             {
-                path: '/cart',
-                component: ShoppingCart,
+                path: '/hvala',
+                component: ThankYou,
             },
             {
-                path: '/results',
-                component: SearchResults,
-                meta: { requiresAuth: true },
-                children: [
-                    {
-                        path: `/:subcategory(.*)`,
-                        component: SearchResults,
-                    },
-                ],
+                path: '/' + encodeURI('košarica'),
+                name: 'košarica',
+                component: ShoppingCart,
             },
             {
                 path: '/:product',
@@ -85,12 +90,12 @@ const routes = [
             // create routes for all top-level categories
             ...categoryRoutes.map((category) => {
                 return {
-                    path: `/${makeUrl(category.name)}`,
+                    path: `/${slug(category.name)}`,
                     component: Category,
                     meta: { requiresAuth: true },
                     children: [
                         {
-                            path: `/${makeUrl(category.name)}/:subcategory(.*)`,
+                            path: `/${slug(category.name)}/:subcategory(.*)`,
                             component: Category,
                         },
                     ],

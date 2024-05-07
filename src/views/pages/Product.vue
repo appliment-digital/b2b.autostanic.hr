@@ -1,12 +1,13 @@
 <script>
 // utils
-import { capitalizeFirstLetter } from '@/utils';
+import { capitalizeFirstLetter, formatPrice } from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
+import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 
 // components
 import Header from '@/components/Header.vue';
@@ -28,7 +29,7 @@ export default {
             },
 
             tabMenuItems: [
-                { label: 'Informacije 1', icon: 'pi pi-home' },
+                { label: 'secondary 1', icon: 'pi pi-home' },
                 { label: 'Informacije 2', icon: 'pi pi-chart-line' },
                 { label: 'Informacije 3', icon: 'pi pi-list' },
             ],
@@ -46,33 +47,34 @@ export default {
     },
     watch: {
         itemQuantity(newVal, oldVal) {
-            console.log({ newVal, oldVal });
-
             if (newVal < 1) {
                 this.itemQuantity = '1';
             }
         },
     },
     computed: {
-        ...mapStores(useUserStore, useResultsStore, useShoppingCartStore),
+        ...mapStores(
+            useUserStore,
+            useResultsStore,
+            useShoppingCartStore,
+            useBreadcrumbsStore,
+        ),
 
         productName() {
             return capitalizeFirstLetter(this.resultsStore.product.name);
         },
 
         productShortDescription() {
-            console.log(this.resultsStore.product.shortDescription);
+            // console.log(this.resultsStore.product.shortDescription);
             return capitalizeFirstLetter(
                 this.resultsStore.product.shortDescription,
             );
         },
     },
-
     mounted() {
-        console.log(capitalizeFirstLetter);
-        console.log('current product:', this.resultsStore.product);
-    },
+        console.log(this.resultsStore.product);
 
+    },
     updated() {
         const [name, lastName] = this.userStore.fullName.split(' ');
 
@@ -82,12 +84,17 @@ export default {
     methods: {
         handleSendInquiry() {
             this.inquiry.isSending = true;
-            console.log('sending inquiry...');
         },
 
         handleAddProdcutToShoppingCart(product) {
-            this.shoppingCartStore.addProduct(product)
-        }
+            const productDetails = { ...product, quantity: this.itemQuantity };
+
+            this.shoppingCartStore.add(productDetails);
+        },
+
+        formatProductPrice(val) {
+            return formatPrice(val);
+        },
     },
 };
 </script>
@@ -95,20 +102,23 @@ export default {
 <template>
     <Header />
 
-    <div class="mt-3"/>
-    <Breadcrumbs />
+    <div class="mt-3 flex justify-content-between align-items-center">
+        <Breadcrumbs :crumbs="this.breadcrumbsStore.current" />
+        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
+            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
+            učitavanje podataka...
+        </div>
+    </div>
 
     <!-- Prodcut: Image & Description -->
-    <div class="mt-4 grid column-gap-6">
-        <div class="col-12 h-20rem md:col-6 md:h-auto">
-            <!-- <img
-                src="https://source.unsplash.com/random/?Car&10"
-                class="image--product"
-            /> -->
-            <img
-                :src="this.resultsStore.product.picture_urls[0]"
-                class="image--product"
-            />
+    <div class="grid column-gap-6 justify-content-between">
+        <div class="col-12 h-20rem md:col-5 md:h-auto">
+            <div class="bg-white p-8 border-round border-1 border-100">
+                <img
+                    :src="this.resultsStore.product.picture_urls[0]"
+                    class="image--product"
+                />
+            </div>
         </div>
 
         <div class="col">
@@ -123,12 +133,17 @@ export default {
             <hr />
 
             <p class="mt-3" v-html="productShortDescription" />
+            <p class="mt-3" v-html="pro" />
 
             <!-- Stock -->
             <span class="block mt-5"
                 ><span
                     class="font-bold"
-                    :class="this.resultsStore.product.stockQuantity == 0 ? 'text-red-500' : 'text-green-500'"
+                    :class="
+                        this.resultsStore.product.stockQuantity == 0
+                            ? 'text-red-500'
+                            : 'text-green-500'
+                    "
                     >{{ this.resultsStore.product.stockQuantity }}</span
                 >
                 na stanju.</span
@@ -139,27 +154,36 @@ export default {
             >
                 <div>
                     <span class="mb-0 mr-2 mb-2 text-lg">Cijena</span>
-                    <span class="font-bold">{{resultsStore.product.price}} €</span>
+                    <span class="font-bold"
+                        >{{
+                            formatProductPrice(resultsStore.product.price)
+                        }}
+                        €</span
+                    >
                 </div>
                 <div>
                     <span class="m-0 mr-2 mb-2 text-lg">Cijena s popustom</span>
-                    <span class="font-bold">{{ resultsStore.product.price }} €</span>
+                    <span class="font-bold"
+                        >{{ resultsStore.product.price }} €</span
+                    >
                 </div>
             </div>
 
             <!-- Price -->
             <!-- Buttons -->
-            <Toolbar class="mt-4 bg-white-alpha-40">
+            <Toolbar class="mt-4 bg-white">
                 <template #start>
                     <Button
                         class="button--no-shadow mr-1"
                         icon="pi pi-minus"
                         severity="secondary"
+                        outlined
                         @click="itemQuantity--"
                     />
                     <Button
                         class="mr-1"
-                        severity="secondary"
+                        severity="info"
+                        outlined
                         :label="itemQuantity"
                         disabled
                     />
@@ -167,6 +191,7 @@ export default {
                         icon="pi pi-plus"
                         class="button--no-shadow"
                         severity="secondary"
+                        outlined
                         @click="itemQuantity++"
                     />
                 </template>
@@ -177,13 +202,21 @@ export default {
                             class="button--no-shadow mr-2 text-sm"
                             label="Dodaj u košaricu"
                             severity="primary"
-                            :disabled="this.resultsStore.product.stockQuantity == 0"
-                            @click="handleAddProdcutToShoppingCart(resultsStore.product)"
+                            outlined
+                            :disabled="
+                                this.resultsStore.product.stockQuantity == 0
+                            "
+                            @click="
+                                handleAddProdcutToShoppingCart(
+                                    resultsStore.product,
+                                )
+                            "
                         />
                         <Button
                             class="button--no-shadow text-sm"
                             label="Pošalji upit"
                             severity="secondary"
+                            outlined
                             @click="handleSendInquiry"
                         />
                     </div>
