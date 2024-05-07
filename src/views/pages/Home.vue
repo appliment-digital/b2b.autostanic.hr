@@ -25,7 +25,6 @@ export default {
     beforeMount() {
         CategoryService.getMainCategories()
             .then((response) => {
-
                 if (response.data.length) {
                     this.setIsDataLoading(false);
 
@@ -55,6 +54,12 @@ export default {
             this.$router.push({
                 path: `/${makeUrl(category.name)}`,
             });
+        },
+        goToCrmForm() {
+            window.open(
+                'https://b24-t1zfqc.bitrix24.site/crm_form_vks6q',
+                '_blank',
+            );
         },
     },
 };
@@ -161,14 +166,21 @@ export default {
                 <div
                     v-else
                     v-for="category in categories"
-                    class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center            
-                    align-items-center cursor-pointer" 
+                    class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center align-items-center cursor-pointer"
                     @click="handleCategoryClick(category)"
                 >
-                    <div class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3">
-                        <img :src="category.pictureUrls[0]" style="width:62px" class="block mx-auto" >
+                    <div
+                        class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3"
+                    >
+                        <img
+                            :src="category.pictureUrls[0]"
+                            style="width: 62px"
+                            class="block mx-auto"
+                        />
                     </div>
-                    <span class="text-sm text-center mt-2">{{ category.name }}</span>
+                    <span class="text-sm text-center mt-2">{{
+                        category.name
+                    }}</span>
                 </div>
             </div>
         </div>
@@ -309,6 +321,7 @@ export default {
                             icon="pi pi-envelope"
                             label="Pošalji upit"
                             class="button--submit block w-full"
+                            @click="goToCrmForm()"
                         />
                     </div>
                 </div>
@@ -355,5 +368,4 @@ export default {
 .categories {
     min-height: 390.5px;
 }
-
 </style>
