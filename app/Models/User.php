@@ -47,7 +47,6 @@ class User extends Authenticatable
     {
         $user = new self();
 
-        return $user->name = $data['name'];
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
         $user->password = $data['password'];
@@ -56,7 +55,7 @@ class User extends Authenticatable
         $user->postal_code = $data['postal_code'] ?? null;
         $user->city = $data['city'] ?? null;
         $user->state_province = $data['state_province'] ?? null;
-        $user->country = $data['country'] ?? null;
+        $user->country = $data['country'] ? $data['country']['NAME'] : null;
 
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];

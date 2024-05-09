@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DiscountTypeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BitrixController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierDetailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,5 +92,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bitrix/getCountriesList', [
         BitrixController::class,
         'getCountriesList',
+    ]);
+
+    //****************   Supplier CONTOLLER ******************
+    Route::post('/supplier/getAll', [SupplierController::class, 'getAll']);
+    Route::post('/supplier/getAllCategoriesForSupplier/{id}', [
+        SupplierController::class,
+        'getAllCategoriesForSupplier',
+    ]);
+
+    //****************   Supplier Detail CONTOLLER ******************
+    Route::get('/supplierDetail/getSupplierWithDetails/{id}', [
+        SupplierDetailController::class,
+        'getSupplierWithDetails',
+    ]);
+    Route::post('/supplierDetail/getAllSuppliersWithDetails', [
+        SupplierDetailController::class,
+        'getAllSuppliersWithDetails',
+    ]);
+    Route::post('/supplierDetail/addDetailsforSupplier', [
+        SupplierDetailController::class,
+        'addDetailsforSupplier',
+    ]);
+
+    Route::put('/supplierDetail/updateDetailsforSupplier/{id}', [
+        UserController::class,
+        'updateDetailsforSupplier',
     ]);
 });
