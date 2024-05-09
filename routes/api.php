@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DiscountTypeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BitrixController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,5 +84,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/product/getProductById/{id}', [
         ProductController::class,
         'getProductById',
+    ]);
+
+    //****************   BITRIX CONTOLLER ******************
+    Route::post('/bitrix/getCountriesList', [
+        BitrixController::class,
+        'getCountriesList',
     ]);
 });

@@ -47,12 +47,16 @@ class User extends Authenticatable
     {
         $user = new self();
 
-        $user->name = $data['name'];
+        return $user->name = $data['name'];
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
         $user->password = $data['password'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
-        $user->delivery_point = $data['delivery_point'] ?? null;
+        $user->address = $data['address'] ?? null;
+        $user->postal_code = $data['postal_code'] ?? null;
+        $user->city = $data['city'] ?? null;
+        $user->state_province = $data['state_province'] ?? null;
+        $user->country = $data['country'] ?? null;
 
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];
@@ -80,7 +84,12 @@ class User extends Authenticatable
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
         $user->bitrix_company_id = $data['bitrix_company_id'];
-        $user->delivery_point = $data['delivery_point'] ?? null;
+        $user->address = $data['address'] ?? null;
+        $user->postal_code = $data['postal_code'] ?? null;
+        $user->city = $data['city'] ?? null;
+        $user->state_province = $data['state_province'] ?? null;
+        $user->country = $data['country'] ? $data['country']['NAME'] : null;
+
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];
         }
