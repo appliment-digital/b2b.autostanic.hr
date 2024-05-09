@@ -32,6 +32,7 @@ export default {
     },
     data() {
         return {
+            filters: {},
             isDialogVisible: false,
             users: [],
             user: {},
@@ -267,7 +268,7 @@ export default {
         header="Detalji korisnika"
         :visible="isDialogVisible"
         :style="{ width: '30rem' }"
-        @update:visible="closeDialog"
+        :filters="filters"
     >
         <p class="text-red-500">Polja označena s zvijezdicom(*) su obavezna!</p>
         <!-- Dialog Input: First Name -->
@@ -423,7 +424,7 @@ export default {
                                 <i class="pi pi-search" />
                             </InputIcon>
                             <InputText
-                                v-model="searchQuery"
+                                v-model="filters['global'].value"
                                 placeholder="Pretraži"
                                 style="min-width: 240px"
                             />

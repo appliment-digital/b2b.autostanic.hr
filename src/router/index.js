@@ -20,11 +20,12 @@ import ForgotPassword from '@/views/pages/ForgotPassword.vue';
 import ResetPassword from '@/views/pages/ResetPassword.vue';
 import Home from '@/views/pages/Home.vue';
 import UserTable from '@/views/pages/admin/UserTable.vue';
+import PriceManagement from '@/views/pages/admin/PriceManagement.vue';
 import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
 import Category from '@/views/pages/Category.vue';
 import Product from '@/views/pages/Product.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
-import ThankYou from '@/views/pages/ThankYou.vue'
+import ThankYou from '@/views/pages/ThankYou.vue';
 
 // pinia
 import { useUserStore } from '@/store/userStore';
@@ -115,6 +116,10 @@ const routes = [
             {
                 path: 'discounts',
                 component: DiscountTable,
+            },
+            {
+                path: 'price-management',
+                component: PriceManagement,
             },
         ],
     },

@@ -27,9 +27,12 @@ export default {
             }
 
             if (icon === 'discounts') {
-                this.$router.push('/admin/discounts');                         
+                this.$router.push('/admin/discounts');
             }
 
+            if (icon === 'priceManagement') {
+                this.$router.push('/admin/price-management');
+            }
 
             if (icon === 'home') {
                 this.$router.push('/');
@@ -92,9 +95,8 @@ export default {
         />
 
         <Button
-            class="block mx-auto mt-7 mb-3 flex align-items-center"
-            severity="secondary"
-            icon="pi pi-user"
+            class="block mx-auto mt-7 mb-3 flex align-items-center bg-blue-500"
+            icon="pi pi-users"
             v-tooltip="'Korisnici'"
             @click="handleSidebarIconClick('users')"
             rounded
@@ -103,9 +105,17 @@ export default {
         <Button
             class="block mx-auto mb-3 flex align-items-center"
             severity="success"
-            icon="pi pi-wallet"
+            icon="pi pi-percentage"
             v-tooltip="'Tipovi rabata'"
             @click="handleSidebarIconClick('discounts')"
+            rounded
+        />
+
+        <Button
+            class="block mx-auto mb-3 flex align-items-center bg-orange-400 border-orange-400"
+            icon="pi pi-euro"
+            v-tooltip="'Upravljanje cijenama'"
+            @click="handleSidebarIconClick('priceManagement')"
             rounded
         />
 
