@@ -1,7 +1,4 @@
 <script>
-// vue-router
-import router from '@/router';
-
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -23,7 +20,7 @@ export default {
     },
     methods: {
         handleForgotPasswordClick() {
-            router.push('/forgot');
+            this.$router.push('/auth/forgot-password');
         },
         login() {
             userService
@@ -70,12 +67,10 @@ export default {
 </script>
 
 <template>
-    <div
-        class="login-screen flex flex-column justify-content-center mx-auto w-10 sm:w-7 md:w-4 lg:w-3"
-    >
+    <section>
         <img
-            src="images/as-logo.png"
-            class="logo mx-auto mb-6"
+            src="/images/as-logo.png"
+            class="block mx-auto mb-6"
             style="height: 48px"
         />
 
@@ -103,18 +98,8 @@ export default {
             <Button
                 @click="login()"
                 label="Prijavi se"
-                class="button--submit"
+                style="background-color: #123649; border: none"
             />
         </div>
-    </div>
+    </section>
 </template>
-
-<style scoped>
-.login-screen {
-    height: 70vh;
-}
-.button--submit {
-    background-color: #123649;
-    border: none;
-}
-</style>

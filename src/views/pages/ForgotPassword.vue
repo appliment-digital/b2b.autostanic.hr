@@ -1,6 +1,5 @@
 <script>
-import router from '@/router';
-import UserService from '../../service/UserService.js';
+import UserService from '@/service/UserService.js';
 
 const userService = new UserService();
 export default {
@@ -10,7 +9,7 @@ export default {
         };
     },
     methods: {
-        forgotPassword() {
+        handleSendResetEmailClick() {
             userService
                 .forgotPassword({ email: this.email })
                 .then((response) => {
@@ -29,7 +28,7 @@ export default {
                             detail: response.data.message,
                             life: 3000,
                         });
-                        router.push('/reset');
+                        this.$router.push('/auth/reset-password');
                     }
                 })
                 .catch((response) => {
@@ -46,28 +45,28 @@ export default {
 </script>
 
 <template>
-    <div class="flex flex-column sm:w-4 mx-auto">
+    <section>
         <h2>Resetiranje lozinke</h2>
         <p>
             Molim vas unesite svoju e-mail adresu kako bi vam poslali
             verifikacijski kod za ponovno postavljenje lozinke.
         </p>
 
-        <div class="mt-6 flex justify-content-between align-items-center">
+        <div class="mt-6 flex justify-content-between align-items-center column-gap-3">
             <InputText
-                class="login-input w-8"
+                class="w-full"
                 type="text"
                 v-model="email"
                 placeholder="email"
             />
 
             <Button
-                @click="forgotPassword()"
+                class="w-7rem"
                 label="Pošalji"
-                class="login-button"
+                @click="handleSendResetEmailClick()"
             />
         </div>
-    </div>
+    </section>
 </template>
 
 <style scoped></style>

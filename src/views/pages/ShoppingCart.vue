@@ -1,4 +1,10 @@
 <script>
+// lib
+import slug from 'slug';
+
+// utils
+import { setSlugCharMap } from '@/utils';
+
 // components
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
@@ -7,6 +13,10 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { mapStores } from 'pinia';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
+import { useResultsStore } from '@/store/resultsStore.js';
+
+// modify slug library (add croatian chars)
+setSlugCharMap(slug);
 
 export default {
     components: {
@@ -15,36 +25,47 @@ export default {
     },
     data() {
         return {
-            tableTotal: {},
+            selectedProduct: null,
         };
     },
     computed: {
-        ...mapStores(useShoppingCartStore, useBreadcrumbsStore),
+        ...mapStores(
+            useShoppingCartStore,
+            useBreadcrumbsStore,
+            useResultsStore,
+        ),
+
+        order() {
+            return [
+                {
+                    name: 'Ukupno',
+                    value: this.shoppingCartStore.totalWithoutFees,
+                },
+                {
+                    name: 'Rabat',
+                    value: this.shoppingCartStore.fees.delivery,
+                },
+                { name: 'Porez', value: this.shoppingCartStore.fees.tax },
+                {
+                    name: 'Sveukupno',
+                    value: this.shoppingCartStore.totalWithFees,
+                },
+            ];
+        },
 
         shoppingCartProducts() {
             if (this.shoppingCartStore.cart.length) {
-                // console.log(this.shoppingCartStore.cart);
+                console.log(this.shoppingCartStore.cart);
                 return this.shoppingCartStore.cart;
             } else {
                 return [];
             }
         },
-
-        tableTotal() {
-            return [
-                {
-                    currentTotal: this.shoppingCartStore.total,
-                    delivery: 10,
-                    tax: 25,
-                    afterTotalsl: 123123,
-                },
-            ];
-        },
     },
 
     methods: {
         calcPrice(price, quantity) {
-            return Number(quantity * price).toFixed(2);
+            return `${Number(quantity * price).toFixed(2)}`;
         },
 
         handleNewProductQuantity(product) {
@@ -58,43 +79,50 @@ export default {
         },
 
         handleFinishOrderClick() {
-            this.$router.push('/hvala')
+            this.$router.push('/hvala');
         },
+
+        handleProductTableItemClick(product) {
+            const productSlug = slug(product.name, { lower: true });
+            this.resultsStore.addCurrentProduct(product);
+            this.$router.push(`/${productSlug}`);
+        }
     },
 };
 </script>
 
 <template>
-    <Header />
-
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs :crumbs="this.breadcrumbsStore.current" />
-        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
-    <div class="grid grid-nogutter justify-content-between column-gap-3">
-        <div class="col-12">
-            <div class="card mb-0">
+    <div class="grid justify-content-between">
+        <div class="col">
+            <div class="card p-5 mb-0">
                 <DataTable
                     v-if="shoppingCartProducts.length"
                     :value="shoppingCartProducts"
-                    tableStyle="min-width: 50rem"
                 >
                     <Column field="image" header="Slika">
                         <template #body="{ data }">
                             <img
                                 :src="data.picture_urls[0]"
-                                class="table-image border-round"
+                                class="table-image border-round cursor-pointer"
+                                @click="handleProductTableItemClick(data)"
                             />
                         </template>
                     </Column>
 
-                    <Column field="name" header="Proizvod"> </Column>
+                    <Column field="name" header="Proizvod">
+                        <template #body="{ data }">
+                            <span
+                                class="cursor-pointer"
+                                @click="handleProductTableItemClick(data)"
+                            >{{ data.name }}</span>
+                        </template>
+                     </Column>
 
-                    <Column field="price" header="Cijena">
+                    <Column
+                        field="price"
+                        header="Cijena"
+                        style="min-width: 110px"
+                    >
                         <template #body="{ data }">
                             <span
                                 >{{
@@ -123,7 +151,7 @@ export default {
                         <template #body="{ data }">
                             <Button
                                 class="button--no-shadow"
-                                icon="pi pi-times"
+                                icon="pi pi-trash"
                                 outlined
                                 severity="info"
                                 @click="handleDeleteProduct(data)"
@@ -136,44 +164,28 @@ export default {
             </div>
         </div>
 
-        <div v-if="shoppingCartProducts.length" class="col mt-3">
-            <div class="card">
-                <DataTable :value="tableTotal">
-                    <Column field="currentTotal" header="Ukupno">
-                        <template #body="{ data }">
-                            <span>{{ data.currentTotal }} €</span>
-                        </template>
-                    </Column>
-                    <Column header="Dostava"> 
-                        <template #body="{ data }">
-                            <span>{{ data.delivery }} €</span>
-                        </template>
-                    </Column>
-                    <Column header="Porez"> 
-                        <template #body="{ data }">
-                            <span>{{ data.tax }} €</span>
-                        </template>
-                    </Column>
-                    <Column header="Sveukupno"> 
-                        <template #body="{ data }">
-                            <span>{{ data.currentTotal }} €</span>
-                        </template>
-                    </Column>
-                    <Column header="Akcije" style="width: 200px;"> 
-                        <template #body>
-                            <Button
-                                class="button--no-shadow w-full"
-                                label="Završi narudžbu"
-                                outlined
-                                severity="info"
-                                @click="handleFinishOrderClick"
-                            />
-
-                        </template>
-                    </Column>
-                </DataTable>
+        <div v-if="shoppingCartProducts.length" class="col-12 lg:col-3">
+            <div class="card p-5">
+                <div class="max-w-24rem mx-auto">
+                    <DataTable :value="order" >
+                        <Column header="Ukupna narudžba">
+                            <template #body="{ data }">
+                                <div class="order-column">
+                                    <span>{{ data.name }}</span>
+                                    <span class="text-right">{{ data.value }} €</span>
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                    <Button
+                        class="button--no-shadow w-full mt-3"
+                        label="Završi narudžbu"
+                        outlined
+                        severity="info"
+                        @click="handleFinishOrderClick"
+                    />
+                </div>
             </div>
-            
         </div>
     </div>
 </template>
@@ -191,5 +203,9 @@ export default {
 
 .button--small .p-button-icon {
     font-size: 8px;
+}
+.order-column {
+    display: flex;
+    justify-content: space-between;
 }
 </style>

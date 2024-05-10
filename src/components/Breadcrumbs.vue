@@ -1,15 +1,19 @@
 <script>
+// lib
+import slug from 'slug';
+
 // utils
-import { makeBreadcrumb } from '@/utils';
+import { makeBreadcrumb, setSlugCharMap, capitalizeFirstLetter } from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
+import { useResultsStore } from '@/store/resultsStore.js';
+
+setSlugCharMap(slug);
 
 export default {
-    props: ['crumbs'],
-    components: {},
     data() {
         return {
             home: {
@@ -20,28 +24,95 @@ export default {
         };
     },
     watch: {
-        '$route.path': function (newPath, oldPath) {
-            // console.log({newPath, oldPath});
+        '$route.path': function (newPath) {
+            if (this.isShoppingCartPageMounted) {
+                const shoppingCartRoute = this.items.find(
+                    (entry) => entry.route === '/košarica',
+                );
+                console.log(this.items);
 
-            this.makeBreadcrumbs(newPath);
+                if (!shoppingCartRoute) {
+                    return this.items.push({
+                        icon: 'pi pi-shopping-cart',
+                        route: '/košarica',
+                    });
+                }
 
-            // console.log('this.items', this.items);
+                console.log(this.items);
+            } else if (this.isProductPageMounted) {
+                const shoppingCartRoute = this.items.find(
+                    (entry) => entry.route === '/košarica',
+                );
 
-            this.breadcrumbsStore.set(this.items);
+                if (shoppingCartRoute) {
+                    this.items.pop();
+                }
+
+                const product = decodeURIComponent(this.$route.path.slice(1));
+                const pbh = this.breadcrumbsStore.productBreadcrumbsHistory;
+
+                if (pbh && pbh[product]) {
+                    return (this.items = pbh[product]);
+                }
+
+                this.items.push({
+                    label: capitalizeFirstLetter(
+                        this.resultsStore.product.name,
+                    ),
+                    route: `/${slug(this.resultsStore.product.name)}`,
+                });
+
+                this.breadcrumbsStore.addProductBreadcrumbsHistory(
+                    product,
+                    this.items,
+                );
+            } else {
+                this.makeBreadcrumbs(newPath);
+            }
         },
     },
     computed: {
-        ...mapStores(useCategoryStore, useBreadcrumbsStore),
+        ...mapStores(useCategoryStore, useBreadcrumbsStore, useResultsStore),
+        isProductPageMounted() {
+            if (this.$route.path === '/') return false;
+
+            const urlPartsMap = Object.fromEntries(
+                this.$route.path
+                    .split('/')
+                    .slice(1)
+                    .map((key) => [key, true]),
+            );
+
+            return this.categoryStore.mainCategories.every(
+                (category) => !urlPartsMap[slug(category.name)],
+            );
+        },
+        isShoppingCartPageMounted() {
+            if (decodeURI(this.$route.path) === '/košarica') return true;
+        },
     },
     mounted() {
-        // const previousUrl = window.history.state.back;
+        if (this.isShoppingCartPageMounted) {
+            if (!this.items.length) {
+                this.home = {
+                    label: 'Košarica',
+                    icon: 'pi pi-shopping-cart',
+                    route: '/košarica',
+                };
+            }
+            return;
+        }
 
-        // if (!previousUrl) return;
+        if (this.isProductPageMounted) {
+            const product = decodeURIComponent(this.$route.path.slice(1));
+            const pbh = this.breadcrumbsStore.productBreadcrumbsHistory;
+
+            if (pbh && pbh[product]) {
+                return (this.items = pbh[product]);
+            }
+        }
 
         this.makeBreadcrumbs(this.$route.fullPath);
-
-        // console.log('breadcrumbs --> items:', this.items);
-
     },
     methods: {
         makeBreadcrumbs(path) {
@@ -58,18 +129,21 @@ export default {
                     route: `${url}`,
                 };
             });
+        },
 
-            if (this.crumbs) {
-                this.items = [...this.crumbs, this.items[this.items.length - 1]];
-                return;
-            }
+        handleNavigate(e, navigate, item) {
+            e.preventDefault();
+
+            if (item.route === '/košarica') return;
+
+            navigate();
         },
     },
 };
 </script>
 
 <template>
-    <Breadcrumb :home="home" false :model="items">
+    <Breadcrumb :home="home" :model="items">
         <template #item="{ item, props }">
             <RouterLink
                 v-if="item.route"
@@ -77,9 +151,13 @@ export default {
                 :to="item.route"
                 custom
             >
-                <a :href="href" v-bind="props.action" @click="navigate">
+                <a
+                    :href="href"
+                    v-bind="props.action"
+                    @click="handleNavigate($event, navigate, item)"
+                >
                     <span :class="[item.icon, 'text-800']" />
-                    <span class="text-800">{{ item.label }}</span>
+                    <span :class="item.label === 'Košarica' && 'ml-2'" class="text-800">{{ item.label }}</span>
                 </a>
             </RouterLink>
             <a

@@ -65,9 +65,10 @@ export default {
 </script>
 
 <template>
-    <h2 class="text-center">Postavi lozinku</h2>
+    <!-- <div class="flex flex-column sm:w-3 mx-auto"> -->
 
-    <div class="flex flex-column sm:w-3 mx-auto">
+    <section>
+        <h2 class="text-center">Postavi lozinku</h2>
         <div class="mt-6">
             <label>E-mail<span class="text-red-500">*</span></label>
             <InputText v-model="email" class="w-full mt-2 mb-3" />
@@ -105,7 +106,7 @@ export default {
                 @click="resetPassword()"
             />
         </div>
-    </div>
+    </section>
 </template>
 
 <style scoped></style>

@@ -7,11 +7,14 @@ import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
-import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
+import { useUIStore } from '@/store/UIStore.js';
 
 // components
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+
+// services
+import ProductService from '@/service/ProductService';
 
 export default {
     components: {
@@ -20,29 +23,14 @@ export default {
     },
     data() {
         return {
-            breadcrumbs: {
-                home: {
-                    icon: 'pi pi-home',
-                    route: '/',
-                },
-                items: [],
-            },
-
-            tabMenuItems: [
-                { label: 'secondary 1', icon: 'pi pi-home' },
-                { label: 'Informacije 2', icon: 'pi pi-chart-line' },
-                { label: 'Informacije 3', icon: 'pi pi-list' },
-            ],
+            productDetails: {},
+            featuredImage: null,
 
             itemQuantity: '1',
 
-            inquiry: {
-                product: 'Product 1',
-                isSending: false, // toggle <Dialog />
-                name: 'Hello',
-                lastName: 'Test',
-                text: '',
-            },
+            productThumbnails: [1, 2, 3],
+
+            displayBasic: false,
         };
     },
     watch: {
@@ -57,33 +45,38 @@ export default {
             useUserStore,
             useResultsStore,
             useShoppingCartStore,
-            useBreadcrumbsStore,
+            useUIStore,
         ),
-
-        productName() {
-            return capitalizeFirstLetter(this.resultsStore.product.name);
-        },
-
-        productShortDescription() {
-            // console.log(this.resultsStore.product.shortDescription);
-            return capitalizeFirstLetter(
-                this.resultsStore.product.shortDescription,
-            );
-        },
     },
     mounted() {
-        console.log(this.resultsStore.product);
+        const productSlug = decodeURIComponent(this.$route.path.slice(1));
 
-    },
-    updated() {
-        const [name, lastName] = this.userStore.fullName.split(' ');
+        const productHistoryData =
+            this.resultsStore.getProductFromHistory(productSlug)();
 
-        this.inquiry.name = name;
-        this.inquiry.lastName = lastName;
+        if (productHistoryData) {
+            this.productDetails = productHistoryData;
+        } else {
+            this.productDetails = this.resultsStore.product;
+        }
+
+        this.featuredImage = this.productDetails.picture_urls[0];
+        console.log({ featuredImage: this.featuredImage });
+
+        console.log('product mounted', { productDetails: this.productDetails });
+
+        // get the additional product pictures
+        ProductService.getProductPictures(this.resultsStore.product.id)
+            .then((response) => {
+                if (response.data && response.data.length) {
+                    this.productThumbnails = response.data;
+                }
+            })
+            .catch((err) => console.err(err));
     },
     methods: {
         handleSendInquiry() {
-            this.inquiry.isSending = true;
+            this.openCRMForm();
         },
 
         handleAddProdcutToShoppingCart(product) {
@@ -95,56 +88,72 @@ export default {
         formatProductPrice(val) {
             return formatPrice(val);
         },
+
+        openCRMForm() {
+            window.open(
+                'https://b24-t1zfqc.bitrix24.site/crm_form_vks6q',
+                '_blank',
+            );
+        },
     },
 };
 </script>
 
 <template>
-    <Header />
-
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs :crumbs="this.breadcrumbsStore.current" />
-        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
-    <!-- Prodcut: Image & Description -->
+    <!-- Product: Image & Description -->
     <div class="grid column-gap-6 justify-content-between">
         <div class="col-12 h-20rem md:col-5 md:h-auto">
-            <div class="bg-white p-8 border-round border-1 border-100">
-                <img
-                    :src="this.resultsStore.product.picture_urls[0]"
-                    class="image--product"
+            <!-- Feature Image -->
+            <div class="border-1 border-200 p-6 flex justify-content-center">
+                <Image
+                    style="object-fit: cover"
+                    :src="featuredImage"
+                    alt="Image"
+                    width="250"
+                    preview
+                />
+            </div>
+
+            <!-- Thumbnails -->
+            <div class="flex mt-2 overflow-x-scroll">
+                <Image
+                    class="block border-1 border-100 mr-2"
+                    style="
+                        width: 64px;
+                        height: 64px;
+                        object-fit: cover;
+                        max-width: 100%;
+                    "
+                    v-for="thumbnail in productThumbnails"
+                    :src="thumbnail.url"
+                    preview
+                    width="64"
                 />
             </div>
         </div>
 
         <div class="col">
-            <h2 class="mt-4 md:mt-0">{{ productName }}</h2>
+            <h2 class="mt-4 md:mt-0">{{ productDetails.name }}</h2>
             <span class="font-bold"
                 >SKU:
-                <span class="font-normal">{{
-                    this.resultsStore.product.sku
-                }}</span></span
+                <span class="font-normal">{{ productDetails.sku }}</span></span
             >
 
             <hr />
 
-            <p class="mt-3" v-html="productShortDescription" />
-            <p class="mt-3" v-html="pro" />
+            <p class="mt-3" v-html="productDetails.shortDescription" />
+            <p class="mt-3" v-html="productDetails.fullDescription" />
 
             <!-- Stock -->
             <span class="block mt-5"
                 ><span
                     class="font-bold"
                     :class="
-                        this.resultsStore.product.stockQuantity == 0
+                        productDetails.stockQuantity == 0
                             ? 'text-red-500'
                             : 'text-green-500'
                     "
-                    >{{ this.resultsStore.product.stockQuantity }}</span
+                    >{{ productDetails.stockQuantity }}</span
                 >
                 na stanju.</span
             >
@@ -171,7 +180,7 @@ export default {
 
             <!-- Price -->
             <!-- Buttons -->
-            <Toolbar class="mt-4 bg-white">
+            <Toolbar class="mt-4 bg-white-alpha-30">
                 <template #start>
                     <Button
                         class="button--no-shadow mr-1"
@@ -203,9 +212,7 @@ export default {
                             label="Dodaj u košaricu"
                             severity="primary"
                             outlined
-                            :disabled="
-                                this.resultsStore.product.stockQuantity == 0
-                            "
+                            :disabled="productDetails.stockQuantity == 0"
                             @click="
                                 handleAddProdcutToShoppingCart(
                                     resultsStore.product,
@@ -228,62 +235,120 @@ export default {
     <!-- Tab Menu -->
     <div class="mt-6 grid column-gap-6">
         <div class="col">
-            <TabMenu :model="tabMenuItems" />
+            <TabView
+                style="max-width: 600px"
+                :pt="{
+                    panelContainer: {
+                        style: 'background-color: transparent',
+                    },
+                    nav: {
+                        style: 'background-color: transparent',
+                    },
+                }"
+            >
+                <TabPanel
+                    header="Dodatne informacije"
+                    :pt="{
+                        headerAction: {
+                            style: 'background-color: transparent',
+                        },
+                    }"
+                >
+                    <div class="flex justify-content-between">
+                        <span class="uppercase">Proizvođač</span>
+                        <!-- <span class="uppercase">{{
+                        console.log(productDetails)
+                    }}</span> -->
+                        <span class="uppercase">{{
+                            productDetails.manufacturerName
+                        }}</span>
+                    </div>
+                </TabPanel>
+                <TabPanel
+                    header="Garancija"
+                    :pt="{
+                        headerAction: {
+                            style: 'background-color: transparent',
+                        },
+                    }"
+                >
+                    <ul>
+                        <li class="mb-2">Nova roba 12-36 mjeseci</li>
+                        <li>Rabljena roba 1-6 mjeseci</li>
+                    </ul>
+
+                    <p class="mt-5">
+                        Svi proizvođači NOVIH auto dijelova garantiraju da su
+                        njihovi proizvodi bez nedostataka u materijalu i izradi,
+                        te da su testirani prije stavljanja u prodaju.
+                    </p>
+                    <p>
+                        Garancija se daje krajnjem korisniku i odnosi se na
+                        proizvode koji su kupljeni, instalirani i korišteni u
+                        svrhe za koje su prvobitno dizajnirani. Garancija
+                        prokriva nedostatke nastale u uobičajenoj uporabi i ne
+                        pokriva neispravnost ili kvarove uslijed zloupotrebe,
+                        zanemarivanja, nepravilne instalacije ili kvarova kod
+                        održavanja.
+                    </p>
+                    <p>
+                        Tijekom garancijskog razdoblja, proizvođač će ili
+                        popraviti ili zamjenitit bez naknade proizvod koji je
+                        neispravan u materijalu ili izradi.
+                    </p>
+                </TabPanel>
+            </TabView>
         </div>
     </div>
 
-    <Dialog
-        modal
-        closeOnEscape
-        dismissableMask
-        :closable="false"
-        :visible="inquiry.isSending"
-        @update:visible="inquiry.isSending = false"
-        class="w-30rem"
-    >
-        <template #header>
-            <h2 class="text-center w-full pt-4">Pošalji upit</h2>
-        </template>
+    <!-- <Dialog
+    modal
+    closeOnEscape
+    dismissableMask
+    :closable="false"
+    :visible="inquiry.isSending"
+    @update:visible="inquiry.isSending = false"
+    class="w-30rem"
+>
+    <template #header>
+        <h2 class="text-center w-full pt-4">Pošalji upit</h2>
+    </template>
 
-        <!-- Dialog Input: Subject -->
-        <label>Proizvod</label>
-        <InputText
-            v-model="inquiry.product"
-            class="w-full mt-2 mb-3"
-            disabled
+    <label>Proizvod</label>
+    <InputText
+        v-model="inquiry.product"
+        class="w-full mt-2 mb-3"
+        disabled
+    />
+
+    <label>Ime</label>
+    <InputText v-model="inquiry.name" class="w-full mt-2 mb-3" disabled />
+
+    <label>Prezime</label>
+    <InputText
+        v-model="inquiry.lastName"
+        class="w-full mt-2 mb-3"
+        disabled
+    />
+
+    <label>Upit</label>
+    <Textarea v-model="inquiry.text" rows="7" class="w-full mt-2 mb-6" />
+
+    <div class="flex justify-content-end gap-2">
+        <Button
+            type="button"
+            label="Odustani"
+            severity="danger"
+            @click="inquiry.isSending = false"
         />
-
-        <!-- Dialog Input: Name -->
-        <label>Ime</label>
-        <InputText v-model="inquiry.name" class="w-full mt-2 mb-3" disabled />
-
-        <!-- Dialog Input: Last Name -->
-        <label>Prezime</label>
-        <InputText
-            v-model="inquiry.lastName"
-            class="w-full mt-2 mb-3"
-            disabled
+        <Button
+            type="button"
+            label="Pošalji"
+            severity="success"
+            @click="inquiry.isSending = false"
         />
-
-        <!-- Dialog Input: Text -->
-        <label>Upit</label>
-        <Textarea v-model="inquiry.text" rows="7" class="w-full mt-2 mb-6" />
-
-        <div class="flex justify-content-end gap-2">
-            <Button
-                type="button"
-                label="Odustani"
-                severity="danger"
-                @click="inquiry.isSending = false"
-            />
-            <Button
-                type="button"
-                label="Pošalji"
-                severity="success"
-                @click="inquiry.isSending = false"
-            />
-        </div>
-    </Dialog>
+    </div>
+</Dialog> -->
 </template>
 
 <style scoped>

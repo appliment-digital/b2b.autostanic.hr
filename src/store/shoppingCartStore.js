@@ -4,11 +4,23 @@ const calcTotal = (items) => {
     return items.reduce((total, item) => total + +item.price, 0);
 };
 
+// TODO: implement FeeService.js to get values
+const DELIVERY = 10000;
+const TAX = 10;
+
 export const useShoppingCartStore = defineStore('shoppingCart', {
     state: () => {
         return {
             shoppingCart:
                 JSON.parse(localStorage.getItem('shopping-cart')) || [],
+
+            currentTotalWithoutFees: 0,
+            currentTotalWithFees: 0,
+
+            feeGroup: {
+                delivery: DELIVERY,
+                tax: TAX,
+            },
         };
     },
     getters: {
@@ -19,17 +31,31 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
                 return JSON.parse(localStorage.getItem('shopping-cart'));
             }
         },
-        total: (state) => {
+        totalWithoutFees: (state) => {
             const items = state.shoppingCart.length
                 ? state.shoppingCart
                 : JSON.parse(localStorage.getItem('shopping-cart'));
 
-                const total = items.reduce((total, item) => {
-                total += Number(item.price * item.quantity)
+            const total = items.reduce((total, item) => {
+                total += Number(item.price * item.quantity);
                 return total;
-            }, 0)
+            }, 0);
+
+            state.currentTotalWithoutFees = total;
 
             return total.toFixed(2);
+        },
+
+        totalWithFees: (state) => {
+            if (state.currentTotalWithoutFees) {
+                return (state.currentTotalWithoutFees + DELIVERY + TAX).toFixed(2);
+            }
+        },
+
+        fees: (state) => {
+            if (state.feeGroup) {
+                return state.feeGroup;
+            }
         },
     },
     actions: {

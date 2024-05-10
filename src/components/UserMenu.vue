@@ -1,7 +1,4 @@
 <script>
-// vue-router
-import router from '@/router';
-
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -26,7 +23,7 @@ export default {
 
         logout() {
             userService.logout().then((response) => {
-                this.$router.push('/login');
+                this.$router.push('/auth/login');
             });
             this.userStore.logout();
         },

@@ -1,10 +1,22 @@
+// lib
 import { defineStore } from 'pinia';
+import slug from 'slug';
+
+// utils
+import { setSlugCharMap, session } from '@/utils';
+
+setSlugCharMap(slug);
 
 export const useResultsStore = defineStore('results', {
     state: () => {
         return {
             currentResults: [],
-            currentProduct: null,
+
+            store: {
+                product: session.load('results-store')?.product || null,
+                productHistory:
+                    session.load('results-store')?.productHistory || {},
+            },
         };
     },
     getters: {
@@ -16,10 +28,15 @@ export const useResultsStore = defineStore('results', {
             }
         },
         product: (state) => {
-            if (state.currentProduct) {
-                return state.currentProduct;
+            if (state.store.product) {
+                return state.store.product;
             } else {
-                return JSON.parse(sessionStorage.getItem('current-product'));
+                return session.load('results-store')?.product || null;
+            }
+        },
+        getProductFromHistory: (state) => (productSlug) => () => {
+            if (state.store.productHistory[productSlug]) {
+                return state.store.productHistory[productSlug];
             }
         },
     },
@@ -28,13 +45,14 @@ export const useResultsStore = defineStore('results', {
             this.currentResults = results;
             // console.log('adding results',{results});
 
-            sessionStorage.setItem('search-results', JSON.stringify(results)); 
+            sessionStorage.setItem('search-results', JSON.stringify(results));
         },
-        addCurrentProduct(product) {
-            // console.log('adding current product to the store', {product});
-            this.currentProduct = product;
+        setProduct(product) {
+            console.log('adding current product to the store', { product });
+            this.store.product = product;
+            this.store.productHistory[slug(product.name)] = product;
 
-            sessionStorage.setItem('current-product', JSON.stringify(product)); 
-        }
+            session.save('results-store', this.store);
+        },
     },
 });

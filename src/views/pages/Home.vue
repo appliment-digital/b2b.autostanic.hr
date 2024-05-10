@@ -1,19 +1,25 @@
 <script>
+import slug from 'slug';
+
 // utils
 import {
-    makeUrl,
+    setSlugCharMap,
     shortenCarAcousticsAndElectronicsCategoryName,
+
 } from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
 import { useCategoryStore } from '@/store/categoryStore.js';
+import { useUIStore } from '@/store/UIStore.js';
 
 // components
 import Header from '@/components/Header.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
+
+setSlugCharMap(slug)
 
 export default {
     components: {
@@ -22,44 +28,48 @@ export default {
     data() {
         return {
             categories: null,
-            isDataLoading: true,
         };
     },
-    beforeMount() {
-        CategoryService.getMainCategories()
-            .then((response) => {
-                if (response.data.length) {
-                    this.setIsDataLoading(false);
-
-                    this.categories = response.data;
-
-                    // update category name to be shorter for better UX
-                    this.categories.forEach(
-                        shortenCarAcousticsAndElectronicsCategoryName,
-                    );
-
-                    console.log(this.categories);
-                }
-            })
-            .catch((err) => console.error(err));
-    },
     computed: {
-        ...mapStores(useCategoryStore),
+        ...mapStores(useCategoryStore, useUIStore),
+    },
+    mounted() {
+        this.loadMainCategories();
     },
     methods: {
-        setIsDataLoading(val) {
-            this.isDataLoading = val;
+        loadMainCategories() {
+            this.UIStore.setIsDataLoading(true);
+
+            CategoryService.getMainCategories()
+                .then((response) => {
+                    if (response.data.length) {
+                        this.UIStore.setIsDataLoading(false);
+
+                        this.categories = response.data;
+                        this.categoryStore.addMainCategories(response.data)
+
+                        // update category name to be shorter for better UX
+                        this.categories.forEach(
+                            shortenCarAcousticsAndElectronicsCategoryName,
+                        );
+                    }
+                })
+                .catch((err) => console.error(err));
         },
 
         handleCategoryClick(category) {
             this.categoryStore.addHistory(category);
-            console.log({ category });
 
             this.$router.push({
-                path: `/${makeUrl(category.name)}`,
+                path: `/${slug(category.name)}`,
             });
         },
-        goToCrmForm() {
+
+        handleNewsCardClick(link) {
+            window.open(link, '_blank');
+        },
+
+        openCRMForm() {
             window.open(
                 'https://b24-t1zfqc.bitrix24.site/crm_form_vks6q',
                 '_blank',
@@ -70,8 +80,6 @@ export default {
 </script>
 
 <template>
-    <Header />
-
     <!-- Home Page: Banner -->
     <div
         class="banner mt-3 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
@@ -166,7 +174,7 @@ export default {
                 class="grid justify-content-center row-gap-1 column-gap-1 px-2 align-items-start"
             >
                 <!-- prettier-ignore -->
-                <ProgressSpinner v-if="isDataLoading" class="mx-auto" strokeWidth="2"/>
+                <ProgressSpinner v-if="UIStore.isDataLoading" class="mx-auto" strokeWidth="2"/>
                 <div
                     v-else
                     v-for="category in categories"
@@ -205,46 +213,61 @@ export default {
         >
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="overflow: hidden"
+                    style="height: 440px"
                     class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    @click="
+                        handleNewsCardClick(
+                            'https://www.autostanic.hr/blog/sto-su-run-flat-gume',
+                        )
+                    "
                 >
                     <template #header>
-                        <img
-                            src="https://source.unsplash.com/random/?Car&1"
-                            class="img--placeholder"
-                        />
+                        <div class="p-4">
+                            <img
+                                src="https://www.autostanic.hr/Content/Images/uploaded/test/run flat gume.jpeg"
+                                class="h-10rem w-full border-round"
+                                style="object-fit: cover"
+                            />
+                        </div>
                     </template>
-                    <template #title>News 1</template>
+                    <template #title><span class="h-2rem">Prednosti i mane run flat guma</span></template>
                     <template #content>
                         <p>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Fuga earum harum non reiciendis ipsum!
-                            Voluptate quibusdam molestias consectetur odit
-                            dolorum earum, esse nemo inventore neque corporis ea
-                            voluptas dolorem culpa!
+                            Run flat gume su gume na kojima nakon probijanja ili
+                            puknuća možete nastaviti voziti kako bi mogli stići
+                            do vulkanizera ili pronaći sigurno, ravno mjesto za
+                            promjenu gume bez da oštetite felge.
                         </p>
                     </template>
                 </Card>
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="overflow: hidden"
+                    style="height: 440px"
                     class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    @click="
+                        handleNewsCardClick(
+                            'https://www.autostanic.hr/blog/simptomi-kvara-kvacila',
+                        )
+                    "
                 >
                     <template #header>
-                        <img
-                            src="https://source.unsplash.com/random/?Car&2"
-                            class="img--placeholder"
-                        />
+                        <div class="p-4">
+                            <img
+                            src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
+                                class="h-10rem w-full border-round"
+                                style="object-fit: cover"
+                            />
+                        </div>
                     </template>
-                    <template #title>News 2</template>
+                    <template #title>5 Simptoma Kvara Kvačila</template>
                     <template #content>
                         <p>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Fuga earum harum non reiciendis ipsum!
-                            Voluptate quibusdam molestias consectetur odit
-                            dolorum earum, esse nemo inventore neque corporis ea
-                            voluptas dolorem culpa!
+                            Na našem području još uvijek ima više automobila s
+                            ručnim mjenjačem nego s automatskim. Ipak, u novije
+                            vrijeme sve je više automobila s automatskim
+                            mjenjačem, a neki proizvođači polako ukidaju ručne
+                            mjenjače.
                         </p>
                     </template>
                     hello
@@ -252,23 +275,31 @@ export default {
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="overflow: hidden"
+                    style="height: 440px"
                     class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    @click="
+                        handleNewsCardClick(
+                            'https://www.autostanic.hr/blog/simptomi-kvara-dsg-mjenjaca',
+                        )
+                    "
                 >
                     <template #header>
-                        <img
-                            src="https://source.unsplash.com/random/?Car&3"
-                            class="img--placeholder"
-                        />
+                        <div class="p-4">
+                            <img
+                            src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
+                                class="h-10rem w-full border-round"
+                                style="object-fit: cover"
+                            />
+                        </div>
                     </template>
-                    <template #title>News 3</template>
+                    <template #title>4 Simptoma Kvara DSG Mjenjača</template>
                     <template #content>
                         <p>
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Fuga earum harum non reiciendis ipsum!
-                            Voluptate quibusdam molestias consectetur odit
-                            dolorum earum, esse nemo inventore neque corporis ea
-                            voluptas dolorem culpa!
+                            Tipični automatski mjenjači nemaju papučicu spojke
+                            kao automobil s ručnim mjenjačem. Umjesto toga, oni
+                            koriste uređaj koji se zove pretvarač okretnog
+                            momenta. U nastavku ćemo objasniti što je DSG,
+                            kako radi.
                         </p>
                     </template>
                 </Card>
@@ -325,7 +356,7 @@ export default {
                             icon="pi pi-envelope"
                             label="Pošalji upit"
                             class="button--submit block w-full"
-                            @click="goToCrmForm()"
+                            @click="openCRMForm()"
                         />
                     </div>
                 </div>
@@ -350,13 +381,6 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-}
-
-.img--placeholder {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
 }
 
 .img--banner {

@@ -51,11 +51,20 @@ export const formatPrice = (number) => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
-}
+};
 
 export const formatNumber = (number) => {
     return Number(number).toLocaleString('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });
-}
+};
+
+export const session = {
+    save: (key, data) => {
+        sessionStorage.setItem(key, JSON.stringify(data));
+    },
+    load: (key) => {
+        return JSON.parse(sessionStorage.getItem(key));
+    },
+};
