@@ -26,46 +26,41 @@ export default {
     watch: {
         '$route.path': function (newPath) {
             if (this.isShoppingCartPageMounted) {
-                const shoppingCartRoute = this.items.find(
-                    (entry) => entry.route === '/košarica',
+                this.items.push({
+                    icon: 'pi pi-shopping-cart',
+                    route: '/košarica',
+                });
+
+                this.breadcrumbsStore.addShoppingCartBreadcrumbsHistory(
+                    this.items,
                 );
-                console.log(this.items);
-
-                if (!shoppingCartRoute) {
-                    return this.items.push({
-                        icon: 'pi pi-shopping-cart',
-                        route: '/košarica',
-                    });
-                }
-
-                console.log(this.items);
             } else if (this.isProductPageMounted) {
-                const shoppingCartRoute = this.items.find(
-                    (entry) => entry.route === '/košarica',
-                );
-
-                if (shoppingCartRoute) {
-                    this.items.pop();
-                }
-
                 const product = decodeURIComponent(this.$route.path.slice(1));
                 const pbh = this.breadcrumbsStore.productBreadcrumbsHistory;
 
                 if (pbh && pbh[product]) {
-                    return (this.items = pbh[product]);
+                    this.items = pbh[product];
+
+                    const shoppingCartRoute = this.items.find(
+                        (entry) => entry.route === '/košarica',
+                    );
+
+                    if (shoppingCartRoute) {
+                        this.items.pop();
+                    }
+                } else {
+                    this.items.push({
+                        label: capitalizeFirstLetter(
+                            this.resultsStore.product.name,
+                        ),
+                        route: `/${slug(this.resultsStore.product.name)}`,
+                    });
+
+                    this.breadcrumbsStore.addProductBreadcrumbsHistory(
+                        product,
+                        this.items,
+                    );
                 }
-
-                this.items.push({
-                    label: capitalizeFirstLetter(
-                        this.resultsStore.product.name,
-                    ),
-                    route: `/${slug(this.resultsStore.product.name)}`,
-                });
-
-                this.breadcrumbsStore.addProductBreadcrumbsHistory(
-                    product,
-                    this.items,
-                );
             } else {
                 this.makeBreadcrumbs(newPath);
             }
@@ -73,6 +68,7 @@ export default {
     },
     computed: {
         ...mapStores(useCategoryStore, useBreadcrumbsStore, useResultsStore),
+
         isProductPageMounted() {
             if (this.$route.path === '/') return false;
 
@@ -87,32 +83,41 @@ export default {
                 (category) => !urlPartsMap[slug(category.name)],
             );
         },
+
         isShoppingCartPageMounted() {
             if (decodeURI(this.$route.path) === '/košarica') return true;
         },
     },
     mounted() {
         if (this.isShoppingCartPageMounted) {
-            if (!this.items.length) {
+            if (this.breadcrumbsStore.shoppingCartBreadcrumbsHistory.length) {
+                this.items =
+                    this.breadcrumbsStore.shoppingCartBreadcrumbsHistory;
+            } else {
                 this.home = {
                     label: 'Košarica',
                     icon: 'pi pi-shopping-cart',
                     route: '/košarica',
                 };
             }
-            return;
-        }
-
-        if (this.isProductPageMounted) {
+        } else if (this.isProductPageMounted) {
             const product = decodeURIComponent(this.$route.path.slice(1));
             const pbh = this.breadcrumbsStore.productBreadcrumbsHistory;
 
             if (pbh && pbh[product]) {
-                return (this.items = pbh[product]);
+                this.items = pbh[product];
             }
-        }
 
-        this.makeBreadcrumbs(this.$route.fullPath);
+            const shoppingCartRoute = this.items.find(
+                (entry) => entry.route === '/košarica',
+            );
+
+            if (shoppingCartRoute) {
+                this.items.pop();
+            }
+        } else {
+            this.makeBreadcrumbs(this.$route.fullPath);
+        }
     },
     methods: {
         makeBreadcrumbs(path) {
@@ -157,7 +162,11 @@ export default {
                     @click="handleNavigate($event, navigate, item)"
                 >
                     <span :class="[item.icon, 'text-800']" />
-                    <span :class="item.label === 'Košarica' && 'ml-2'" class="text-800">{{ item.label }}</span>
+                    <span
+                        :class="item.label === 'Košarica' && 'ml-2'"
+                        class="text-800"
+                        >{{ item.label }}</span
+                    >
                 </a>
             </RouterLink>
             <a

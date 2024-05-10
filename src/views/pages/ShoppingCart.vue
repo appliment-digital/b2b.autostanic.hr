@@ -55,7 +55,7 @@ export default {
 
         shoppingCartProducts() {
             if (this.shoppingCartStore.cart.length) {
-                console.log(this.shoppingCartStore.cart);
+                // console.log(this.shoppingCartStore.cart);
                 return this.shoppingCartStore.cart;
             } else {
                 return [];

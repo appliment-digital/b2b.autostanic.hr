@@ -16,6 +16,10 @@ export const useBreadcrumbsStore = defineStore('breadcrumbs', {
                 productBreadcrumbsHistory:
                     session.load('breadcrumbs-store')
                         ?.productBreadcrumbsHistory || {},
+
+                shoppingCartBreadcrumbsHistory:
+                    session.load('breadcrumbs-store')
+                        ?.shoppingCartBreadcrumbsHistory || [],
             },
         };
     },
@@ -46,12 +50,16 @@ export const useBreadcrumbsStore = defineStore('breadcrumbs', {
                     ?.productBreadcrumbsHistory;
             }
         },
+        shoppingCartBreadcrumbsHistory: (state) => {
+            if (state.store.shoppingCartBreadcrumbsHistory) {
+                return state.store.shoppingCartBreadcrumbsHistory;
+            } else {
+                return session.load('breadcrumbs-store')
+                    ?.shoppingCartBreadcrumbsHistory;
+            }
+        },
     },
     actions: {
-        haveFun() {
-            console.log('having fun');
-        },
-
         set(breadcrumbs) {
             console.log('setting breadcrumbs', { breadcrumbs });
             this.currentBreadcrumbs = breadcrumbs;
@@ -76,6 +84,16 @@ export const useBreadcrumbsStore = defineStore('breadcrumbs', {
                 product,
                 breadcrumbs,
                 store: this.store.productBreadcrumbsHistory,
+            });
+
+            session.save('breadcrumbs-store', this.store);
+        },
+        addShoppingCartBreadcrumbsHistory(breadcrumbs) {
+            this.store.shoppingCartBreadcrumbsHistory = breadcrumbs;
+
+            console.log('adding product breadcrumbs history', {
+                breadcrumbs,
+                store: this.store.shoppingCartBreadcrumbsHistory,
             });
 
             session.save('breadcrumbs-store', this.store);
