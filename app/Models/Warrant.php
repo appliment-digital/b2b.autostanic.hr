@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SuppliersDetail;
 
-class Warrant extends Model
+class Warrent extends Model
 {
     use HasFactory;
 

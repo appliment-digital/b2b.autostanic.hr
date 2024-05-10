@@ -25,21 +25,35 @@ class SuppliersDetail extends Model
 
     public static function add($data)
     {
-        $suppliersDetail = new self();
+        $suppliersDetails = [];
 
-        $suppliersDetail->web_db_supplier_id = $data['web_db_supplier_id'];
-        $suppliersDetail->web_db_category_id = $data['web_db_category_id'];
-        $suppliersDetail->web_db_product_id = $data['web_db_product_id'];
-        $suppliersDetail->mark_up = $data['mark_up'];
-        $suppliersDetail->expenses = $data['expenses'] ?? null;
-        $suppliersDetail->warrant_id = $data['warrant_id'] ?? null;
-        $suppliersDetail->delivery_deadline_id =
-            $data['delivery_deadline_id'] ?? null;
+        //return $data['supplierDetail']['deliveryDeadline']['id'];
 
-        $suppliersDetail->save();
-        $suppliersDetail->refresh();
+        foreach ($data['categoriesIds'] as $categoryId) {
+            foreach ($data['products'] as $product) {
+                $suppliersDetail = new self();
 
-        return $suppliersDetail;
+                $suppliersDetail->web_db_supplier_id = $data['supplierId'];
+                $suppliersDetail->web_db_category_id = $categoryId;
+                $suppliersDetail->web_db_product_id = $product['Id'];
+                $suppliersDetail->product_cost =
+                    $product['ProductCost'] ?? null;
+                $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
+                $suppliersDetail->expenses =
+                    $data['supplierDetail']['expenses'] ?? null;
+                $suppliersDetail->warrent_id =
+                    $data['supplierDetail']['warrent']['id'] ?? null;
+                $suppliersDetail->delivery_deadline_id =
+                    $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
+
+                $suppliersDetail->save();
+                $suppliersDetail->refresh();
+
+                $suppliersDetails[] = $suppliersDetail;
+            }
+        }
+
+        return $suppliersDetails;
     }
 
     public static function updateSuppliersDetail($id, $data)

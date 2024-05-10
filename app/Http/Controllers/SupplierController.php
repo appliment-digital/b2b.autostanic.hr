@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class SupplierController extends Controller
+class SupplierController extends BaseController
 {
     public function getAll()
     {
@@ -24,12 +24,27 @@ class SupplierController extends Controller
         }
     }
 
-    public function getAllCategoriesForSupplier($id)
+    public function getCategoriesForSupplier($id)
     {
         try {
             $query = DB::connection('webshopdb')
                 ->table('dbo.Supplier')
-                ->select('Supplier.Id', 'Supplier.Name')
+                ->join('dbo.Product', 'Supplier.Id', '=', 'Product.SupplierId')
+                ->join(
+                    'dbo.Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->join(
+                    'dbo.Category',
+                    'Product_Category_Mapping.CategoryId',
+                    '=',
+                    'Category.Id'
+                )
+                ->select('Category.Id', 'Category.Name')
+                ->where('Supplier.Id', $id)
+                ->distinct()
                 ->get();
 
             return $this->convertKeysToCamelCase($query);

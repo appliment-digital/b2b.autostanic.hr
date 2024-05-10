@@ -11,6 +11,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BitrixController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierDetailController;
+use App\Http\Controllers\WarrentController;
+use App\Http\Controllers\DeliveryDeadlineController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +37,6 @@ Route::get('/category/categories', [
 ]);
 
 Route::get('/test', [ProductController::class, 'test']);
-//Route::get('/test', [CategoryController::class, 'test']);
 
 //**************** MIDDLEWARE ******************
 Route::middleware('auth:sanctum')->group(function () {
@@ -88,6 +89,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'getProductById',
     ]);
 
+    Route::post('/product/getProductsBySupplierCategoresAndPriceRange', [
+        ProductController::class,
+        'getProductsBySupplierCategoresAndPriceRange',
+    ]);
+
     //****************   BITRIX CONTOLLER ******************
     Route::post('/bitrix/getCountriesList', [
         BitrixController::class,
@@ -96,9 +102,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //****************   Supplier CONTOLLER ******************
     Route::post('/supplier/getAll', [SupplierController::class, 'getAll']);
-    Route::post('/supplier/getAllCategoriesForSupplier/{id}', [
+    Route::get('/supplier/getCategoriesForSupplier/{id}', [
         SupplierController::class,
-        'getAllCategoriesForSupplier',
+        'getCategoriesForSupplier',
     ]);
 
     //****************   Supplier Detail CONTOLLER ******************
@@ -118,5 +124,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/supplierDetail/updateDetailsforSupplier/{id}', [
         UserController::class,
         'updateDetailsforSupplier',
+    ]);
+
+    //****************   Warrant CONTOLLER ******************
+    Route::get('/warrent/getAll', [WarrentController::class, 'getAll']);
+
+    //****************   DeliveryDeadline CONTOLLER ******************
+    Route::get('/deliveryDeadline/getAll', [
+        DeliveryDeadlineController::class,
+        'getAll',
     ]);
 });

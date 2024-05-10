@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
 export default class SupplierDetailService {
-    apiResourceEndpoint = '/api/bitrix';
+    apiResourceEndpoint = '/api/supplierDetail';
 
     async getSupplierWithDetails(id) {
         return Axios.get(

@@ -10,8 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('suppliers_details', function (Blueprint $table) {
-            $table->unsignedBigInteger('expenses')->nullable()->change();
+        Schema::create('warrents', function (Blueprint $table) {
+            $table->id();
+            $table->string('description');
+            $table->timestamps();
         });
     }
 
@@ -20,8 +22,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('suppliers_details', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('warrants');
     }
 };
