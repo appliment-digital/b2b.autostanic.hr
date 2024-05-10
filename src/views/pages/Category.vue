@@ -15,7 +15,7 @@ import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
-import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
+import { useUIStore } from '@/store/UIStore.js';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
@@ -55,13 +55,10 @@ export default {
             useUserStore,
             useCategoryStore,
             useResultsStore,
-            useBreadcrumbsStore,
+            useUIStore,
         ),
     },
     mounted() {
-        this.setIsDataLoading(false);
-        // console.log('mounted', this.categoryStore.history);
-
         this.handleNavigation(this.$route.path);
     },
     methods: {
@@ -69,8 +66,7 @@ export default {
             const history = this.categoryStore.history;
 
             if (selectedCategory) {
-                this.getSubcategories(this.selectedCategory.id);
-                return;
+                return this.getSubcategories(this.selectedCategory.id);
             }
 
             const freshUrl = path
@@ -79,21 +75,20 @@ export default {
                 .map((entry) => decodeURIComponent(entry))
                 .pop();
 
-            // console.log({ freshUrl });
-
             const freshUrlData = history.find(
                 (entry) => entry.url === freshUrl,
             );
 
             if (!freshUrlData) {
                 this.subcategories = null;
+                this.$router.push('/')
             }
 
             this.getSubcategories(freshUrlData.id);
         },
 
         getSubcategories(id) {
-            this.setIsDataLoading(true);
+            this.UIStore.setIsDataLoading(true)
             // console.log('getting subcategories');
 
             CategoryService.getSubcategories(id)
@@ -102,7 +97,7 @@ export default {
                     // console.log({ subcategories: response.data });
 
                     if (response.data.length) {
-                        this.setIsDataLoading(false);
+                        this.UIStore.setIsDataLoading(false)
                         this.selectedCategory = null;
 
                         this.subcategories = response.data;
@@ -115,7 +110,7 @@ export default {
         },
 
         getProductsByCategoryId(id, page = 1, pageSize = 9, filters = {}) {
-            this.setIsDataLoading(true);
+            this.UIStore.setIsDataLoading(true)
             this.selectedCategory = null;
 
             ProductService.getProductsByCategoryId(id, page, pageSize, filters)
@@ -136,20 +131,20 @@ export default {
 
                     console.log('getting products', { response });
 
-                    // set produckjut results data
+                    // set product results data
                     this.resultsStore.addResults(data.products);
                     this.resultsFilter['manufacturers'] = data.manufacturers;
                     this.results = data.products;
 
                     this.subcategories = null;
                     this.hasResults = true;
-                    this.setIsDataLoading(false);
+                    this.UIStore.setIsDataLoading(false)
                 })
                 .catch((err) => console.error(err));
         },
 
         handleSubcategoryClick(subcategory) {
-            if (this.isDataLoading) return;
+            if (this.UIStore.isDataLoading) return;
 
             const { path } = this.$route;
 
@@ -178,17 +173,13 @@ export default {
         },
 
         handleResultsFilterSelect(states) {
-            const filters = Object.keys(states).filter((key) => states[key]);
+            const filters = Object.keys(states).filter((key) => states[key]);              
 
             console.log({ filters });
-            console.log({ states });
-
-            // console.log(this.selectedCategoryId);
-            // console.log('filter changes...', { manufacturer, val });
 
             if (filters[0]) {
                 this.getProductsByCategoryId(this.selectedCategoryId, 1, 10, {
-                    ManufacturerName: filters[0],
+                    ManufacturerName: filters,
                 });
             }
         },
@@ -197,16 +188,6 @@ export default {
 </script>
 
 <template>
-    <Header />
-
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs />
-        <div v-if="isDataLoading" class="flex align-items-center column-gap-2">
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
     <div v-if="!hasResults && subcategories" class="grid">
         <div
             v-for="subcategory in subcategories"
@@ -214,12 +195,14 @@ export default {
             @click="handleSubcategoryClick(subcategory)"
         >
             <!-- prettier-ignore -->
-            <div class="w-full h-full border-1 border-100 p-4 
+            <div class="w-full h-full border-1 border-100 pl-0 pr-0
                 flex flex-column justify-content-center align-items-center 
                 border-round bg-white transition-ease-in transition-color
-                hover:shadow-3">
-                    <img class="mb-2" :src="subcategory.pictureUrls[0]" style="width:64px; block"/>
-                    <span class="mb-1 text-center">{{ subcategory.name }}</span>
+                hover:shadow-3"
+                style="min-height: 180px"
+                >
+                    <img class="mb-2" :src="subcategory.pictureUrls[0]" style="width:72px; block"/>
+                    <span class="block text-center mb-1">{{ subcategory.name }}</span>
                     <span class="text-center text-xs">({{ subcategory.productCount }})</span>
                 </div>
         </div>

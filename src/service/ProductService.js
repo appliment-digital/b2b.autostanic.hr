@@ -16,7 +16,7 @@ export default class ProductService {
         );
     }
 
-    static async getProductById(id) {
-        return Axios.get(this.apiResourceEndpoint + '/getProductById/' + id);
+    static async getProductPictures(id) {
+        return Axios.get(this.apiResourceEndpoint + '/getProductPictures/' + id);
     }
 }

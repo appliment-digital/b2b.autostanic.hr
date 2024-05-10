@@ -84,4 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ProductController::class,
         'getProductById',
     ]);
+
+    Route::get('/product/getProductPictures/{id}', [
+        ProductController::class,
+        'getProductPictures',
+    ]);
 });
