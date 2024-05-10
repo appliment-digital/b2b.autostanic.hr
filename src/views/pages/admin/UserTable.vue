@@ -8,9 +8,11 @@ import Sidebar from '@/components/admin/Sidebar.vue';
 // services
 import UserService from '@/service/UserService.js';
 import DiscountTypeService from '@/service/DiscountTypeService.js';
+import BitrixService from '@/service/BitrixService.js';
 
 const userService = new UserService();
 const discountTypeService = new DiscountTypeService();
+const bitrixService = new BitrixService();
 
 export default {
     components: {
@@ -26,9 +28,11 @@ export default {
         this.getAll();
         this.getRoles();
         this.getDiscountTypes();
+        this.getCountriesList();
     },
     data() {
         return {
+            filters: {},
             isDialogVisible: false,
             users: [],
             user: {},
@@ -81,7 +85,13 @@ export default {
                     name: 'Kompenzacija',
                 },
             ],
+            countries: [],
         };
+    },
+    watch: {
+        user() {
+            console.log(this.user);
+        },
     },
     computed: {
         showSaveButton() {
@@ -99,6 +109,11 @@ export default {
         },
     },
     methods: {
+        getCountriesList() {
+            bitrixService.getCountriesList().then((response) => {
+                this.countries = response.data;
+            });
+        },
         closeDialog() {
             this.getAll();
             this.isDialogVisible = false;
@@ -253,7 +268,7 @@ export default {
         header="Detalji korisnika"
         :visible="isDialogVisible"
         :style="{ width: '30rem' }"
-        @update:visible="closeDialog"
+        :filters="filters"
     >
         <p class="text-red-500">Polja označena s zvijezdicom(*) su obavezna!</p>
         <!-- Dialog Input: First Name -->
@@ -267,6 +282,29 @@ export default {
         <!-- Dialog Input: E-mai -->
         <label>E-mail<span class="text-red-500">*</span></label>
         <InputText v-model="user.email" class="w-full mt-2 mb-3" />
+
+        <label>Adresa</label>
+        <InputText v-model="user.address" class="w-full mt-2 mb-3" />
+
+        <label>Poštanski broj</label>
+        <InputNumber
+            v-model="user.postal_code"
+            class="w-full mt-2 mb-3"
+            :useGrouping="false"
+        />
+
+        <label>Županija</label>
+        <InputText v-model="user.state_province" class="w-full mt-2 mb-3" />
+
+        <label>Država</label>
+        <Dropdown
+            v-model="user.country"
+            class="w-full mt-2 mb-3"
+            :options="countries"
+            optionLabel="NAME"
+            placeholder="Odaberite državu"
+        >
+        </Dropdown>
 
         <label>Uloga<span class="text-red-500">*</span></label>
         <Dropdown
@@ -318,11 +356,8 @@ export default {
             v-model="user.bitrix_company_id"
             class="w-full mt-2 mb-3"
             :min="1"
+            :useGrouping="false"
         />
-
-        <!-- Dialog Input: Delivery Address -->
-        <label>Mjesto isporuke</label>
-        <InputText v-model="user.delivery_point" class="w-full mt-2 mb-3" />
 
         <!-- Dialog Input: Payment Type -->
         <label>Način plaćanja</label>
@@ -389,7 +424,7 @@ export default {
                                 <i class="pi pi-search" />
                             </InputIcon>
                             <InputText
-                                v-model="searchQuery"
+                                v-model="filters['global'].value"
                                 placeholder="Pretraži"
                                 style="min-width: 240px"
                             />
@@ -399,6 +434,18 @@ export default {
                 <Column field="name" header="Ime" sortable></Column>
                 <Column field="last_name" header="Prezime" sortable></Column>
                 <Column field="email" header="E-mail" sortable></Column>
+                <Column header="Adresa dostave">
+                    <template #body="{ data }">
+                        <span v-if="data.address">{{ data.address }}</span>
+                        <span v-if="data.postal_code"
+                            >, {{ data.postal_code }}</span
+                        >
+                        <span v-if="data.state_province"
+                            >, {{ data.state_province }}
+                        </span>
+                        <span v-if="data.country">, {{ data.country }} </span>
+                    </template>
+                </Column>
                 <Column field="discount_type" header="Tip rabata" sortable>
                     <template #body="{ data }">
                         <span v-if="data.discount_type_id">{{
@@ -423,11 +470,6 @@ export default {
                 <Column
                     field="bitrix_company_id"
                     header="Bitrix company ID"
-                    sortable
-                ></Column>
-                <Column
-                    field="delivery_point"
-                    header="Mjesto isporuke"
                     sortable
                 ></Column>
                 <Column field="payment_method" header="Način plaćanja" sortable

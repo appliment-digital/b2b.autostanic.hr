@@ -8,6 +8,11 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DiscountTypeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BitrixController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierDetailController;
+use App\Http\Controllers\WarrentController;
+use App\Http\Controllers\DeliveryDeadlineController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +37,6 @@ Route::get('/category/categories', [
 ]);
 
 Route::get('/test', [ProductController::class, 'test']);
-//Route::get('/test', [CategoryController::class, 'test']);
 
 //**************** MIDDLEWARE ******************
 Route::middleware('auth:sanctum')->group(function () {
@@ -85,8 +89,49 @@ Route::middleware('auth:sanctum')->group(function () {
         'getProductById',
     ]);
 
-    Route::get('/product/getProductPictures/{id}', [
+    Route::post('/product/getProductsBySupplierCategoresAndPriceRange', [
         ProductController::class,
-        'getProductPictures',
+        'getProductsBySupplierCategoresAndPriceRange',
+    ]);
+
+    //****************   BITRIX CONTOLLER ******************
+    Route::post('/bitrix/getCountriesList', [
+        BitrixController::class,
+        'getCountriesList',
+    ]);
+
+    //****************   Supplier CONTOLLER ******************
+    Route::post('/supplier/getAll', [SupplierController::class, 'getAll']);
+    Route::get('/supplier/getCategoriesForSupplier/{id}', [
+        SupplierController::class,
+        'getCategoriesForSupplier',
+    ]);
+
+    //****************   Supplier Detail CONTOLLER ******************
+    Route::get('/supplierDetail/getSupplierWithDetails/{id}', [
+        SupplierDetailController::class,
+        'getSupplierWithDetails',
+    ]);
+    Route::post('/supplierDetail/getAllSuppliersWithDetails', [
+        SupplierDetailController::class,
+        'getAllSuppliersWithDetails',
+    ]);
+    Route::post('/supplierDetail/addDetailsforSupplier', [
+        SupplierDetailController::class,
+        'addDetailsforSupplier',
+    ]);
+
+    Route::put('/supplierDetail/updateDetailsforSupplier/{id}', [
+        UserController::class,
+        'updateDetailsforSupplier',
+    ]);
+
+    //****************   Warrant CONTOLLER ******************
+    Route::get('/warrent/getAll', [WarrentController::class, 'getAll']);
+
+    //****************   DeliveryDeadline CONTOLLER ******************
+    Route::get('/deliveryDeadline/getAll', [
+        DeliveryDeadlineController::class,
+        'getAll',
     ]);
 });

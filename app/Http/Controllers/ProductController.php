@@ -304,10 +304,44 @@ class ProductController extends BaseController
         return $carTypes;
     }
 
-    public function test()
-    {
-        $id = 1982906;
+    public function getProductsBySupplierCategoresAndPriceRange(
+        Request $request
+    ) {
+        try {
+            $query = DB::connection('webshopdb')
+                ->table('dbo.Supplier')
+                ->join('dbo.Product', 'Supplier.Id', '=', 'Product.SupplierId')
+                ->join(
+                    'dbo.Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->join(
+                    'dbo.Category',
+                    'Product_Category_Mapping.CategoryId',
+                    '=',
+                    'Category.Id'
+                )
+                ->select('Product.Id', 'Product.ProductCost')
+                ->where('Supplier.Id', $request->supplierId)
+                ->where('Category.Id', $request->categoryIds)
+                ->whereBetween('Product.ProductCost', [
+                    $request->minPrice,
+                    $request->maxPrice,
+                ])
+                ->get();
 
-        return $this->getProductById($id);
+            return $query;
+        } catch (Exception $e) {
+            return [
+                'exception' =>
+                    $e->getMessage() .
+                    ' on line ' .
+                    $e->getLine() .
+                    ' in file ' .
+                    $e->getFile(),
+            ];
+        }
     }
 }
