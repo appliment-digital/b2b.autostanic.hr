@@ -13,6 +13,7 @@ import {
 // components
 import Layout from '@/components/Layout.vue';
 import AdminLayout from '@/components/AdminLayout.vue';
+import AuthLayout from '@/components/AuthLayout.vue';
 
 // pages
 import Login from '@/views/pages/Login.vue';
@@ -24,7 +25,7 @@ import DiscountTable from '@/views/pages/admin/DiscountTable.vue';
 import Category from '@/views/pages/Category.vue';
 import Product from '@/views/pages/Product.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
-import ThankYou from '@/views/pages/ThankYou.vue'
+import ThankYou from '@/views/pages/ThankYou.vue';
 
 // pinia
 import { useUserStore } from '@/store/userStore';
@@ -48,7 +49,7 @@ const makeCategoryRoutes = async () => {
 const categoryRoutes = await makeCategoryRoutes();
 
 // update category name to be shorter for better UX
-categoryRoutes.forEach(shortenCarAcousticsAndElectronicsCategoryName);
+categoryRoutes.forEach(shortenCarAcousticsAndElectronicsCategoryName);         
 
 const routes = [
     {
@@ -59,18 +60,6 @@ const routes = [
                 path: '/',
                 component: Home,
                 meta: { requiresAuth: true },
-            },
-            {
-                path: '/login',
-                component: Login,
-            },
-            {
-                path: '/forgot',
-                component: ForgotPassword,
-            },
-            {
-                path: '/reset',
-                component: ResetPassword,
             },
             {
                 path: '/hvala',
@@ -118,6 +107,25 @@ const routes = [
             },
         ],
     },
+    {
+        path: '/auth',
+        component: AuthLayout,
+        children: [
+            {
+                path: 'login',
+                component: Login,
+            },
+            {
+                path: 'forgot-password',
+                component: ForgotPassword,
+            },
+            {
+                path: 'reset-password',
+                component: ResetPassword,
+            },
+        ],
+    },
+
 ];
 
 const router = createRouter({
@@ -139,7 +147,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-        next('/login');
+        next('/auth/login');
     } else {
         next();
     }
