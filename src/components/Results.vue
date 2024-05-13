@@ -214,15 +214,15 @@ export default {
                                     src="/images/as_logo_single.png"
                                 >
                                     <img
-                                        v-if="product.picture_urls[0]"
-                                        :src="product.picture_urls[0]"
+                                        v-if="product.pictureUrl"
+                                        :src="product.pictureUrl"
                                         class="product-image--default border-200"
                                     />
                                 </div>
                                 <div v-else>
                                     <img
-                                        v-if="product.picture_urls[0]"
-                                        :src="product.picture_urls[0]"
+                                        v-if="product.pictureUrl"
+                                        :src="product.pictureUrl"
                                         class="product-image border-200"
                                     />
                                 </div>

@@ -17,13 +17,50 @@ class ProductController extends BaseController
         try {
             $offset = ($page - 1) * $pageSize;
 
+            $productCount = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->where('Product_Category_Mapping.CategoryId', $categoryId)
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->where('Product_Category_Mapping.Deleted', 0)
+                //filters
+                ->when($filters->has('ManufacturerName'), function (
+                    $query
+                ) use ($filters) {
+                    return $query->whereIn(
+                        'Product.ManufacturerName',
+                        $filters->ManufacturerName
+                    );
+                })
+                ->when($filters->has('IsUsedPart'), function ($query) use (
+                    $filters
+                ) {
+                    return $query->where(
+                        'Product.IsUsedPart',
+                        $filters->IsUsedPart
+                    );
+                })
+                ->when($filters->has('IsNewPart'), function ($query) use (
+                    $filters
+                ) {
+                    return $query->where(
+                        'Product.IsNewPart',
+                        $filters->IsNewPart
+                    );
+                })
+                ->count();
+
             $query = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
                     'Product.Id',
                     'Product.Name',
-                    'Product.ShortDescription',
-                    'Product.FullDescription',
                     'Product.Sku',
                     'Product.StockQuantity',
                     'Product.Price',
@@ -54,6 +91,7 @@ class ProductController extends BaseController
                     'Picture.Id'
                 )
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
+                ->where('Product_Picture_Mapping.DisplayOrder', 1)
                 //filters
                 ->when($filters->has('ManufacturerName'), function (
                     $query
@@ -81,11 +119,10 @@ class ProductController extends BaseController
                 })
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
+                ->where('Product_Category_Mapping.Deleted', 0)
                 ->groupBy(
                     'Product.Id',
                     'Product.Name',
-                    'Product.ShortDescription',
-                    'Product.FullDescription',
                     'Product.Sku',
                     'Product.StockQuantity',
                     'Product.Price',
@@ -97,6 +134,7 @@ class ProductController extends BaseController
                     'Picture.MimeType',
                     'Picture.Id'
                 )
+                ->orderBy('Product.Price', 'asc')
                 ->offset($offset)
                 ->limit($pageSize)
                 ->get();
@@ -113,6 +151,7 @@ class ProductController extends BaseController
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
+                ->orderBy('Product.ManufacturerName', 'asc')
                 ->groupBy('ManufacturerName');
 
             $response = [
@@ -120,6 +159,7 @@ class ProductController extends BaseController
                 'manufacturers' => $manufacturersQuery->pluck(
                     'ManufacturerName'
                 ),
+                'productCount' => $productCount,
             ];
 
             $productsById = collect($query)->groupBy('Id');
@@ -128,8 +168,6 @@ class ProductController extends BaseController
                 $productData = [
                     'id' => $productId,
                     'name' => $products[0]->Name,
-                    'shortDescription' => $products[0]->ShortDescription,
-                    'fullDescription' => $products[0]->FullDescription,
                     'sku' => $products[0]->Sku,
                     'stockQuantity' => $products[0]->StockQuantity,
                     'price' => $products[0]->Price,
@@ -137,7 +175,6 @@ class ProductController extends BaseController
                     'isNewPart' => $products[0]->IsNewPart,
                     'isUsedPart' => $products[0]->IsUsedPart,
                     'manufacturerName' => $products[0]->ManufacturerName,
-                    'pictureUrls' => [],
                 ];
 
                 foreach ($products as $product) {
@@ -151,10 +188,10 @@ class ProductController extends BaseController
                         $extension = explode('/', $product->MimeType);
                         $fileExtension = end($extension);
                         $productData[
-                            'picture_urls'
-                        ][] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$product->SeoFilename}_280.{$fileExtension}";
+                            'pictureUrl'
+                        ] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$products[0]->SeoFilename}_280.{$fileExtension}";
                     } else {
-                        $productData['picture_urls'][] =
+                        $productData['pictureUrl'][] =
                             'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
                     }
                 }
@@ -231,7 +268,8 @@ class ProductController extends BaseController
                 $picture->MimeType,
                 strpos($picture->MimeType, '/') + 1
             );
-            $picture->url = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_280.{$fileExtension}";
+            $picture->url = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_550.{$fileExtension}";
+            // https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_100{$fileExtension}.jpg
             return $picture;
         });
 

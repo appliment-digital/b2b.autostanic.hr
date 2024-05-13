@@ -81,14 +81,14 @@ export default {
 
             if (!freshUrlData) {
                 this.subcategories = null;
-                this.$router.push('/')
+                this.$router.push('/');
             }
 
             this.getSubcategories(freshUrlData.id);
         },
 
         getSubcategories(id) {
-            this.UIStore.setIsDataLoading(true)
+            this.UIStore.setIsDataLoading(true);
             // console.log('getting subcategories');
 
             CategoryService.getSubcategories(id)
@@ -97,7 +97,7 @@ export default {
                     // console.log({ subcategories: response.data });
 
                     if (response.data.length) {
-                        this.UIStore.setIsDataLoading(false)
+                        this.UIStore.setIsDataLoading(false);
                         this.selectedCategory = null;
 
                         this.subcategories = response.data;
@@ -110,24 +110,23 @@ export default {
         },
 
         getProductsByCategoryId(id, page = 1, pageSize = 9, filters = {}) {
-            this.UIStore.setIsDataLoading(true)
+            this.UIStore.setIsDataLoading(true);
             this.selectedCategory = null;
 
             ProductService.getProductsByCategoryId(id, page, pageSize, filters)
                 .then((response) => {
                     const { data } = response;
-
-                    // add default image to products that have no image
-                    data.products.forEach((entry) => {
-                        if (
-                            entry.picture_urls[0] ===
-                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
-                        ) {
-                            entry.hasDefaultImage = 'true';
-                            entry.picture_urls[0] =
-                                '/images/as_logo_single.png';
-                        }
-                    });
+                    //this is done in controller method
+                    // // add default image to products that have no image
+                    // data.products.forEach((entry) => {
+                    //     if (
+                    //         entry.picture_url ===
+                    //         'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
+                    //     ) {
+                    //         entry.hasDefaultImage = 'true';
+                    //         entry.picture_url = '/images/as_logo_single.png';
+                    //     }
+                    // });
 
                     console.log('getting products', { response });
 
@@ -138,7 +137,7 @@ export default {
 
                     this.subcategories = null;
                     this.hasResults = true;
-                    this.UIStore.setIsDataLoading(false)
+                    this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
         },
@@ -173,7 +172,7 @@ export default {
         },
 
         handleResultsFilterSelect(states) {
-            const filters = Object.keys(states).filter((key) => states[key]);              
+            const filters = Object.keys(states).filter((key) => states[key]);
 
             console.log({ filters });
 
@@ -201,7 +200,7 @@ export default {
                 hover:shadow-3"
                 style="min-height: 180px"
                 >
-                    <img class="mb-2" :src="subcategory.pictureUrls[0]" style="width:72px; block"/>
+                    <img class="mb-2" :src="subcategory.pictureUrl" style="width:72px; block"/>
                     <span class="block text-center mb-1">{{ subcategory.name }}</span>
                     <span class="text-center text-xs">({{ subcategory.productCount }})</span>
                 </div>

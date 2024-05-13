@@ -62,7 +62,7 @@ class CategoryController extends BaseController
                     'MimeType' => $categories[0]->MimeType,
                 ];
 
-                $pictureUrls = [];
+                $pictureUrl = [];
 
                 foreach ($categories as $category) {
                     $paddedPictureId = str_pad(
@@ -74,10 +74,10 @@ class CategoryController extends BaseController
                     $mimeType = $category->MimeType;
                     $extension = explode('/', $mimeType);
                     $fileExtension = end($extension);
-                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
+                    $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$categories[0]->SeoFilename}_170.{$fileExtension}";
                 }
 
-                $categoryData['picture_urls'] = $pictureUrls;
+                $categoryData['picture_url'] = $pictureUrl;
 
                 $response[] = $categoryData;
             }
@@ -144,7 +144,7 @@ class CategoryController extends BaseController
                     'MimeType' => $categories[0]->MimeType,
                 ];
 
-                $pictureUrls = [];
+                $pictureUrl = null;
 
                 foreach ($categories as $category) {
                     $paddedPictureId = str_pad(
@@ -156,10 +156,10 @@ class CategoryController extends BaseController
                     $mimeType = $category->MimeType;
                     $extension = explode('/', $mimeType);
                     $fileExtension = end($extension);
-                    $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
+                    $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$categories[0]->SeoFilename}_170.{$fileExtension}";
                 }
 
-                $categoryData['picture_urls'] = $pictureUrls;
+                $categoryData['picture_url'] = $pictureUrl;
 
                 $response[] = $categoryData;
             }

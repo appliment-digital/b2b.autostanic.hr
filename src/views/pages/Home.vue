@@ -5,7 +5,6 @@ import slug from 'slug';
 import {
     setSlugCharMap,
     shortenCarAcousticsAndElectronicsCategoryName,
-
 } from '@/utils';
 
 // pinia
@@ -19,7 +18,7 @@ import Header from '@/components/Header.vue';
 // services
 import CategoryService from '@/service/CategoryService.js';
 
-setSlugCharMap(slug)
+setSlugCharMap(slug);
 
 export default {
     components: {
@@ -46,7 +45,7 @@ export default {
                         this.UIStore.setIsDataLoading(false);
 
                         this.categories = response.data;
-                        this.categoryStore.addMainCategories(response.data)
+                        this.categoryStore.addMainCategories(response.data);
 
                         // update category name to be shorter for better UX
                         this.categories.forEach(
@@ -185,7 +184,7 @@ export default {
                         class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3"
                     >
                         <img
-                            :src="category.pictureUrls[0]"
+                            :src="category.pictureUrl"
                             style="width: 62px"
                             class="block mx-auto"
                         />
@@ -230,7 +229,11 @@ export default {
                             />
                         </div>
                     </template>
-                    <template #title><span class="h-2rem">Prednosti i mane run flat guma</span></template>
+                    <template #title
+                        ><span class="h-2rem"
+                            >Prednosti i mane run flat guma</span
+                        ></template
+                    >
                     <template #content>
                         <p>
                             Run flat gume su gume na kojima nakon probijanja ili
@@ -254,7 +257,7 @@ export default {
                     <template #header>
                         <div class="p-4">
                             <img
-                            src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
+                                src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
                                 class="h-10rem w-full border-round"
                                 style="object-fit: cover"
                             />
@@ -286,7 +289,7 @@ export default {
                     <template #header>
                         <div class="p-4">
                             <img
-                            src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
+                                src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
                                 class="h-10rem w-full border-round"
                                 style="object-fit: cover"
                             />
@@ -298,8 +301,8 @@ export default {
                             Tipični automatski mjenjači nemaju papučicu spojke
                             kao automobil s ručnim mjenjačem. Umjesto toga, oni
                             koriste uređaj koji se zove pretvarač okretnog
-                            momenta. U nastavku ćemo objasniti što je DSG,
-                            kako radi.
+                            momenta. U nastavku ćemo objasniti što je DSG, kako
+                            radi.
                         </p>
                     </template>
                 </Card>
