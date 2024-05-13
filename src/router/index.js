@@ -109,14 +109,17 @@ const routes = [
             {
                 path: 'login',
                 component: Login,
+                meta: { isPublic: true },
             },
             {
                 path: 'forgot-password',
                 component: ForgotPassword,
+                meta: { isPublic: true },
             },
             {
                 path: 'reset-password',
                 component: ResetPassword,
+                meta: { isPublic: true },
             },
         ],
     },
@@ -131,15 +134,12 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    if (
-        to.path === '/auth/login' ||
-        to.path === '/auth/reset-password' ||
-        to.path === '/auth/forgot-password'
-    ) {
+    if (to.matched.some((record) => record.meta.isPublic)) {
         next();
-    } else {
+    }
+    else {
         try {
-            await UserService.getCurrentUserData(); 
+            await UserService.getCurrentUserData();
 
             next();
         } catch (error) {

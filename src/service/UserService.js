@@ -27,7 +27,7 @@ export default class UserService {
         })
 
             .then((response) => {
-                return response;
+                console.log(response);
             })
             .catch((error) => {
                 console.log(error.response);
