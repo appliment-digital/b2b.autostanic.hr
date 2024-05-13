@@ -26,38 +26,48 @@ use App\Http\Controllers\DeliveryDeadlineController;
 */
 
 //****************  AUTH CONTOLLER  ******************
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 //****************   CATEGORY CONTOLLER ******************
+
 Route::get('/category/categories', [
     CategoryController::class,
     'getMainCategories',
 ]);
 
-Route::get('/test', [ProductController::class, 'test']);
+Route::get('/test', function (Request $Request) {
+    return response()->json([
+        'x' => 'hi',
+    ]);
+});
 
 //**************** MIDDLEWARE ******************
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     //****************   USER CONTOLLER ******************
+
+    Route::get('/user/getRoles', [UserController::class, 'getRoles']);
+    Route::get('/user/getCurrentUserData', [
+        UserController::class,
+        'getCurrentUserData',
+    ]);
     Route::post('/user/add', [UserController::class, 'add']);
-    Route::put('/user/update/{id}', [UserController::class, 'update']);
     Route::post('/user/getAll', [UserController::class, 'getAll']);
+    Route::post('/user/changeStatus', [UserController::class, 'changeStatus']);
     Route::post('/user/getAllWithRelations', [
         UserController::class,
         'getAllWithRelations',
     ]);
-    Route::get('/user/getRoles', [UserController::class, 'getRoles']);
-    Route::post('/user/getCurrentUserData', [
-        UserController::class,
-        'getCurrentUserData',
-    ]);
-    Route::post('/user/changeStatus', [UserController::class, 'changeStatus']);
+
+    Route::put('/user/update/{id}', [UserController::class, 'update']);
 
     //****************   DISCOUNT TYPE CONTOLLER ******************
+
     Route::get('/discountType/getAll', [
         DiscountTypeController::class,
         'getAll',
@@ -73,17 +83,18 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
     //****************   CATEGORY CONTOLLER ******************
+
     Route::get('/category/subcategories/{id}', [
         CategoryController::class,
         'getSubcategories',
     ]);
 
     //****************   PRODUCT CONTOLLER ******************
+
     Route::post(
         '/product/getProductsByCategoryId/{categoryId}/{page}/{pageSize}',
         [ProductController::class, 'getProductsByCategoryId']
     );
-
     Route::get('/product/getProductById/{id}', [
         ProductController::class,
         'getProductById',
@@ -100,12 +111,14 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
     //****************   BITRIX CONTOLLER ******************
+
     Route::post('/bitrix/getCountriesList', [
         BitrixController::class,
         'getCountriesList',
     ]);
 
     //****************   Supplier CONTOLLER ******************
+
     Route::post('/supplier/getAll', [SupplierController::class, 'getAll']);
     Route::get('/supplier/getCategoriesForSupplier/{id}', [
         SupplierController::class,
@@ -113,6 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
     //****************   Supplier Detail CONTOLLER ******************
+
     Route::get('/supplierDetail/getSupplierWithDetails/{id}', [
         SupplierDetailController::class,
         'getSupplierWithDetails',
@@ -132,9 +146,11 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
     //****************   Warrant CONTOLLER ******************
+
     Route::get('/warrent/getAll', [WarrentController::class, 'getAll']);
 
     //****************   DeliveryDeadline CONTOLLER ******************
+
     Route::get('/deliveryDeadline/getAll', [
         DeliveryDeadlineController::class,
         'getAll',

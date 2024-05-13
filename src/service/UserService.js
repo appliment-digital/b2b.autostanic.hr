@@ -2,6 +2,7 @@ import Axios from 'axios';
 
 export default class UserService {
     apiResourceEndpoint = '/api/user';
+    static apiResourceEndpoint = '/api/user';
 
     async login(email, password) {
         return Axios.post('/api/login', {
@@ -64,8 +65,8 @@ export default class UserService {
         return Axios.post(this.apiResourceEndpoint + '/changeStatus', object);
     }
 
-    async getCurrentUserData() {
-        return Axios.post(this.apiResourceEndpoint + '/getCurrentUserData');
+    static async getCurrentUserData() {
+        return Axios.get(this.apiResourceEndpoint + '/getCurrentUserData');
     }
 
     async getRoles() {
