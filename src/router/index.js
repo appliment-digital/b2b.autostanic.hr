@@ -27,11 +27,9 @@ import Product from '@/views/pages/Product.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
 import ThankYou from '@/views/pages/ThankYou.vue';
 
-// pinia
-import { useUserStore } from '@/store/userStore';
-
 // service
 import CategoryService from '../service/CategoryService';
+import UserService from '../service/UserService';
 
 setSlugCharMap(slug);
 
@@ -49,7 +47,7 @@ const makeCategoryRoutes = async () => {
 const categoryRoutes = await makeCategoryRoutes();
 
 // update category name to be shorter for better UX
-categoryRoutes.forEach(shortenCarAcousticsAndElectronicsCategoryName);         
+categoryRoutes.forEach(shortenCarAcousticsAndElectronicsCategoryName);
 
 const routes = [
     {
@@ -59,7 +57,6 @@ const routes = [
             {
                 path: '/',
                 component: Home,
-                meta: { requiresAuth: true },
             },
             {
                 path: '/hvala',
@@ -73,7 +70,6 @@ const routes = [
             {
                 path: '/:product',
                 component: Product,
-                meta: { requiresAuth: true },
             },
 
             // create routes for all top-level categories
@@ -81,7 +77,6 @@ const routes = [
                 return {
                     path: `/${slug(category.name)}`,
                     component: Category,
-                    meta: { requiresAuth: true },
                     children: [
                         {
                             path: `/${slug(category.name)}/:subcategory(.*)`,
@@ -125,7 +120,6 @@ const routes = [
             },
         ],
     },
-
 ];
 
 const router = createRouter({
@@ -137,19 +131,20 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    const userStore = useUserStore();
-    const storedIsUserLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn'));
-
-    // console.log({ to });
-
-    if (to.meta.requiresAuth && storedIsUserLoggedIn) {
+    if (
+        to.path === '/auth/login' ||
+        to.path === '/auth/reset-password' ||
+        to.path === '/auth/forgot-password'
+    ) {
         next();
-    }
-
-    if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-        next('/auth/login');
     } else {
-        next();
+        try {
+            await UserService.getCurrentUserData(); 
+
+            next();
+        } catch (error) {
+            next('/auth/login');
+        }
     }
 });
 
