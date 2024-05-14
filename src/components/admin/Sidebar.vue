@@ -45,7 +45,7 @@ export default {
 
         logout() {
             userService.logout().then((response) => {
-                this.$router.push('/login');
+                this.$router.push('/auth/login');
             });
             this.userStore.logout();
         },

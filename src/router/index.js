@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // lib
 import slug from 'slug';
+import axios from 'axios';
 
 // utils
 import {
@@ -27,7 +28,6 @@ import Product from '@/views/pages/Product.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
 import ThankYou from '@/views/pages/ThankYou.vue';
 import PriceManagement from '@/views/pages/admin/PriceManagement.vue';
-
 
 // service
 import CategoryService from '../service/CategoryService';
@@ -140,26 +140,8 @@ const router = createRouter({
     },
 });
 
-router.beforeEach(async (to, from, next) => {
-    if (to.matched.some((record) => record.meta.isPublic)) {
-        localStorage.removeItem('token');
-        next();
-    } 
+router.beforeEach((to, from) => {
 
-    else {
-        try {
-            const token = localStorage.getItem('token');
-
-            if (token && await UserService.getCurrentUserData()) {
-                next();
-            } else {
-                console.log('error');
-                throw new Error();
-            }
-        } catch (error) {
-            next('/auth/login');
-        }
-    }
 });
 
 export default router;
