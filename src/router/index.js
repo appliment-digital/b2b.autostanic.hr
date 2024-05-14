@@ -135,13 +135,17 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     if (to.matched.some((record) => record.meta.isPublic)) {
+        localStorage.removeItem('token');
         next();
-    }
-    else {
+    } else {
         try {
-            await UserService.getCurrentUserData();
+            const token = localStorage.getItem('token');
 
-            next();
+            if (token && await UserService.getCurrentUserData()) {
+                next();
+            } else {
+                throw new Error();
+            }
         } catch (error) {
             next('/auth/login');
         }
