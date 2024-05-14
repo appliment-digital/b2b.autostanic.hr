@@ -26,6 +26,8 @@ import Category from '@/views/pages/Category.vue';
 import Product from '@/views/pages/Product.vue';
 import ShoppingCart from '@/views/pages/ShoppingCart.vue';
 import ThankYou from '@/views/pages/ThankYou.vue';
+import PriceManagement from '@/views/pages/admin/PriceManagement.vue';
+
 
 // service
 import CategoryService from '../service/CategoryService';
@@ -87,10 +89,10 @@ const routes = [
             }),
         ],
     },
+
     {
         path: '/admin',
         component: AdminLayout,
-        meta: { requiresAuth: true },
         children: [
             {
                 path: 'users',
@@ -100,8 +102,13 @@ const routes = [
                 path: 'discounts',
                 component: DiscountTable,
             },
+            {
+                path: 'price-management',
+                component: PriceManagement,
+            },
         ],
     },
+
     {
         path: '/auth',
         component: AuthLayout,
@@ -137,13 +144,16 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some((record) => record.meta.isPublic)) {
         localStorage.removeItem('token');
         next();
-    } else {
+    } 
+
+    else {
         try {
             const token = localStorage.getItem('token');
 
             if (token && await UserService.getCurrentUserData()) {
                 next();
             } else {
+                console.log('error');
                 throw new Error();
             }
         } catch (error) {

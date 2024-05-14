@@ -141,14 +141,16 @@ export default {
         },
 
         handleResultsPageChange(event) {
-            this.getProductsByCategoryId(
-                this.selectedCategoryId,
-                event.page + 1,
-            );
+            console.log('handleResultsPageChange', {event});
+
+            // this.getProductsByCategoryId(
+            //     this.selectedCategoryId,
+            //     event.page + 1,
+            // );
         },
 
-        handleResultsFilterSelect(states) {
-            const filters = Object.keys(states).filter((key) => states[key]);
+        handleFilterSelect(filters) {
+            const selectedFilters = Object.keys(filters).filter((entry) => states[key]);
 
             console.log({ filters });
 
@@ -202,7 +204,7 @@ export default {
             :products="products"
             :manufacturers="manufacturers"
             @on-page-change="handleResultsPageChange"
-            @on-filter-select="handleResultsFilterSelect"
+            @on-filter-select="handleFilterSelect"
         />
     </div>
 </template>

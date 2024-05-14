@@ -31,23 +31,32 @@ export default {
             totalItems: Number(this.productCount),
             isChecked: false,
 
-            checkboxesStates: {},
+            filters: {
+                condition: {
+                    isNew: false,
+                    isUsed: false,
+                },
 
-            filters: {},
+                manufacturers: {}
+            }
         };
     },
     mounted() {
-        // set current product count
+        // logs
         console.log(this.categoryStore.selectedCategory)
 
+        // load category data from storage
         const selectedCategory = this.categoryStore.selectedCategory
 
+        // set total items in a category
         this.totalItems = Number(selectedCategory.productCount)
 
 
-        // this.resultsFilter.manufacturers.forEach((filter) => {
-        //     this.checkboxesStates[filter] = false;
-        // });
+        // set filters
+        this.manufacturers.forEach(entry => {
+            this.filters.manufacturers[entry] = false
+        })
+
     },
     computed: {
         ...mapStores(useResultsStore, useShoppingCartStore, useCategoryStore, useUIStore),
@@ -64,8 +73,10 @@ export default {
             this.$emit('on-page-change', event);
         },
 
-        handleFilterSelect() {
-            this.$emit('on-filter-select', this.checkboxesStates);
+        handleFilterSelect(event) {
+            console.log({event});
+            console.log(this.filters);
+            this.$emit('on-filter-select', this.filters);
         },
 
         formatProductStockQuantity(val) {
@@ -155,7 +166,7 @@ export default {
                                 <!-- Checkbox -->
                                 <Checkbox
                                     v-if="manufacturer"
-                                    v-model="checkboxesStates[manufacturer]"
+                                    v-model="filters.manufacturers[manufacturer]"
                                     @change="handleFilterSelect"
                                     :binary="true"
                                     :name="manufacturer"
