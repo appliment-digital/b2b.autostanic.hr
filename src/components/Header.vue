@@ -35,12 +35,6 @@ export default {
         handleShoppingCartClick() {
             this.$router.push(encodeURI('/košarica'))
         },
-
-        logout() {
-            userService.logout().then((response) => {
-                this.$router.push('/login');
-            });
-        },
     },
 };
 </script>

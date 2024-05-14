@@ -3,7 +3,7 @@
 import slug from 'slug';
 
 // utils
-import { makeUrl, setSlugCharMap } from '@/utils';
+import { getLastUrlPart, setSlugCharMap } from '@/utils';
 
 // components
 import Header from '@/components/Header.vue';
@@ -33,22 +33,15 @@ export default {
     data() {
         return {
             subcategories: null,
-            isDataLoading: null,
-            products: [],
+            products: null,
             productCount: null,
+            manufacturers: null,
 
-            hasResults: false,
-            results: null,
-            resultsFilter: {},
-
-            selectedCategory: null,
-            selectedCategoryId: null,
+            page: {
+                current: 1,
+                size: 9,
+            },
         };
-    },
-    watch: {
-        '$route.path': function (newPath) {
-            this.handleNavigation(newPath, this.selectedCategory);
-        },
     },
     computed: {
         ...mapStores(
@@ -58,113 +51,96 @@ export default {
             useUIStore,
         ),
     },
+    watch: {
+        '$route.path': function (newPath) {
+            this.handleNavigation();
+
+            // hide product results and show category cards 
+            this.products = null; 
+        },
+    },
     mounted() {
-        this.handleNavigation(this.$route.path);
+        this.handleNavigation();
     },
     methods: {
-        handleNavigation(path, selectedCategory) {
-            const history = this.categoryStore.history;
+        /**
+         * Handle navigating categories.
+         * Get category data from history (e.g. /karoserija/retrovizori --> retrovizori).
+         */
+        handleNavigation() {
+            const category = this.getCategoryDataFromHistory();
 
-            if (selectedCategory) {
-                return this.getSubcategories(this.selectedCategory.id);
-            }
-
-            const freshUrl = path
-                .slice(1)
-                .split('/')
-                .map((entry) => decodeURIComponent(entry))
-                .pop();
-
-            const freshUrlData = history.find(
-                (entry) => entry.url === freshUrl,
-            );
-
-            if (!freshUrlData) {
-                this.subcategories = null;
-                this.$router.push('/');
-            }
-
-            this.getSubcategories(freshUrlData.id);
-        },
-
-        getSubcategories(id) {
             this.UIStore.setIsDataLoading(true);
-            // console.log('getting subcategories');
 
-            CategoryService.getSubcategories(id)
+            CategoryService.getSubcategories(category.id)
                 .then((response) => {
-                    this.hasResults = false;
-                    // console.log({ subcategories: response.data });
-
                     if (response.data.length) {
                         this.UIStore.setIsDataLoading(false);
-                        this.selectedCategory = null;
-
                         this.subcategories = response.data;
                     } else {
-                        this.selectedCategoryId = id;
-                        this.getProductsByCategoryId(id);
+                        this.getProducts(category.id);
                     }
                 })
                 .catch((err) => console.error(err));
         },
 
-        getProductsByCategoryId(id, page = 1, pageSize = 9, filters = {}) {
-            this.UIStore.setIsDataLoading(true);
-            this.selectedCategory = null;
+        /**
+         * Get category data fronm history (e.g. /karoserija/retrovizori --> retrovizori).
+         */
+        getCategoryDataFromHistory() {
+            return this.categoryStore.history.find(
+                (entry) => entry.url === getLastUrlPart(this.$route.path),
+            );
+        },
 
-            ProductService.getProductsByCategoryId(id, page, pageSize, filters)
+        /**
+         * Get products based on the category id, page options, and filters.
+         */
+        getProducts(id, filters) {
+            this.UIStore.setIsDataLoading(true);
+
+            ProductService.getProductsByCategoryId(
+                id,
+                this.page.current,
+                this.page.size,
+                filters,
+            )
                 .then((response) => {
                     const { data } = response;
-                    //this is done in controller method
-                    // // add default image to products that have no image
-                    // data.products.forEach((entry) => {
-                    //     if (
-                    //         entry.picture_url ===
-                    //         'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
-                    //     ) {
-                    //         entry.hasDefaultImage = 'true';
-                    //         entry.picture_url = '/images/as_logo_single.png';
-                    //     }
-                    // });
+                    console.log('getProductsByCategoryId', { data });
 
-                    console.log('getting products', { response });
+                    // store response data
+                    this.products = data.products;
+                    this.manufacturers = data.manufacturers;
 
-                    // set product results data
-                    this.resultsStore.addResults(data.products);
-                    this.resultsFilter['manufacturers'] = data.manufacturers;
-                    this.results = data.products;
-
-                    this.subcategories = null;
-                    this.hasResults = true;
                     this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
         },
 
+        /**
+         * Handle clicking subcategory cards.
+         */
         handleSubcategoryClick(subcategory) {
+            // prevent user clicking on the next category if data still loads 
             if (this.UIStore.isDataLoading) return;
 
-            const { path } = this.$route;
-
+            // set selected category
             this.selectedCategory = subcategory;
 
             // set product count to display on results page
             this.productCount = subcategory.productCount;
 
+            // store
+            this.categoryStore.setSelectedCategory(subcategory);
             this.categoryStore.addHistory(subcategory);
 
             this.$router.push(
-                `${path}/${slug(subcategory.name, { lower: true })}`,
+                `${this.$route.path}/${slug(subcategory.name)}`,
             );
         },
 
-        setIsDataLoading(val) {
-            this.isDataLoading = val;
-        },
-
         handleResultsPageChange(event) {
-            console.log('changing page, hello', event);
             this.getProductsByCategoryId(
                 this.selectedCategoryId,
                 event.page + 1,
@@ -177,17 +153,30 @@ export default {
             console.log({ filters });
 
             if (filters[0]) {
-                this.getProductsByCategoryId(this.selectedCategoryId, 1, 10, {
+                this.getProducts(this.selectedCategoryId, 1, 10, {
                     ManufacturerName: filters,
                 });
             }
+        },
+
+        setDefaultImageToProducts(products) {
+            products.forEach((entry) => {
+                if (
+                    entry.picture_urls &&
+                    entry.picture_urls[0] ===
+                        'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
+                ) {
+                    entry.hasDefaultImage = 'true';
+                    entry.picture_urls[0] = '/images/as_logo_single.png';
+                }
+            });
         },
     },
 };
 </script>
 
 <template>
-    <div v-if="!hasResults && subcategories" class="grid">
+    <div v-if="subcategories && !products" class="grid">
         <div
             v-for="subcategory in subcategories"
             class="col-3 cursor-pointer"
@@ -207,11 +196,11 @@ export default {
         </div>
     </div>
 
-    <div v-if="hasResults">
+    <div v-if="products">
         <Results
             :productCount="productCount"
-            :results="results"
-            :resultsFilter="resultsFilter"
+            :products="products"
+            :manufacturers="manufacturers"
             @on-page-change="handleResultsPageChange"
             @on-filter-select="handleResultsFilterSelect"
         />
@@ -219,5 +208,3 @@ export default {
 </template>
 
 <style scoped></style>
-
-{ manufacturerName: 'Bosch' }

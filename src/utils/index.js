@@ -68,3 +68,11 @@ export const session = {
         return JSON.parse(sessionStorage.getItem(key));
     },
 };
+
+export const getLastUrlPart = (url) => {
+    return url
+        .slice(1)
+        .split('/')
+        .map((entry) => decodeURIComponent(entry))
+        .pop();
+};

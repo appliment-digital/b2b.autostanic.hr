@@ -13,13 +13,14 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { mapStores } from 'pinia';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
+import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
 
 export default {
-    props: ['results', 'resultsFilter', 'productCount'],
+    props: ['productCount', 'products', 'manufacturers'],
     components: {
         Header,
         Breadcrumbs,
@@ -30,20 +31,26 @@ export default {
             totalItems: Number(this.productCount),
             isChecked: false,
 
-            currentPage: 3,
-
             checkboxesStates: {},
 
             filters: {},
         };
     },
     mounted() {
-        this.resultsFilter.manufacturers.forEach((filter) => {
-            this.checkboxesStates[filter] = false;
-        });
+        // set current product count
+        console.log(this.categoryStore.selectedCategory)
+
+        const selectedCategory = this.categoryStore.selectedCategory
+
+        this.totalItems = Number(selectedCategory.productCount)
+
+
+        // this.resultsFilter.manufacturers.forEach((filter) => {
+        //     this.checkboxesStates[filter] = false;
+        // });
     },
     computed: {
-        ...mapStores(useResultsStore, useShoppingCartStore, useUIStore),
+        ...mapStores(useResultsStore, useShoppingCartStore, useCategoryStore, useUIStore),
     },
     methods: {
         handleProductClick(product) {
@@ -53,9 +60,7 @@ export default {
         },
 
         handlePageChangeClick(event) {
-            console.log(event);
             this.currentPage = event.page + 1;
-            console.log({ currentPage: this.currentPage });
             this.$emit('on-page-change', event);
         },
 
@@ -144,7 +149,7 @@ export default {
                         <!-- manufacturer -->
                         <div class="mt-0 max-h-30rem overflow-y-scroll">
                             <div
-                                v-for="manufacturer in resultsFilter.manufacturers"
+                                v-for="manufacturer in manufacturers"
                                 class="flex align-items-center mb-1 px-1"
                             >
                                 <!-- Checkbox -->
@@ -177,15 +182,19 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
-                <!-- <Paginator
+                <!-- product count -->
+                <span>{{ totalItems }}</span>
+
+                <Paginator
                     :rows="itemsPerPage"
                     :totalRecords="totalItems"
                     v-model:page="currentPage"
                     @page="handlePageChangeClick"
                     class="p-0 mb-4"
-                /> -->
+                />
+
                 <div id="search-results" class="grid">
-                    <div v-for="product in results" class="col-4">
+                    <div v-for="product in products" class="col-4">
                         <!-- Product -->
                         <Card
                             :pt="{

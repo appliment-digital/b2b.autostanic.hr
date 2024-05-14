@@ -17,7 +17,8 @@ export const useCategoryStore = defineStore('category', {
                 JSON.parse(sessionStorage.getItem('category-history')) || [],
 
             store: {
-                mainCategories: session.load('category-store')?.mainCategories,
+                mainCategories: session.load('category-store')?.mainCategories || null,
+                selectedCategory: session.load('category-store')?.selectedCategory || null,
             },
         };
     },
@@ -36,6 +37,13 @@ export const useCategoryStore = defineStore('category', {
                 return session.load('category-store')?.mainCategories
             }
         },
+        selectedCategory: (state) => {
+            if (state.store.selectedCategory) {
+                return state.store.selectedCategory
+            } else {
+                return session.load('category-store')?.selectedCategory
+            }
+        }
     },
     actions: {
         // not using
@@ -65,11 +73,15 @@ export const useCategoryStore = defineStore('category', {
                 JSON.stringify(this.categoryHistory),
             );
         },
-
         addMainCategories(categories) {
             this.store.mainCategories = categories;
 
             session.save('category-store', this.store);
         },
+        setSelectedCategory(category) {
+            this.store.selectedCategory = category
+
+            session.save('category-store', this.store);
+        }
     },
 });
