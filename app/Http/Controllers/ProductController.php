@@ -29,29 +29,29 @@ class ProductController extends BaseController
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->where('Product_Category_Mapping.Deleted', 0)
-                //filters
-                ->when($filters->has('ManufacturerName'), function (
+                // filters
+                ->when($filters->has('manufacturerName'), function (
                     $query
                 ) use ($filters) {
                     return $query->whereIn(
                         'Product.ManufacturerName',
-                        $filters->ManufacturerName
+                        $filters->manufacturerName
                     );
                 })
-                ->when($filters->has('IsUsedPart'), function ($query) use (
+                ->when($filters->has('isUsedPart'), function ($query) use (
                     $filters
                 ) {
                     return $query->where(
                         'Product.IsUsedPart',
-                        $filters->IsUsedPart
+                        $filters->isUsedPart
                     );
                 })
-                ->when($filters->has('IsNewPart'), function ($query) use (
+                ->when($filters->has('isNewPart'), function ($query) use (
                     $filters
                 ) {
                     return $query->where(
                         'Product.IsNewPart',
-                        $filters->IsNewPart
+                        $filters->isNewPart
                     );
                 })
                 ->count();
@@ -93,28 +93,28 @@ class ProductController extends BaseController
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
                 ->where('Product_Picture_Mapping.DisplayOrder', 1)
                 //filters
-                ->when($filters->has('ManufacturerName'), function (
+                ->when($filters->has('manufacturerName'), function (
                     $query
                 ) use ($filters) {
                     return $query->whereIn(
                         'Product.ManufacturerName',
-                        $filters->ManufacturerName
+                        $filters->manufacturerName
                     );
                 })
-                ->when($filters->has('IsUsedPart'), function ($query) use (
+                ->when($filters->has('isUsedPart'), function ($query) use (
                     $filters
                 ) {
                     return $query->where(
                         'Product.IsUsedPart',
-                        $filters->IsUsedPart
+                        $filters->isUsedPart
                     );
                 })
-                ->when($filters->has('IsNewPart'), function ($query) use (
+                ->when($filters->has('isNewPart'), function ($query) use (
                     $filters
                 ) {
                     return $query->where(
                         'Product.IsNewPart',
-                        $filters->IsNewPart
+                        $filters->isNewPart
                     );
                 })
                 ->where('Product.Deleted', 0)

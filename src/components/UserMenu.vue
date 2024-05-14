@@ -18,6 +18,7 @@ export default {
     },
     methods: {
         handleAdminIconClick() {
+            console.log('pushing /admin/users');
             this.$router.push('/admin/users');
         },
 
