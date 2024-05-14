@@ -13,9 +13,9 @@ class SuppliersDetail extends Model
 
     protected $fillable = ['description'];
 
-    public function warrant()
+    public function warrent()
     {
-        return $this->belongsTo(Warrant::class);
+        return $this->belongsTo(Warrent::class);
     }
 
     public function deliveryDeadline()
@@ -27,30 +27,31 @@ class SuppliersDetail extends Model
     {
         $suppliersDetails = [];
 
-        //return $data['supplierDetail']['deliveryDeadline']['id'];
-
         foreach ($data['categoriesIds'] as $categoryId) {
-            foreach ($data['products'] as $product) {
-                $suppliersDetail = new self();
+            $suppliersDetail = new self();
+            $suppliersDetail->web_db_supplier_id = $data['supplierId'];
+            $suppliersDetail->web_db_category_id = $categoryId;
+            $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
+            $suppliersDetail->warrent_id =
+                $data['supplierDetail']['warrent']['id'] ?? null;
+            $suppliersDetail->delivery_deadline_id =
+                $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
+            if (!empty($data['products'])) {
+                foreach ($data['products'] as $product) {
+                    $suppliersDetail->web_db_product_id =
+                        $product['Id'] ?? null;
+                    $suppliersDetail->product_cost =
+                        $product['ProductCost'] ?? null;
 
-                $suppliersDetail->web_db_supplier_id = $data['supplierId'];
-                $suppliersDetail->web_db_category_id = $categoryId;
-                $suppliersDetail->web_db_product_id = $product['Id'];
-                $suppliersDetail->product_cost =
-                    $product['ProductCost'] ?? null;
-                $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
-                $suppliersDetail->expenses =
-                    $data['supplierDetail']['expenses'] ?? null;
-                $suppliersDetail->warrent_id =
-                    $data['supplierDetail']['warrent']['id'] ?? null;
-                $suppliersDetail->delivery_deadline_id =
-                    $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
-
-                $suppliersDetail->save();
-                $suppliersDetail->refresh();
-
-                $suppliersDetails[] = $suppliersDetail;
+                    $suppliersDetail->expenses =
+                        $data['supplierDetail']['expenses'] ?? null;
+                }
             }
+
+            $suppliersDetail->save();
+            $suppliersDetail->refresh();
+
+            $suppliersDetails[] = $suppliersDetail;
         }
 
         return $suppliersDetails;
@@ -58,7 +59,7 @@ class SuppliersDetail extends Model
 
     public static function updateSuppliersDetail($id, $data)
     {
-        $suppliersDetail = self::where('web_db_supplier_id', $id);
+        $suppliersDetail = self::find($id);
 
         $suppliersDetail->mark_up = $data['mark_up'];
         $suppliersDetail->expenses = $data['expenses'] ?? null;

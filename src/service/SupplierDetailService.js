@@ -10,7 +10,9 @@ export default class SupplierDetailService {
     }
 
     async getAllSuppliersWithDetails() {
-        return Axios.post(this.apiResourceEndpoint + '/getSupplierWithDetails');
+        return Axios.get(
+            this.apiResourceEndpoint + '/getAllSuppliersWithDetails',
+        );
     }
 
     async addDetailsforSupplier(object) {
