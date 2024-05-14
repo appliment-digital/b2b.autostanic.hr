@@ -80,10 +80,13 @@ export default {
             this.$emit('on-page-change', event);
         },
 
+        /**
+         * Handle user interaction with filter checkboxes (condition, manufacturers)
+         */
         handleFilterSelect(event) {
             const { id } = event.target;
 
-            // disable both condition filters to be set to `true`
+            // 1. don't allow both condition-filters to be 'true' (checked)
 
             if (id === 'isNewPart' && this.filters.condition.isUsedPart) {
                 this.filters.condition.isUsedPart = false;
@@ -93,9 +96,9 @@ export default {
                 this.filters.condition.isNewPart = false;
             }
 
-            // create selected filters data
+            // 2. create selected filters data
 
-            const selectedFilters = { manufacturerName: [] };
+            const selectedFilters = { manufacturerName: [] }; 
 
             //  add condition filters
             for (const key in this.filters.condition) {
@@ -110,6 +113,8 @@ export default {
                     selectedFilters.manufacturerName.push(`${key}`)
                 }
             }
+
+            // 3. emit event to call parent handler ('handleFilterSelect')
 
             this.$emit(
                 'on-filter-select',
