@@ -245,35 +245,59 @@ class ProductController extends BaseController
 
     public function getProductPictures($id)
     {
-        $productPictures = DB::connection('webshopdb')
-            ->table('dbo.Product_Picture_Mapping')
-            ->select(
-                'Picture.Id as PictureId',
-                'Picture.MimeType',
-                'Picture.SeoFilename'
-            )
-            ->join(
-                'Picture',
-                'Product_Picture_Mapping.PictureId',
-                '=',
-                'Picture.Id'
-            )
-            ->where('Product_Picture_Mapping.ProductId', $id)
-            ->get();
+        try {
+            $productPictures = DB::connection('webshopdb')
+                ->table('dbo.Product_Picture_Mapping')
+                ->select(
+                    'Picture.Id as PictureId',
+                    'Picture.MimeType',
+                    'Picture.SeoFilename'
+                )
+                ->join(
+                    'Picture',
+                    'Product_Picture_Mapping.PictureId',
+                    '=',
+                    'Picture.Id'
+                )
+                ->where('Product_Picture_Mapping.ProductId', $id)
+                ->get();
 
-        // Generate URLs
-        $productPictures->transform(function ($picture) {
-            $pictureId = str_pad($picture->PictureId, 7, '0', STR_PAD_LEFT);
-            $fileExtension = substr(
-                $picture->MimeType,
-                strpos($picture->MimeType, '/') + 1
-            );
-            $picture->url = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_550.{$fileExtension}";
-            // https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_100{$fileExtension}.jpg
-            return $picture;
-        });
+            $url550Array = [];
+            $url100Array = [];
 
-        return $productPictures;
+            foreach ($productPictures as $picture) {
+                $pictureId = str_pad($picture->PictureId, 7, '0', STR_PAD_LEFT);
+                $fileExtension = substr(
+                    $picture->MimeType,
+                    strpos($picture->MimeType, '/') + 1
+                );
+
+                $url550 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_550.{$fileExtension}";
+                $url550Array[] = $url550;
+
+                $url100 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_100.{$fileExtension}";
+                $url100Array[] = $url100;
+            }
+
+            if (empty($url550Array) && empty($url100Array)) {
+                $url550Array[] =
+                    'https://www.autostanic.hr/content/images/default-image.png';
+                $url100Array[] =
+                    'https://www.autostanic.hr/content/images/default-image.png';
+                return [
+                    'url550' => $url550Array,
+                    'url100' => $url100Array,
+                ];
+            }
+            return [
+                'url550' => $url550Array,
+                'url100' => $url100Array,
+            ];
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     public function getOEMCodeForProduct($id)

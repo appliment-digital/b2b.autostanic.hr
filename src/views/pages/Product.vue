@@ -60,7 +60,7 @@ export default {
             this.productDetails = this.resultsStore.product;
         }
 
-        this.featuredImage = this.productDetails.picture_urls[0];
+        this.featuredImage = this.productDetails;
         console.log({ featuredImage: this.featuredImage });
 
         console.log('product mounted', { productDetails: this.productDetails });
@@ -125,7 +125,7 @@ export default {
                         max-width: 100%;
                     "
                     v-for="thumbnail in productThumbnails"
-                    :src="thumbnail.url"
+                    :src="thumbnail.url550"
                     preview
                     width="64"
                 />
