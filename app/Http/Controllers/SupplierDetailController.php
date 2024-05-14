@@ -10,7 +10,7 @@ use App\Models\SuppliersDetail;
 use App\Models\Warrent;
 use App\Models\DeliveryDeadline;
 
-class SupplierDetailController extends Controller
+class SupplierDetailController extends BaseController
 {
     public function getSupplierWithDetails($id)
     {
@@ -33,7 +33,7 @@ class SupplierDetailController extends Controller
             ->first();
     }
 
-    private function getCategoryName($id)
+    public function getCategoryName($id)
     {
         return DB::connection('webshopdb')
             ->table('dbo.Category')
@@ -43,7 +43,7 @@ class SupplierDetailController extends Controller
             ->first();
     }
 
-    private function getProductName($id)
+    public function getProductName($id)
     {
         return DB::connection('webshopdb')
             ->table('dbo.Product')
@@ -56,7 +56,10 @@ class SupplierDetailController extends Controller
     public function getAllSuppliersWithDetails()
     {
         try {
-            $suppliersDetails = SuppliersDetail::get();
+            $suppliersDetails = SuppliersDetail::orderBy(
+                'updated_at',
+                'desc'
+            )->get();
 
             foreach ($suppliersDetails as &$detail) {
                 $detail->supplier_name = $this->getSuppliersName(
@@ -93,7 +96,21 @@ class SupplierDetailController extends Controller
     public function addDetailsforSupplier(Request $request)
     {
         try {
-            return SuppliersDetail::add($request);
+            $suppliersDetails = SuppliersDetail::add($request);
+
+            if (empty($suppliersDetails)) {
+                return $this->sendError(
+                    $suppliersDetails,
+                    'Greška prilikom dodavanja detalja za dobavljača.'
+                );
+            }
+
+            $success['suppliersDetails'] = $suppliersDetails;
+
+            return $this->sendResponse(
+                $success,
+                'dodani detalji za dobavljača.'
+            );
         } catch (Exception $e) {
             return [
                 'exception' =>
@@ -106,13 +123,51 @@ class SupplierDetailController extends Controller
         }
     }
 
-    public function updateDetailsforSupplier(Request $request)
+    public function updateDetailsforSupplier($id, Request $request)
     {
         try {
-            return SuppliersDetail::updateSuppliersDetail(
-                $request->id,
+            $supplierDetails = SuppliersDetail::updateSuppliersDetail(
+                $id,
                 $request
             );
+
+            if (empty($supplierDetails)) {
+                return $this->sendError(
+                    $supplierDetails,
+                    'Greška prilikom uređivanja detalja za dobavljača.'
+                );
+            }
+
+            $success['supplierDetails'] = $supplierDetails;
+
+            return $this->sendResponse(
+                $success,
+                'uređeni detalji za dobavljača.'
+            );
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getUniqueCategories()
+    {
+        try {
+            $uniqueCategoryIds = SuppliersDetail::distinct()->pluck(
+                'web_db_category_id'
+            );
+
+            $uniqueCategories = [];
+
+            foreach ($uniqueCategoryIds as $id) {
+                $uniqueCategories[] = [
+                    'id' => $id,
+                    'name' => $this->getCategoryName($id),
+                ];
+            }
+
+            return $uniqueCategories;
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),

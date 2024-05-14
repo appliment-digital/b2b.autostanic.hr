@@ -9,10 +9,22 @@ export default class SupplierDetailService {
         );
     }
 
+    async getCategoryName(id) {
+        return Axios.get(this.apiResourceEndpoint + '/getCategoryName/' + id);
+    }
+
+    async getProductName(id) {
+        return Axios.get(this.apiResourceEndpoint + '/getProductName/' + id);
+    }
+
     async getAllSuppliersWithDetails() {
         return Axios.get(
             this.apiResourceEndpoint + '/getAllSuppliersWithDetails',
         );
+    }
+
+    async getUniqueCategories() {
+        return Axios.get(this.apiResourceEndpoint + '/getUniqueCategories');
     }
 
     async addDetailsforSupplier(object) {
@@ -24,7 +36,7 @@ export default class SupplierDetailService {
 
     async updateDetailsforSupplier(id, object) {
         return Axios.put(
-            this.apiResourceEndpoint + '/addDetailsforSupplier/' + id,
+            this.apiResourceEndpoint + '/updateDetailsforSupplier/' + id,
             object,
         );
     }

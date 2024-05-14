@@ -49,6 +49,10 @@ export default {
             productsWithCoust: [],
             suppliersWithDetails: [],
             selectedProduct: null,
+            companyName: null,
+            productName: null,
+            selectedDetailsId: null,
+            disabledCategories: [],
         };
     },
     watch: {
@@ -60,6 +64,15 @@ export default {
     },
     computed: {},
     methods: {
+        resetInputs() {
+            this.selectedSuppier =
+                this.selectedProduct =
+                this.productName =
+                    null;
+            this.selectedCategories = [];
+            this.minPrice = this.maxPrice = 0;
+            this.supplierDetail = {};
+        },
         getWarrents() {
             WarrentService.getAll().then((response) => {
                 this.warrents = response.data.data;
@@ -80,6 +93,7 @@ export default {
                 .getCategoriesForSupplier(this.selectedSuppier.id)
                 .then((response) => {
                     this.categories = response.data;
+                    this.getUniqueCategories();
                 });
         },
         getProductsBySupplierCategoresAndPriceRange() {
@@ -95,16 +109,40 @@ export default {
                 this.productsWithCoust = response.data;
             });
         },
-        openDialog(data) {
+        getCategoryName(categoryId) {
+            return supplierDetailService
+                .getCategoryName(categoryId)
+                .then((response) => {
+                    return response.data;
+                });
+        },
+        getProductName(productId) {
+            return supplierDetailService
+                .getProductName(productId)
+                .then((response) => {
+                    this.showDialog = true;
+                    return response.data;
+                });
+        },
+        getUniqueCategories() {
+            supplierDetailService.getUniqueCategories().then((response) => {
+                this.disabledCategories = response.data;
+            });
+        },
+        async openDialog(data) {
             if (data) {
-                this.showDialog = true;
+                this.selectedDetailsId = data.id;
+                this.getCategoryName(data.web_db_category_id);
+
                 this.selectedSuppier = this.suppliers.find(
                     (s) => s.id == data.web_db_supplier_id,
                 );
-                this.selectedCategories = this.categories.find(
-                    (c) => c.id == data.web_db_category_id,
+                this.companyName = await this.getCategoryName(
+                    data.web_db_category_id,
                 );
-                //this.selectedProduct = data.web_db_product_id ?? null;
+                this.productName = await this.getProductName(
+                    data.web_db_product_id,
+                );
                 this.supplierDetail.markUp = data.mark_up;
                 this.supplierDetail.product_cost = data.product_cost ?? null;
                 this.supplierDetail.expenses = data.expenses ?? null;
@@ -124,6 +162,7 @@ export default {
         },
         closeDialog() {
             this.showDialog = false;
+            this.resetInputs();
         },
         saveSuppliersDeatels() {
             this.closeDialog();
@@ -136,22 +175,64 @@ export default {
                 });
         },
         saveDetailsforSupplier() {
-            const categoriesIds = this.selectedCategories.map(
-                (category) => category.id,
-            );
-            supplierDetailService
-                .addDetailsforSupplier({
-                    supplierId: this.selectedSuppier.id,
-                    categoriesIds: categoriesIds,
-                    products: this.productsWithCoust,
-                    minPrice: this.minPrice,
-                    maxPrice: this.maxPrice,
-                    supplierDetail: this.supplierDetail,
-                })
-                .then((response) => {
-                    this.getAllSuppliersWithDetails();
-                    this.closeDialog();
-                });
+            if (this.selectedDetailsId) {
+                supplierDetailService
+                    .updateDetailsforSupplier(
+                        this.selectedDetailsId,
+                        this.supplierDetail,
+                    )
+                    .then((response) => {
+                        if (response.data.success) {
+                            this.$toast.add({
+                                severity: 'success',
+                                summary: 'Uspješno',
+                                detail: response.data.message,
+                                life: 3000,
+                            });
+                            this.getAllSuppliersWithDetails();
+                            this.closeDialog();
+                        } else {
+                            this.$toast.add({
+                                severity: 'error',
+                                summary: 'Greška',
+                                detail: response.data.message,
+                                life: 3000,
+                            });
+                        }
+                    });
+            } else {
+                const categoriesIds = this.selectedCategories.map(
+                    (category) => category.id,
+                );
+                supplierDetailService
+                    .addDetailsforSupplier({
+                        supplierId: this.selectedSuppier.id,
+                        categoriesIds: categoriesIds,
+                        products: this.productsWithCoust,
+                        minPrice: this.minPrice,
+                        maxPrice: this.maxPrice,
+                        supplierDetail: this.supplierDetail,
+                    })
+                    .then((response) => {
+                        if (response.data.success) {
+                            this.$toast.add({
+                                severity: 'success',
+                                summary: 'Uspješno',
+                                detail: response.data.message,
+                                life: 3000,
+                            });
+                            this.getAllSuppliersWithDetails();
+                            this.closeDialog();
+                        } else {
+                            this.$toast.add({
+                                severity: 'error',
+                                summary: 'Greška',
+                                detail: response.data.message,
+                                life: 3000,
+                            });
+                        }
+                    });
+            }
         },
     },
 };
@@ -368,8 +449,13 @@ export default {
             }}</label>
         </div>
         <div class="field grid">
-            <label class="col-3">Kategorije:</label>
-            <div class="col-9 font-semibold">
+            <label class="col-3">Kategorija/e:</label>
+            <div v-if="companyName" class="col-9 font-semibold">
+                <div class="block">
+                    <label>{{ companyName }}</label>
+                </div>
+            </div>
+            <div v-else class="col-9 font-semibold">
                 <template
                     v-for="(category, index) in selectedCategories"
                     :key="index"
@@ -379,6 +465,15 @@ export default {
                         ><br />
                     </div>
                 </template>
+            </div>
+        </div>
+
+        <div v-if="productName" class="field grid">
+            <label class="col-3">Proizvod:</label>
+            <div class="col-9 font-semibold">
+                <div class="block">
+                    <label>{{ productName }}</label>
+                </div>
             </div>
         </div>
 
@@ -394,6 +489,15 @@ export default {
             <label class="col-3">Odabrano:</label>
             <div class="col-9 font-semibold">
                 <label>{{ this.productsWithCoust.length }} proizvoda</label>
+            </div>
+        </div>
+
+        <div v-if="productName" class="field grid">
+            <label class="col-3">Cijena:</label>
+            <div class="col-9 font-semibold">
+                <div class="block">
+                    <label>{{ supplierDetail.product_cost }}</label>
+                </div>
             </div>
         </div>
 

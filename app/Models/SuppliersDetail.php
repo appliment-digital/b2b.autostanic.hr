@@ -28,16 +28,18 @@ class SuppliersDetail extends Model
         $suppliersDetails = [];
 
         foreach ($data['categoriesIds'] as $categoryId) {
-            $suppliersDetail = new self();
-            $suppliersDetail->web_db_supplier_id = $data['supplierId'];
-            $suppliersDetail->web_db_category_id = $categoryId;
-            $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
-            $suppliersDetail->warrent_id =
-                $data['supplierDetail']['warrent']['id'] ?? null;
-            $suppliersDetail->delivery_deadline_id =
-                $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
             if (!empty($data['products'])) {
                 foreach ($data['products'] as $product) {
+                    $suppliersDetail = new self();
+                    $suppliersDetail->web_db_supplier_id = $data['supplierId'];
+                    $suppliersDetail->web_db_category_id = $categoryId;
+                    $suppliersDetail->mark_up =
+                        $data['supplierDetail']['markUp'];
+                    $suppliersDetail->warrent_id =
+                        $data['supplierDetail']['warrent']['id'] ?? null;
+                    $suppliersDetail->delivery_deadline_id =
+                        $data['supplierDetail']['deliveryDeadline']['id'] ??
+                        null;
                     $suppliersDetail->web_db_product_id =
                         $product['Id'] ?? null;
                     $suppliersDetail->product_cost =
@@ -45,11 +47,22 @@ class SuppliersDetail extends Model
 
                     $suppliersDetail->expenses =
                         $data['supplierDetail']['expenses'] ?? null;
-                }
-            }
 
-            $suppliersDetail->save();
-            $suppliersDetail->refresh();
+                    $suppliersDetail->save();
+                    $suppliersDetail->refresh();
+                }
+            } else {
+                $suppliersDetail = new self();
+                $suppliersDetail->web_db_supplier_id = $data['supplierId'];
+                $suppliersDetail->web_db_category_id = $categoryId;
+                $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
+                $suppliersDetail->warrent_id =
+                    $data['supplierDetail']['warrent']['id'] ?? null;
+                $suppliersDetail->delivery_deadline_id =
+                    $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
+                $suppliersDetail->save();
+                $suppliersDetail->refresh();
+            }
 
             $suppliersDetails[] = $suppliersDetail;
         }
@@ -61,11 +74,11 @@ class SuppliersDetail extends Model
     {
         $suppliersDetail = self::find($id);
 
-        $suppliersDetail->mark_up = $data['mark_up'];
+        $suppliersDetail->mark_up = $data['markUp'];
         $suppliersDetail->expenses = $data['expenses'] ?? null;
-        $suppliersDetail->warrant_id = $data['warrant_id'] ?? null;
+        $suppliersDetail->warrent_id = $data['warrent']['id'] ?? null;
         $suppliersDetail->delivery_deadline_id =
-            $data['delivery_deadline_id'] ?? null;
+            $data['deliveryDeadline']['id'] ?? null;
 
         $suppliersDetail->save();
         $suppliersDetail->refresh();
