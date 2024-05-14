@@ -156,7 +156,13 @@ class CategoryController extends BaseController
                     $mimeType = $category->MimeType;
                     $extension = explode('/', $mimeType);
                     $fileExtension = end($extension);
-                    $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$categories[0]->SeoFilename}_170.{$fileExtension}";
+
+                    if ($mimeType) {
+                        $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$categories[0]->SeoFilename}_170.{$fileExtension}";
+                    } else {
+                        $pictureUrl =
+                            'https://www.autostanic.hr/content/images/default-image.png';
+                    }
                 }
 
                 $categoryData['picture_url'] = $pictureUrl;
@@ -170,82 +176,5 @@ class CategoryController extends BaseController
                 'error' => 'Exception: ' . $e->getMessage(),
             ]);
         }
-    }
-
-    public function test()
-    {
-        $id = 39596;
-        $query = DB::connection('webshopdb')
-            ->table('dbo.Category')
-            ->select(
-                'Category.Id',
-                'Category.Name',
-                'Category.ParentCategoryId',
-                'Category.ProductCount',
-                'Category.PictureId',
-                'Category.Breadcrumb',
-                'Category.DisplayOrder',
-                'Picture.SeoFilename',
-                'Picture.MimeType'
-            )
-            ->leftJoin(
-                'dbo.Category_Picture_Mapping',
-                'Category_Picture_Mapping.CategoryId',
-                '=',
-                'Category.Id'
-            )
-            ->leftJoin(
-                'dbo.Picture',
-                'Category_Picture_Mapping.PictureId',
-                '=',
-                'Picture.Id'
-            )
-            ->where('Category.ParentCategoryId', $id)
-            ->where('Category.Deleted', 0)
-            ->where('Category.Published', 1)
-            ->orderBy('Category.DisplayOrder')
-            ->orderBy('Category.Id')
-            ->distinct()
-            ->get()
-            ->toArray();
-
-        $response = [];
-
-        $categoriesById = collect($query)->groupBy('Id');
-
-        foreach ($categoriesById as $categoryId => $categories) {
-            $categoryData = [
-                'Id' => $categoryId,
-                'Name' => $categories[0]->Name,
-                'ParentCategoryId' => $categories[0]->ParentCategoryId,
-                'ProductCount' => $categories[0]->ProductCount,
-                'PictureId' => $categories[0]->PictureId,
-                'Breadcrumb' => $categories[0]->Breadcrumb,
-                'DisplayOrder' => $categories[0]->DisplayOrder,
-                'SeoFilename' => $categories[0]->SeoFilename,
-                'MimeType' => $categories[0]->MimeType,
-            ];
-
-            $pictureUrls = [];
-
-            foreach ($categories as $category) {
-                $paddedPictureId = str_pad(
-                    $category->PictureId,
-                    7,
-                    '0',
-                    STR_PAD_LEFT
-                );
-                $mimeType = $category->MimeType;
-                $extension = explode('/', $mimeType);
-                $fileExtension = end($extension);
-                $pictureUrls[] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$category->SeoFilename}_170.{$fileExtension}";
-            }
-
-            $categoryData['picture_urls'] = $pictureUrls;
-
-            $response[] = $categoryData;
-        }
-
-        return $this->convertKeysToCamelCase($response);
     }
 }
