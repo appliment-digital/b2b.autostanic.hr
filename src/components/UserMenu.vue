@@ -22,7 +22,7 @@ export default {
         },
 
         logout() {
-            userService.logout()
+            userService.logout().then(() => this.$router.push('/auth/login'))
             this.userStore.logout();
         },
     },
