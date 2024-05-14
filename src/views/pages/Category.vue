@@ -149,16 +149,11 @@ export default {
             // );
         },
 
-        handleFilterSelect(filters) {
-            const selectedFilters = Object.keys(filters).filter((entry) => states[key]);
+        handleFilterSelect(filters, categoryId) {
+            console.log('filters:', filters);
 
-            console.log({ filters });
 
-            if (filters[0]) {
-                this.getProducts(this.selectedCategoryId, 1, 10, {
-                    ManufacturerName: filters,
-                });
-            }
+            this.getProducts(categoryId, filters)
         },
 
         setDefaultImageToProducts(products) {

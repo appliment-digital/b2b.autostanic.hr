@@ -33,33 +33,40 @@ export default {
 
             filters: {
                 condition: {
-                    isNew: false,
-                    isUsed: false,
+                    isNewPart: false,
+                    isUsedPart: false,
                 },
 
-                manufacturers: {}
-            }
+                manufacturers: {},
+            },
         };
     },
     mounted() {
+        console.log('results mounted');
         // logs
-        console.log(this.categoryStore.selectedCategory)
+        console.log(this.categoryStore.selectedCategory);
 
         // load category data from storage
-        const selectedCategory = this.categoryStore.selectedCategory
+        const selectedCategory = this.categoryStore.selectedCategory;
 
         // set total items in a category
-        this.totalItems = Number(selectedCategory.productCount)
-
+        this.totalItems = Number(selectedCategory.productCount);
 
         // set filters
-        this.manufacturers.forEach(entry => {
-            this.filters.manufacturers[entry] = false
-        })
-
+        this.manufacturers.forEach((entry) => {
+            this.filters.manufacturers[entry] = false;
+        });
+    },
+    updated() {
+        console.log('results updated', { products: this.products });
     },
     computed: {
-        ...mapStores(useResultsStore, useShoppingCartStore, useCategoryStore, useUIStore),
+        ...mapStores(
+            useResultsStore,
+            useShoppingCartStore,
+            useCategoryStore,
+            useUIStore,
+        ),
     },
     methods: {
         handleProductClick(product) {
@@ -73,10 +80,47 @@ export default {
             this.$emit('on-page-change', event);
         },
 
+        /**
+         * Handle user interaction with filter checkboxes (condition, manufacturers)
+         */
         handleFilterSelect(event) {
-            console.log({event});
-            console.log(this.filters);
-            this.$emit('on-filter-select', this.filters);
+            const { id } = event.target;
+
+            // 1. don't allow both condition-filters to be 'true' (checked)
+
+            if (id === 'isNewPart' && this.filters.condition.isUsedPart) {
+                this.filters.condition.isUsedPart = false;
+            }
+
+            if (id === 'isUsedPart' && this.filters.condition.isNewPart) {
+                this.filters.condition.isNewPart = false;
+            }
+
+            // 2. create selected filters data
+
+            const selectedFilters = { manufacturerName: [] }; 
+
+            //  add condition filters
+            for (const key in this.filters.condition) {
+                if (this.filters.condition[key]) {
+                    selectedFilters[key] = this.filters.condition[key];
+                }
+            }
+
+            //  add manufacturer filters
+            for (const key in this.filters.manufacturers) {
+                if (this.filters.manufacturers[key]) {
+                    selectedFilters.manufacturerName.push(`${key}`)
+                }
+            }
+
+            // 3. emit event to call parent handler ('handleFilterSelect')
+
+            this.$emit(
+                'on-filter-select',
+                selectedFilters,
+                this.categoryStore.selectedCategory.id,
+            );
         },
 
         formatProductStockQuantity(val) {
@@ -114,10 +158,10 @@ export default {
                                         style: 'border-width: 1px',
                                     },
                                 }"
-                                :v-model="false"
+                                v-model="filters.condition.isNewPart"
+                                @change="handleFilterSelect"
                                 :binary="true"
-                                name="pizza"
-                                value="Mushroom"
+                                inputId="isNewPart"
                             />
                             <label for="ingredient2" class="ml-2 text-sm">
                                 NOVO
@@ -130,10 +174,10 @@ export default {
                                         style: 'border-width: 1px',
                                     },
                                 }"
-                                :v-model="false"
-                                inputId="ingredient2"
-                                name="pizza"
-                                value="Mushroom"
+                                v-model="filters.condition.isUsedPart"
+                                @change="handleFilterSelect"
+                                :binary="true"
+                                inputId="isUsedPart"
                             />
                             <label for="ingredient2" class="ml-2 text-sm">
                                 RABLJENO
@@ -166,10 +210,11 @@ export default {
                                 <!-- Checkbox -->
                                 <Checkbox
                                     v-if="manufacturer"
-                                    v-model="filters.manufacturers[manufacturer]"
+                                    v-model="
+                                        filters.manufacturers[manufacturer]
+                                    "
                                     @change="handleFilterSelect"
                                     :binary="true"
-                                    :name="manufacturer"
                                     :pt="{
                                         box: {
                                             style: 'border-width: 1px',
