@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // lib
 import slug from 'slug';
-import axios from 'axios';
 
 // utils
 import {
@@ -30,8 +29,8 @@ import ThankYou from '@/views/pages/ThankYou.vue';
 import PriceManagement from '@/views/pages/admin/PriceManagement.vue';
 
 // service
-import CategoryService from '../service/CategoryService';
-import UserService from '../service/UserService';
+import CategoryService from '@/service/CategoryService';
+import UserService from '@/service/UserService';
 
 setSlugCharMap(slug);
 
@@ -66,7 +65,6 @@ const routes = [
             },
             {
                 path: '/' + encodeURI('košarica'),
-                name: 'košarica',
                 component: ShoppingCart,
             },
             {
@@ -89,13 +87,13 @@ const routes = [
             }),
         ],
     },
-
     {
         path: '/admin',
         component: AdminLayout,
         children: [
             {
                 path: 'users',
+                name: 'users',
                 component: UserTable,
             },
             {
@@ -108,13 +106,13 @@ const routes = [
             },
         ],
     },
-
     {
         path: '/auth',
         component: AuthLayout,
         children: [
             {
                 path: 'login',
+                name: 'login',
                 component: Login,
                 meta: { isPublic: true },
             },
@@ -140,8 +138,20 @@ const router = createRouter({
     },
 });
 
-router.beforeEach((to, from) => {
-
+router.beforeResolve(async (to) => {
+    if (to.meta.isPublic) {
+        return true;
+    } else {
+        try {
+            const res = await UserService.getCurrentUserData();
+            if (!res.data) {
+                throw new Error('Not authenticated...');
+            }
+        } catch (error) {
+            console.error(error);
+            return { name: 'login' };
+        }
+    }
 });
 
 export default router;

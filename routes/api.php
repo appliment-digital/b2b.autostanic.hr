@@ -44,6 +44,11 @@ Route::get('/test', function (Request $Request) {
     ]);
 });
 
+Route::get('/user/getCurrentUserData', [
+    UserController::class,
+    'getCurrentUserData',
+]);
+
 //**************** MIDDLEWARE ******************
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,10 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
     //****************   USER CONTOLLER ******************
 
     Route::get('/user/getRoles', [UserController::class, 'getRoles']);
-    Route::get('/user/getCurrentUserData', [
-        UserController::class,
-        'getCurrentUserData',
-    ]);
     Route::post('/user/add', [UserController::class, 'add']);
     Route::post('/user/getAll', [UserController::class, 'getAll']);
     Route::post('/user/changeStatus', [UserController::class, 'changeStatus']);
@@ -99,12 +100,22 @@ Route::middleware('auth:sanctum')->group(function () {
         ProductController::class,
         'getProductById',
     ]);
-
     Route::get('/product/getProductPictures/{id}', [
         ProductController::class,
         'getProductPictures',
     ]);
-
+    Route::get('/product/getOEMCodeForProduct/{id}', [
+        ProductController::class,
+        'getOEMCodeForProduct',
+    ]);
+    Route::get('/product/getCarTypesForProduct/{id}', [
+        ProductController::class,
+        'getCarTypesForProduct',
+    ]);
+    Route::get('/product/getSpecificationAttributeForProduct/{id}', [
+        ProductController::class,
+        'getSpecificationAttributeForProduct',
+    ]);
     Route::post('/product/getProductsBySupplierCategoresAndPriceRange', [
         ProductController::class,
         'getProductsBySupplierCategoresAndPriceRange',

@@ -1,4 +1,7 @@
 <script>
+// lib
+import axios from 'axios';
+
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
@@ -18,12 +21,11 @@ export default {
     },
     methods: {
         handleAdminIconClick() {
-            console.log('pushing /admin/users');
             this.$router.push('/admin/users');
         },
 
         logout() {
-            userService.logout().then(() => this.$router.push('/auth/login'))
+            userService.logout().then(() => this.$router.push('/auth/login'));
             this.userStore.logout();
         },
     },
@@ -69,9 +71,12 @@ export default {
                         <span>{{ userStore.fullName }}</span>
                     </span>
                 </li>
-                <li v-if="userStore.isUserAdmin" role="menuitem" class="m-0 mb-3">
+                <li
+                    v-if="userStore.isUserAdmin"
+                    role="menuitem"
+                    class="m-0 mb-3"
+                >
                     <a
-                        href="#"
                         @click="handleAdminIconClick"
                         class="flex align-items-center hover:text-primary-500 transition-duration-200"
                         v-styleclass="{

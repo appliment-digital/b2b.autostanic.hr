@@ -86,6 +86,7 @@ export default {
             placeholder="Lozinka"
             :feedback="false"
             v-model="password"
+            @keyup.enter="login()"
         />
 
         <div class="flex justify-content-between mt-6 w-full">
