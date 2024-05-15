@@ -142,17 +142,34 @@ Route::middleware('auth:sanctum')->group(function () {
         SupplierDetailController::class,
         'getSupplierWithDetails',
     ]);
-    Route::post('/supplierDetail/getAllSuppliersWithDetails', [
+
+    Route::get('/supplierDetail/getCategoryName/{id}', [
+        SupplierDetailController::class,
+        'getCategoryName',
+    ]);
+
+    Route::get('/supplierDetail/getProductName/{id}', [
+        SupplierDetailController::class,
+        'getProductName',
+    ]);
+
+    Route::get('/supplierDetail/getAllSuppliersWithDetails', [
         SupplierDetailController::class,
         'getAllSuppliersWithDetails',
     ]);
+
+    Route::get('/supplierDetail/getUniqueCategories', [
+        SupplierDetailController::class,
+        'getUniqueCategories',
+    ]);
+
     Route::post('/supplierDetail/addDetailsforSupplier', [
         SupplierDetailController::class,
         'addDetailsforSupplier',
     ]);
 
     Route::put('/supplierDetail/updateDetailsforSupplier/{id}', [
-        UserController::class,
+        SupplierDetailController::class,
         'updateDetailsforSupplier',
     ]);
 

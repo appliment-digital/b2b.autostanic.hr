@@ -11,10 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('suppliers_details', function (Blueprint $table) {
+            $table->id();
             $table->unsignedBigInteger('web_db_supplier_id');
             $table->unsignedBigInteger('web_db_category_id');
             $table->unsignedBigInteger('web_db_product_id')->nullable();
-            $table->unsignedBigInteger('product_cost')->nullable();
+            $table->decimal('product_cost', 10, 2)->nullable();
             $table->unsignedBigInteger('mark_up');
             $table->unsignedBigInteger('expenses')->nullable();
             $table->unsignedBigInteger('warrent_id')->nullable();

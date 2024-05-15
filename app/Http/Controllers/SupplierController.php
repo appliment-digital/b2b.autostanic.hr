@@ -54,4 +54,21 @@ class SupplierController extends BaseController
             ]);
         }
     }
+
+    public function getNameById($id)
+    {
+        try {
+            $query = DB::connection('webshopdb')
+                ->table('dbo.Supplier')
+                ->select('Supplier.Name')
+                ->where('Supplier.Id', $id)
+                ->get();
+
+            return $this->convertKeysToCamelCase($query);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
 }
