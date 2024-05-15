@@ -30,30 +30,28 @@ class ProductController extends BaseController
                 ->where('Product.Published', 1)
                 ->where('Product_Category_Mapping.Deleted', 0)
                 // filters
-                ->when($filters->has('manufacturerName'), function (
-                    $query
-                ) use ($filters) {
-                    return $query->whereIn(
-                        'Product.ManufacturerName',
-                        $filters->manufacturerName
-                    );
-                })
-                ->when($filters->has('isUsedPart'), function ($query) use (
-                    $filters
-                ) {
-                    return $query->where(
-                        'Product.IsUsedPart',
-                        $filters->isUsedPart
-                    );
-                })
-                ->when($filters->has('isNewPart'), function ($query) use (
-                    $filters
-                ) {
-                    return $query->where(
-                        'Product.IsNewPart',
-                        $filters->isNewPart
-                    );
-                })
+                ->when(
+                    $filters->has('manufacturerName') &&
+                        $filters->manufacturerName !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ManufacturerName',
+                            $filters->manufacturerName
+                        );
+                    }
+                )
+                ->when(
+                    $filters->has('isUsedPart') && $filters->isUsedPart == true,
+                    function ($query) use ($filters) {
+                        return $query->where('Product.IsUsedPart', 1);
+                    }
+                )
+                ->when(
+                    $filters->has('isNewPart') && $filters->isNewPart == true,
+                    function ($query) use ($filters) {
+                        return $query->where('Product.IsNewPart', 1);
+                    }
+                )
                 ->count();
 
             $query = DB::connection('webshopdb')
@@ -70,7 +68,7 @@ class ProductController extends BaseController
                     'Product.ManufacturerName',
                     'Picture.SeoFilename',
                     'Picture.MimeType',
-                    'Picture.Id as PictureId'
+                    'Product_Picture_Mapping.PictureId as PictureId'
                 )
                 ->join(
                     'Product_Category_Mapping',
@@ -78,66 +76,80 @@ class ProductController extends BaseController
                     '=',
                     'Product_Category_Mapping.ProductId'
                 )
+                ->leftJoin('Product_Picture_Mapping', function ($join) {
+                    $join
+                        ->on(
+                            'Product.Id',
+                            '=',
+                            'Product_Picture_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_Picture_Mapping.Id',
+                            '=',
+                            DB::raw(
+                                '(SELECT MIN(Id) FROM Product_Picture_Mapping WHERE ProductId = Product.Id)'
+                            )
+                        );
+                })
                 ->leftJoin(
-                    'dbo.Product_Picture_Mapping',
-                    'Product_Picture_Mapping.ProductId',
-                    '=',
-                    'Product.Id'
-                )
-                ->leftJoin(
-                    'dbo.Picture',
+                    'Picture',
                     'Product_Picture_Mapping.PictureId',
                     '=',
                     'Picture.Id'
                 )
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
-                ->where('Product_Picture_Mapping.DisplayOrder', 1)
-                //filters
-                ->when($filters->has('manufacturerName'), function (
-                    $query
-                ) use ($filters) {
-                    return $query->whereIn(
-                        'Product.ManufacturerName',
-                        $filters->manufacturerName
-                    );
-                })
-                ->when($filters->has('isUsedPart'), function ($query) use (
-                    $filters
-                ) {
-                    return $query->where(
-                        'Product.IsUsedPart',
-                        $filters->isUsedPart
-                    );
-                })
-                ->when($filters->has('isNewPart'), function ($query) use (
-                    $filters
-                ) {
-                    return $query->where(
-                        'Product.IsNewPart',
-                        $filters->isNewPart
-                    );
-                })
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->where('Product_Category_Mapping.Deleted', 0)
-                ->groupBy(
-                    'Product.Id',
-                    'Product.Name',
-                    'Product.Sku',
-                    'Product.StockQuantity',
-                    'Product.Price',
-                    'Product.OldPrice',
-                    'Product.IsNewPart',
-                    'Product.IsUsedPart',
-                    'Product.ManufacturerName',
-                    'Picture.SeoFilename',
-                    'Picture.MimeType',
-                    'Picture.Id'
+                // filters
+                ->when(
+                    $filters->has('manufacturerName') &&
+                        $filters->manufacturerName !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ManufacturerName',
+                            $filters->manufacturerName
+                        );
+                    }
                 )
+                ->when(
+                    $filters->has('isUsedPart') && $filters->isUsedPart == true,
+                    function ($query) use ($filters) {
+                        return $query->where('Product.IsUsedPart', 1);
+                    }
+                )
+                ->when(
+                    $filters->has('isNewPart') && $filters->isNewPart == true,
+                    function ($query) use ($filters) {
+                        return $query->where('Product.IsNewPart', 1);
+                    }
+                )
+                ->orderBy('Product.IsNewPart', 'desc')
                 ->orderBy('Product.Price', 'asc')
                 ->offset($offset)
                 ->limit($pageSize)
-                ->get();
+                ->distinct()
+                ->get()
+                ->map(function ($product) {
+                    $pictureUrl = '';
+                    if (!is_null($product->PictureId)) {
+                        $paddedPictureId = str_pad(
+                            $product->PictureId,
+                            7,
+                            '0',
+                            STR_PAD_LEFT
+                        );
+                        $extension = explode('/', $product->MimeType);
+                        $fileExtension = end($extension);
+                        $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$product->SeoFilename}_280.{$fileExtension}";
+                    } else {
+                        $pictureUrl =
+                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
+                    }
+                    $product->pictureUrl = $pictureUrl;
+                    return $product;
+                })
+                ->toArray();
 
             $manufacturersQuery = DB::connection('webshopdb')
                 ->table('dbo.Product')
@@ -155,49 +167,12 @@ class ProductController extends BaseController
                 ->groupBy('ManufacturerName');
 
             $response = [
-                'products' => [],
+                'products' => $this->convertKeysToCamelCase($query),
                 'manufacturers' => $manufacturersQuery->pluck(
                     'ManufacturerName'
                 ),
                 'productCount' => $productCount,
             ];
-
-            $productsById = collect($query)->groupBy('Id');
-
-            foreach ($productsById as $productId => $products) {
-                $productData = [
-                    'id' => $productId,
-                    'name' => $products[0]->Name,
-                    'sku' => $products[0]->Sku,
-                    'stockQuantity' => $products[0]->StockQuantity,
-                    'price' => $products[0]->Price,
-                    'oldPrice' => $products[0]->OldPrice,
-                    'isNewPart' => $products[0]->IsNewPart,
-                    'isUsedPart' => $products[0]->IsUsedPart,
-                    'manufacturerName' => $products[0]->ManufacturerName,
-                ];
-
-                foreach ($products as $product) {
-                    if ($product->SeoFilename && $product->MimeType) {
-                        $paddedPictureId = str_pad(
-                            $product->PictureId,
-                            7,
-                            '0',
-                            STR_PAD_LEFT
-                        );
-                        $extension = explode('/', $product->MimeType);
-                        $fileExtension = end($extension);
-                        $productData[
-                            'pictureUrl'
-                        ] = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$products[0]->SeoFilename}_280.{$fileExtension}";
-                    } else {
-                        $productData['pictureUrl'][] =
-                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
-                    }
-                }
-
-                $response['products'][] = $productData;
-            }
 
             return $this->convertKeysToCamelCase($response);
         } catch (Exception $e) {
