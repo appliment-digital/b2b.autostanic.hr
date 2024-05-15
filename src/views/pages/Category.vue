@@ -152,7 +152,6 @@ export default {
         handleFilterSelect(filters, categoryId) {
             console.log('filters:', filters);
 
-
             this.getProducts(categoryId, filters)
         },
 

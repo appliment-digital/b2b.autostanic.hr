@@ -98,7 +98,7 @@ export default {
 
             // 2. create selected filters data
 
-            const selectedFilters = { manufacturerName: [] }; 
+            const selectedFilters = { manufacturerName: [] };
 
             //  add condition filters
             for (const key in this.filters.condition) {
@@ -110,7 +110,7 @@ export default {
             //  add manufacturer filters
             for (const key in this.filters.manufacturers) {
                 if (this.filters.manufacturers[key]) {
-                    selectedFilters.manufacturerName.push(`${key}`)
+                    selectedFilters.manufacturerName.push(`${key}`);
                 }
             }
 
@@ -239,15 +239,45 @@ export default {
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
                 <!-- product count -->
-                <span>{{ totalItems }}</span>
 
-                <Paginator
+                <div class="ml-2 mb-4 flex align-items-center">
+                    <span class=""
+                        >Proizvodi
+                        <span class="text-red-400 font-bold">{{
+                            totalItems
+                        }}</span></span
+                    >
+                    <span class="ml-3 mr-1">Prikaz</span>
+                    <Button
+                        class="button--no-shadow mr-1 text-xs p-0"
+                        style="width: 32px; height: 32px"
+                        label="24"
+                        outlined
+                        severity="secondary"
+                    />
+                    <Button
+                        class="button--no-shadow mr-1 text-xs p-0"
+                        style="width: 32px; height: 32px"
+                        label="36"
+                        outlined
+                        severity="secondary"
+                    />
+                    <Button
+                        class="button--no-shadow mr-1 text-xs p-0"
+                        style="width: 32px; height: 32px"
+                        label="48"
+                        outlined
+                        severity="secondary"
+                    />
+                </div>
+
+                <!-- <Paginator
                     :rows="itemsPerPage"
                     :totalRecords="totalItems"
                     v-model:page="currentPage"
                     @page="handlePageChangeClick"
                     class="p-0 mb-4"
-                />
+                /> -->
 
                 <div id="search-results" class="grid">
                     <div v-for="product in products" class="col-4">
