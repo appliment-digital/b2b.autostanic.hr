@@ -277,20 +277,21 @@ class ProductController extends BaseController
 
     public function getOEMCodeForProduct($id)
     {
-        $response = DB::connection('webshopdb')
-            ->table('dbo.Product_OEMCode_Mapping')
-            ->select('OEMCode.*')
+        $oemCodes = DB::connection('webshopdb')
+            ->table('Product_OEMCode_Mapping')
+            ->select('OEMCodeDenormalized', 'OEMManufacturer')
             ->join(
-                'OEMCode',
-                'Product_OEMCode_Mapping.OEMCodeId',
+                'Product',
+                'Product.Id',
                 '=',
-                'OEMCode.Id'
+                'Product_OEMCode_Mapping.ProductId'
             )
-            ->where('Product_OEMCode_Mapping.ProductId', $id)
-            ->where('OEMCode.Published', 1)
+            ->where('Product.Id', $id)
             ->get();
 
-        return $this->convertKeysToCamelCase($response);
+        return $oemCodes;
+
+        return $this->convertKeysToCamelCase($oemCodes);
     }
 
     public function getSpecificationAttributeForProduct($id)
