@@ -1,7 +1,49 @@
-import Axios from 'axios';
+import axios from 'axios';
 
 export default class ProductService {
     static apiResourceEndpoint = '/api/product';
+
+    // get all related product data
+
+    static async getDetails(productID) {
+        const pictures = await this.getProductPictures(productID);
+        const oemCodes = await this.getOEMCodeForProduct(productID);
+        const specifications = await this.getSpecificationAttributeForProduct(productID);
+        const relatedVehicles = await this.getCarTypesForProduct(productID)
+
+        console.log({pictures, oemCodes, specifications, relatedVehicles});
+        return {pictures, oemCodes, specifications, relatedVehicles}
+    }
+
+    // get
+
+    static async getProductPictures(id) {
+        return axios.get(
+            this.apiResourceEndpoint + '/getProductPictures/' + id,
+        );
+    }
+
+    static async getOEMCodeForProduct(id) {
+        return axios.get(
+            this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id,
+        );
+    }
+
+    static async getSpecificationAttributeForProduct(id) {
+        return axios.get(
+            this.apiResourceEndpoint +
+                '/getSpecificationAttributeForProduct/' +
+                id,
+        );
+    }
+
+    static async getCarTypesForProduct(id) {
+        return axios.get(
+            this.apiResourceEndpoint + '/getCarTypesForProduct/' + id,
+        );
+    }
+
+    // post
 
     static async getProductsByCategoryId(
         categoryId,
@@ -9,7 +51,7 @@ export default class ProductService {
         pageSize,
         filter = {},
     ) {
-        return Axios.post(
+        return axios.post(
             this.apiResourceEndpoint +
                 '/getProductsByCategoryId/' +
                 categoryId +
@@ -21,12 +63,8 @@ export default class ProductService {
         );
     }
 
-    static async getProductPictures(id) {
-        return Axios.get(this.apiResourceEndpoint + '/getProductPictures/' + id);
-    }
-
     static async getProductsBySupplierCategoresAndPriceRange(object) {
-        return Axios.post(
+        return axios.post(
             this.apiResourceEndpoint +
                 '/getProductsBySupplierCategoresAndPriceRange',
             object,

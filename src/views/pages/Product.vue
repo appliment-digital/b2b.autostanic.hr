@@ -23,12 +23,13 @@ export default {
     },
     data() {
         return {
-            productDetails: {},
+            product: null,
+            details: null,
+
             featuredImage: null,
+            thumbnails: null,
 
             itemQuantity: '1',
-
-            productThumbnails: [1, 2, 3],
 
             displayBasic: false,
         };
@@ -48,33 +49,43 @@ export default {
             useUIStore,
         ),
     },
+    beforeMount() {
+        // load and set product data
+        this.loadProduct();
+    },
     mounted() {
-        const productSlug = decodeURIComponent(this.$route.path.slice(1));
+        // load and set product details
+        this.loadDetails();
 
-        const productHistoryData =
-            this.resultsStore.getProductFromHistory(productSlug)();
-
-        if (productHistoryData) {
-            this.productDetails = productHistoryData;
-        } else {
-            this.productDetails = this.resultsStore.product;
-        }
-
-        this.featuredImage = this.productDetails;
-        console.log({ featuredImage: this.featuredImage });
-
-        console.log('product mounted', { productDetails: this.productDetails });
-
-        // get the additional product pictures
-        ProductService.getProductPictures(this.resultsStore.product.id)
-            .then((response) => {
-                if (response.data && response.data.length) {
-                    this.productThumbnails = response.data;
-                }
-            })
-            .catch((err) => console.err(err));
+        console.log({product: this.product});
     },
     methods: {
+        /**
+         * Load product data.
+         */
+        loadProduct() {
+            const productSlug = decodeURIComponent(this.$route.path.slice(1));
+            const productHistoryData =
+                this.resultsStore.getProductFromHistory(productSlug)();
+
+            if (productHistoryData) {
+                this.product = productHistoryData;
+            } else {
+                this.product = this.resultsStore.product;
+            }
+        },
+
+        /**
+         * Load product details.
+         */
+        loadDetails() {
+            ProductService.getDetails(this.product.id)
+                .then((res) => {
+                    this.details = res;
+                })
+                .catch((err) => console.error(err));
+        },
+
         handleSendInquiry() {
             this.openCRMForm();
         },
@@ -104,56 +115,54 @@ export default {
     <div class="grid column-gap-6 justify-content-between">
         <div class="col-12 h-20rem md:col-5 md:h-auto">
             <!-- Feature Image -->
-            <div class="border-1 border-200 p-6 flex justify-content-center">
+            <div
+                class="bg-white border-1 border-200 p-6 flex justify-content-center"
+            >
                 <Image
-                    style="object-fit: cover"
-                    :src="featuredImage"
+                    imageStyle="width: 100%"
+                    :src="product.pictureUrl"
                     alt="Image"
-                    width="250"
                     preview
                 />
             </div>
 
             <!-- Thumbnails -->
             <div class="flex mt-2 overflow-x-scroll">
-                <Image
-                    class="block border-1 border-100 mr-2"
-                    style="
-                        width: 64px;
-                        height: 64px;
-                        object-fit: cover;
-                        max-width: 100%;
-                    "
-                    v-for="thumbnail in productThumbnails"
-                    :src="thumbnail.url550"
-                    preview
-                    width="64"
-                />
+                <div
+                    style="width: 64px; height: 64px"
+                    class="bg-white div border-1 border-100 mr-2 flex align-items-center justify-content-center"
+                >
+                    <Image
+                        v-for="thumbnail in thumbnails"
+                        :src="featuredImage"
+                        preview
+                        width="62"
+                    />
+                </div>
             </div>
         </div>
 
         <div class="col">
-            <h2 class="mt-4 md:mt-0">{{ productDetails.name }}</h2>
+            <h2 class="mt-4 md:mt-0">{{ product.name }}</h2>
             <span class="font-bold"
-                >SKU:
-                <span class="font-normal">{{ productDetails.sku }}</span></span
+                >SKU: <span class="font-normal">{{ product.sku }}</span></span
             >
 
             <hr />
 
-            <p class="mt-3" v-html="productDetails.shortDescription" />
-            <p class="mt-3" v-html="productDetails.fullDescription" />
+            <p class="mt-3" v-html="product.shortDescription" />
+            <p class="mt-3" v-html="product.fullDescription" />
 
             <!-- Stock -->
             <span class="block mt-5"
                 ><span
                     class="font-bold"
                     :class="
-                        productDetails.stockQuantity == 0
+                        product.stockQuantity == 0
                             ? 'text-red-500'
                             : 'text-green-500'
                     "
-                    >{{ productDetails.stockQuantity }}</span
+                    >{{ product.stockQuantity }}</span
                 >
                 na stanju.</span
             >
@@ -164,23 +173,18 @@ export default {
                 <div>
                     <span class="mb-0 mr-2 mb-2 text-lg">Cijena</span>
                     <span class="font-bold"
-                        >{{
-                            formatProductPrice(resultsStore.product.price)
-                        }}
-                        €</span
+                        >{{ formatProductPrice(product.price) }} €</span
                     >
                 </div>
                 <div>
                     <span class="m-0 mr-2 mb-2 text-lg">Cijena s popustom</span>
-                    <span class="font-bold"
-                        >{{ resultsStore.product.price }} €</span
-                    >
+                    <span class="font-bold">{{ product.price }} €</span>
                 </div>
             </div>
 
             <!-- Price -->
             <!-- Buttons -->
-            <Toolbar class="mt-4 bg-white-alpha-30">
+            <Toolbar class="mt-4">
                 <template #start>
                     <Button
                         class="button--no-shadow mr-1"
@@ -212,12 +216,8 @@ export default {
                             label="Dodaj u košaricu"
                             severity="primary"
                             outlined
-                            :disabled="productDetails.stockQuantity == 0"
-                            @click="
-                                handleAddProdcutToShoppingCart(
-                                    resultsStore.product,
-                                )
-                            "
+                            :disabled="product.stockQuantity == 0"
+                            @click="handleAddProdcutToShoppingCart(product)"
                         />
                         <Button
                             class="button--no-shadow text-sm"
@@ -254,14 +254,34 @@ export default {
                         },
                     }"
                 >
-                    <div class="flex justify-content-between">
-                        <span class="uppercase">Proizvođač</span>
-                        <!-- <span class="uppercase">{{
-                        console.log(productDetails)
-                    }}</span> -->
-                        <span class="uppercase">{{
-                            productDetails.manufacturerName
-                        }}</span>
+                    <div >
+                        <div class="flex justify-content-between">
+                        <!-- Manufacturer -->
+                            <span class="uppercase">Proizvođač</span>
+                            <span class="uppercase">{{
+                                product.manufacturerName
+                            }}</span>
+                        </div>
+
+                        <!-- OEM Codes -->
+                        <div v-if="details && details.oemCodes.data" class="mt-4">
+                            <span class="block uppercase mb-2">OEM Kodovi</span>
+                            <!-- prettier-ignore -->
+                            <p>OEM je skraćenica od „Original Equipment Manufacturer“ ili u prijevodu OEM se odnosi na originalne dijelove za automobilsku industriju. Na primjer, ako imate Audi i potreban vam je motor, možete ga kupiti od drugog proizvođača ili autentičan Audi motor. Iako proizvođač ne može napraviti identičan dio, OEM se odnosi na dio koji proizvođač koristi u originalnom vozilu. Ljudi često traže originalne OEM dijelove kako bi zamjenili potrgani dio jer mogu biti sigurni u kvalitetu dijela. U većini slučajeva proizvođač vozila ne proizvodi i OEM dijelove već angažira vanjsku tvrtku da bude službeni proizvođač tog dijela kao što je BOSCH, VALO, LUK itd. To znači da ti proizvođači mogu te dijelove prodavati i kasnije pod oznakom OEM dio samo bez oznake proizvođača vozila.</p>
+                            <div class="flex align-items-center justify-content-between">
+                                <span>{{ product.manufacturerName }}</span>
+
+                                <ul class="flex" style="list-style: none;">
+                                    <li v-for="oemCode in details.oemCodes.data" class="mr-2">{{ oemCode.id }}</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Related Vehicles -->
+                        <!-- <div v-if="details && details.relatedVehicles" class="mt-4">
+
+                        </div> -->
+
                     </div>
                 </TabPanel>
                 <TabPanel
@@ -300,55 +320,6 @@ export default {
             </TabView>
         </div>
     </div>
-
-    <!-- <Dialog
-    modal
-    closeOnEscape
-    dismissableMask
-    :closable="false"
-    :visible="inquiry.isSending"
-    @update:visible="inquiry.isSending = false"
-    class="w-30rem"
->
-    <template #header>
-        <h2 class="text-center w-full pt-4">Pošalji upit</h2>
-    </template>
-
-    <label>Proizvod</label>
-    <InputText
-        v-model="inquiry.product"
-        class="w-full mt-2 mb-3"
-        disabled
-    />
-
-    <label>Ime</label>
-    <InputText v-model="inquiry.name" class="w-full mt-2 mb-3" disabled />
-
-    <label>Prezime</label>
-    <InputText
-        v-model="inquiry.lastName"
-        class="w-full mt-2 mb-3"
-        disabled
-    />
-
-    <label>Upit</label>
-    <Textarea v-model="inquiry.text" rows="7" class="w-full mt-2 mb-6" />
-
-    <div class="flex justify-content-end gap-2">
-        <Button
-            type="button"
-            label="Odustani"
-            severity="danger"
-            @click="inquiry.isSending = false"
-        />
-        <Button
-            type="button"
-            label="Pošalji"
-            severity="success"
-            @click="inquiry.isSending = false"
-        />
-    </div>
-</Dialog> -->
 </template>
 
 <style scoped>
@@ -359,10 +330,6 @@ export default {
     object-fit: cover;
     object-position: center;
     border-radius: 4px;
-}
-
-.button--no-shadow:focus {
-    box-shadow: none !important;
 }
 
 /* upadate product image on smaller devices */

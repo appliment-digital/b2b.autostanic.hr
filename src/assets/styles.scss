@@ -71,3 +71,7 @@ body {
         padding-top: 0;
     }
 }
+
+.button--no-shadow:focus {
+    box-shadow: none !important;
+}

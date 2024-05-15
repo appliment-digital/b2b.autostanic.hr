@@ -302,7 +302,7 @@ class ProductController extends BaseController
 
     public function getOEMCodeForProduct($id)
     {
-        $OEMCodes = DB::connection('webshopdb')
+        $response = DB::connection('webshopdb')
             ->table('dbo.Product_OEMCode_Mapping')
             ->select('OEMCode.*')
             ->join(
@@ -315,12 +315,12 @@ class ProductController extends BaseController
             ->where('OEMCode.Published', 1)
             ->get();
 
-        return $OEMCodes;
+        return $this->convertKeysToCamelCase($response);
     }
 
     public function getSpecificationAttributeForProduct($id)
     {
-        $specificationAttributes = DB::connection('webshopdb')
+        $response = DB::connection('webshopdb')
             ->table('dbo.Product_SpecificationAttribute_Mapping')
             ->select('SpecificationAttributeOption.*')
             ->join(
@@ -332,12 +332,12 @@ class ProductController extends BaseController
             ->where('Product_SpecificationAttribute_Mapping.ProductId', $id)
             ->get();
 
-        return $specificationAttributes;
+        return $this->convertKeysToCamelCase($response);
     }
 
     public function getCarTypesForProduct($id)
     {
-        $carTypes = DB::connection('webshopdb')
+        $response = DB::connection('webshopdb')
             ->table('dbo.Product_CarType_Mapping as pcm')
             ->select(
                 // CarType
@@ -363,7 +363,7 @@ class ProductController extends BaseController
             ->where('ct.Published', 1)
             ->get();
 
-        return $carTypes;
+        return $this->convertKeysToCamelCase($response);
     }
 
     public function getProductsBySupplierCategoresAndPriceRange(
