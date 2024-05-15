@@ -45,7 +45,10 @@ export default {
                     name: 'Rabat',
                     value: this.shoppingCartStore.fees.delivery,
                 },
-                { name: 'Porez', value: this.shoppingCartStore.fees.tax },
+                {
+                    name: 'Porez',
+                    value: this.shoppingCartStore.fees.tax,
+                },
                 {
                     name: 'Sveukupno',
                     value: this.shoppingCartStore.totalWithFees,
@@ -55,7 +58,6 @@ export default {
 
         shoppingCartProducts() {
             if (this.shoppingCartStore.cart.length) {
-                // console.log(this.shoppingCartStore.cart);
                 return this.shoppingCartStore.cart;
             } else {
                 return [];
@@ -86,7 +88,7 @@ export default {
             const productSlug = slug(product.name, { lower: true });
             this.resultsStore.addCurrentProduct(product);
             this.$router.push(`/${productSlug}`);
-        }
+        },
     },
 };
 </script>
@@ -102,7 +104,7 @@ export default {
                     <Column field="image" header="Slika">
                         <template #body="{ data }">
                             <img
-                                :src="data.picture_urls[0]"
+                                :src="data.pictureUrl"
                                 class="table-image border-round cursor-pointer"
                                 @click="handleProductTableItemClick(data)"
                             />
@@ -114,9 +116,10 @@ export default {
                             <span
                                 class="cursor-pointer"
                                 @click="handleProductTableItemClick(data)"
-                            >{{ data.name }}</span>
+                                >{{ data.name }}</span
+                            >
                         </template>
-                     </Column>
+                    </Column>
 
                     <Column
                         field="price"
@@ -167,12 +170,14 @@ export default {
         <div v-if="shoppingCartProducts.length" class="col-12 lg:col-3">
             <div class="card p-5">
                 <div class="max-w-24rem mx-auto">
-                    <DataTable :value="order" >
+                    <DataTable :value="order">
                         <Column header="Ukupna narudžba">
                             <template #body="{ data }">
-                                <div class="order-column">
+                                <div class="flex justify-content-between">
                                     <span>{{ data.name }}</span>
-                                    <span class="text-right">{{ data.value }} €</span>
+                                    <span class="text-right"
+                                        >{{ data.value }} €</span
+                                    >
                                 </div>
                             </template>
                         </Column>
@@ -203,9 +208,5 @@ export default {
 
 .button--small .p-button-icon {
     font-size: 8px;
-}
-.order-column {
-    display: flex;
-    justify-content: space-between;
 }
 </style>

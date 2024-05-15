@@ -78,7 +78,7 @@ export default {
                 >
                     <a
                         @click="handleAdminIconClick"
-                        class="flex align-items-center hover:text-primary-500 transition-duration-200"
+                        class="flex align-items-center hover:text-primary-500 transition-duration-200 cursor-pointer"
                         v-styleclass="{
                             selector: '@grandparent',
                             enterClass: 'hidden',
