@@ -289,26 +289,53 @@ class ProductController extends BaseController
             ->where('Product.Id', $id)
             ->get();
 
-        return $oemCodes;
+        $result = [];
 
-        return $this->convertKeysToCamelCase($oemCodes);
+        foreach ($oemCodes as $code) {
+            $manufacturer = $code->OEMManufacturer;
+            $oemCode = $code->OEMCodeDenormalized;
+
+            if (!isset($result[$manufacturer])) {
+                $result[$manufacturer] = [];
+            }
+
+            $result[$manufacturer][] = $oemCode;
+        }
+
+        return $result;
     }
 
     public function getSpecificationAttributeForProduct($id)
     {
         $response = DB::connection('webshopdb')
             ->table('dbo.Product_SpecificationAttribute_Mapping')
-            ->select('SpecificationAttributeOption.*')
+            ->select(
+                'SpecificationAttribute.name as specificationAttributeName',
+                'SpecificationAttributeOption.name as SpecificationAttributeOptionName'
+            )
             ->join(
                 'SpecificationAttributeOption',
                 'Product_SpecificationAttribute_Mapping.SpecificationAttributeOptionId',
                 '=',
                 'SpecificationAttributeOption.Id'
             )
+            ->join(
+                'SpecificationAttribute',
+                'SpecificationAttributeOption.SpecificationAttributeId',
+                '=',
+                'SpecificationAttribute.Id'
+            )
             ->where('Product_SpecificationAttribute_Mapping.ProductId', $id)
             ->get();
 
-        return $this->convertKeysToCamelCase($response);
+        $result = [];
+
+        foreach ($response as $item) {
+            $result[$item->specificationAttributeName] =
+                $item->SpecificationAttributeOptionName;
+        }
+
+        return $result;
     }
 
     public function getCarTypesForProduct($id)
