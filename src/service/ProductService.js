@@ -7,12 +7,11 @@ export default class ProductService {
 
     static async getDetails(productID) {
         const pictures = await this.getProductPictures(productID);
-        const oemCodes = await this.getOEMCodeForProduct(productID);
-        const specifications = await this.getSpecificationAttributeForProduct(productID);
-        const relatedVehicles = await this.getCarTypesForProduct(productID)
+        const specifications =
+            await this.getSpecificationAttributeForProduct(productID);
 
-        console.log({pictures, oemCodes, specifications, relatedVehicles});
-        return {pictures, oemCodes, specifications, relatedVehicles}
+        console.log({ pictures, oemCodes, specifications, relatedVehicles });
+        return { pictures, oemCodes, specifications, relatedVehicles };
     }
 
     // get
@@ -41,6 +40,10 @@ export default class ProductService {
         return axios.get(
             this.apiResourceEndpoint + '/getCarTypesForProduct/' + id,
         );
+    }
+
+    static async getProductDetails(id) {
+        return axios.get(this.apiResourceEndpoint + '/getProductDetails/' + id);
     }
 
     // post

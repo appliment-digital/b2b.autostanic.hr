@@ -275,36 +275,6 @@ class ProductController extends BaseController
         }
     }
 
-    public function getOEMCodeForProduct($id)
-    {
-        $oemCodes = DB::connection('webshopdb')
-            ->table('Product_OEMCode_Mapping')
-            ->select('OEMCodeDenormalized', 'OEMManufacturer')
-            ->join(
-                'Product',
-                'Product.Id',
-                '=',
-                'Product_OEMCode_Mapping.ProductId'
-            )
-            ->where('Product.Id', $id)
-            ->get();
-
-        $result = [];
-
-        foreach ($oemCodes as $code) {
-            $manufacturer = $code->OEMManufacturer;
-            $oemCode = $code->OEMCodeDenormalized;
-
-            if (!isset($result[$manufacturer])) {
-                $result[$manufacturer] = [];
-            }
-
-            $result[$manufacturer][] = $oemCode;
-        }
-
-        return $result;
-    }
-
     public function getSpecificationAttributeForProduct($id)
     {
         $response = DB::connection('webshopdb')
@@ -333,6 +303,36 @@ class ProductController extends BaseController
         foreach ($response as $item) {
             $result[$item->specificationAttributeName] =
                 $item->SpecificationAttributeOptionName;
+        }
+
+        return $result;
+    }
+
+    public function getOEMCodeForProduct($id)
+    {
+        $oemCodes = DB::connection('webshopdb')
+            ->table('Product_OEMCode_Mapping')
+            ->select('OEMCodeDenormalized', 'OEMManufacturer')
+            ->join(
+                'Product',
+                'Product.Id',
+                '=',
+                'Product_OEMCode_Mapping.ProductId'
+            )
+            ->where('Product.Id', $id)
+            ->get();
+
+        $result = [];
+
+        foreach ($oemCodes as $code) {
+            $manufacturer = $code->OEMManufacturer;
+            $oemCode = $code->OEMCodeDenormalized;
+
+            if (!isset($result[$manufacturer])) {
+                $result[$manufacturer] = [];
+            }
+
+            $result[$manufacturer][] = $oemCode;
         }
 
         return $result;
@@ -381,6 +381,15 @@ class ProductController extends BaseController
         }
 
         return $result;
+    }
+
+    public function getProductDetails($id)
+    {
+        $details = [
+            'oemCodes' => $this->getOEMCodeForProduct($id),
+            'relatedVehicles' => $this->getCarTypesForProduct($id),
+        ];
+        return $details;
     }
 
     public function getProductsBySupplierCategoresAndPriceRange(

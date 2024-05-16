@@ -116,6 +116,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ProductController::class,
         'getSpecificationAttributeForProduct',
     ]);
+    Route::get('/product/getProductDetails/{id}', [
+        ProductController::class,
+        'getProductDetails',
+    ]);
     Route::post('/product/getProductsBySupplierCategoresAndPriceRange', [
         ProductController::class,
         'getProductsBySupplierCategoresAndPriceRange',
