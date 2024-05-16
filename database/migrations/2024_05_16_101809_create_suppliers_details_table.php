@@ -13,9 +13,9 @@ return new class extends Migration {
         Schema::create('suppliers_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('web_db_supplier_id');
-            $table->unsignedBigInteger('web_db_category_id');
-            $table->unsignedBigInteger('web_db_product_id')->nullable();
-            $table->decimal('product_cost', 10, 2)->nullable();
+            $table->unsignedBigInteger('web_db_category_id')->nullable();
+            $table->decimal('min_product_cost')->nullable();
+            $table->decimal('max_product_cost', 10, 2)->nullable();
             $table->unsignedBigInteger('mark_up');
             $table->unsignedBigInteger('expenses')->nullable();
             $table->unsignedBigInteger('warrent_id')->nullable();

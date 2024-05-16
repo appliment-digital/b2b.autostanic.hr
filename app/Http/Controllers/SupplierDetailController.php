@@ -43,16 +43,6 @@ class SupplierDetailController extends BaseController
             ->first();
     }
 
-    public function getProductName($id)
-    {
-        return DB::connection('webshopdb')
-            ->table('dbo.Product')
-            ->select('Product.Name')
-            ->where('Product.Id', $id)
-            ->pluck('Name')
-            ->first();
-    }
-
     public function getAllSuppliersWithDetails()
     {
         try {
@@ -68,11 +58,6 @@ class SupplierDetailController extends BaseController
                 $detail->category_name = $this->getCategoryName(
                     $detail->web_db_category_id
                 );
-                if ($detail->web_db_product_id) {
-                    $detail->product_name = $this->getProductName(
-                        $detail->web_db_product_id
-                    );
-                }
                 if ($detail->warrent_id) {
                     $detail->warrent_name = Warrent::find(
                         $detail->warrent_id

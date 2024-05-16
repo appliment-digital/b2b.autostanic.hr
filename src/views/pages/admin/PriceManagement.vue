@@ -46,7 +46,7 @@ export default {
             supplierDetail: {},
             warrents: [],
             deliveryDeadlines: [],
-            productsWithCoust: [],
+            productCount: null,
             suppliersWithDetails: [],
             selectedProduct: null,
             companyName: null,
@@ -93,34 +93,17 @@ export default {
                 .getCategoriesForSupplier(this.selectedSuppier.id)
                 .then((response) => {
                     this.categories = response.data;
+                    this.categories.push({
+                        id: null,
+                        name: 'PROIZVODI BEZ KATEGORIJE',
+                    });
                     this.getUniqueCategories();
                 });
-        },
-        getProductsBySupplierCategoresAndPriceRange() {
-            const categoriesIds = this.selectedCategories.map(
-                (category) => category.id,
-            );
-            ProductService.getProductsBySupplierCategoresAndPriceRange({
-                supplierId: this.selectedSuppier.id,
-                categoryIds: categoriesIds,
-                minPrice: this.minPrice,
-                maxPrice: this.maxPrice,
-            }).then((response) => {
-                this.productsWithCoust = response.data;
-            });
         },
         getCategoryName(categoryId) {
             return supplierDetailService
                 .getCategoryName(categoryId)
                 .then((response) => {
-                    return response.data;
-                });
-        },
-        getProductName(productId) {
-            return supplierDetailService
-                .getProductName(productId)
-                .then((response) => {
-                    this.showDialog = true;
                     return response.data;
                 });
         },
@@ -131,6 +114,7 @@ export default {
         },
         async openDialog(data) {
             if (data) {
+                console.log(data);
                 this.selectedDetailsId = data.id;
                 this.getCategoryName(data.web_db_category_id);
 
@@ -140,11 +124,11 @@ export default {
                 this.companyName = await this.getCategoryName(
                     data.web_db_category_id,
                 );
-                this.productName = await this.getProductName(
-                    data.web_db_product_id,
-                );
                 this.supplierDetail.markUp = data.mark_up;
-                this.supplierDetail.product_cost = data.product_cost ?? null;
+                this.supplierDetail.min_product_cost =
+                    data.min_product_cost ?? null;
+                this.supplierDetail.max_product_cost =
+                    data.max_product_cost ?? null;
                 this.supplierDetail.expenses = data.expenses ?? null;
                 this.supplierDetail.warrent = this.warrents.find(
                     (w) => w.id == data.warrent_id,
@@ -164,15 +148,25 @@ export default {
             this.showDialog = false;
             this.resetInputs();
         },
-        saveSuppliersDeatels() {
-            this.closeDialog();
-        },
         getAllSuppliersWithDetails() {
             supplierDetailService
                 .getAllSuppliersWithDetails()
                 .then((response) => {
                     this.suppliersWithDetails = response.data;
                 });
+        },
+        getProductsBySupplierCategoresAndPriceRange() {
+            const categoriesIds = this.selectedCategories.map(
+                (category) => category.id,
+            );
+            ProductService.getProductsBySupplierCategoresAndPriceRange({
+                supplierId: this.selectedSuppier.id,
+                categoryIds: categoriesIds,
+                minPrice: this.minPrice,
+                maxPrice: this.maxPrice,
+            }).then((response) => {
+                this.productCount = response.data;
+            });
         },
         saveDetailsforSupplier() {
             if (this.selectedDetailsId) {
@@ -204,13 +198,13 @@ export default {
                 const categoriesIds = this.selectedCategories.map(
                     (category) => category.id,
                 );
+
                 supplierDetailService
                     .addDetailsforSupplier({
                         supplierId: this.selectedSuppier.id,
                         categoriesIds: categoriesIds,
-                        products: this.productsWithCoust,
-                        minPrice: this.minPrice,
-                        maxPrice: this.maxPrice,
+                        minProductCost: this.minPrice,
+                        maxProductCost: this.maxPrice,
                         supplierDetail: this.supplierDetail,
                     })
                     .then((response) => {
@@ -279,6 +273,20 @@ export default {
                             placeholder="Odaberite kategoriju"
                             class="w-full"
                         >
+                            <template #option="slotProps">
+                                <div
+                                    v-if="
+                                        slotProps.option.name ==
+                                        'PROIZVODI BEZ KATEGORIJE'
+                                    "
+                                    class="font-bold"
+                                >
+                                    {{ slotProps.option.name }}
+                                </div>
+                                <div v-else>
+                                    {{ slotProps.option.name }}
+                                </div>
+                            </template>
                         </MultiSelect>
                     </div>
                 </div>
@@ -354,7 +362,7 @@ export default {
                     <div
                         class="flex flex-column md:flex-row md:justify-content-between md:align-items-center"
                     >
-                        <h6>Kategorije i proizvodi s definiranim cijenama</h6>
+                        <h6>Dobavljači s definiranim cijenama</h6>
                         <div class="flex">
                             <IconField iconPosition="left">
                                 <InputIcon>
@@ -374,25 +382,21 @@ export default {
                     header="Dobavljač"
                     sortable
                 ></Column>
-                <Column
-                    field="category_name"
-                    header="Kategorija"
-                    sortable
-                ></Column>
-                <Column field="product_name" header="Proizvod" sortable>
+                <Column field="category_name" header="Kategorija" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.product_name">{{
-                            data.product_name
+                        <span v-if="data.category_name">{{
+                            data.category_name
                         }}</span>
 
                         <span v-else> - </span>
                     </template>
                 </Column>
-                <Column field="product_cost" header="Nabavna cijena" sortable>
+                <Column header="Nabavna cijena" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.product_cost">{{
-                            data.product_cost
-                        }}</span>
+                        <span v-if="data.min_product_cost"
+                            >{{ data.min_product_cost }} -
+                            {{ data.max_product_cost }} €</span
+                        >
 
                         <span v-else> - </span>
                     </template>
@@ -488,7 +492,7 @@ export default {
         <div v-if="maxPrice > 0" class="field grid">
             <label class="col-3">Odabrano:</label>
             <div class="col-9 font-semibold">
-                <label>{{ this.productsWithCoust.length }} proizvoda</label>
+                <label>{{ this.productCount }} proizvod/a</label>
             </div>
         </div>
 
@@ -496,7 +500,7 @@ export default {
             <label class="col-3">Cijena:</label>
             <div class="col-9 font-semibold">
                 <div class="block">
-                    <label>{{ supplierDetail.product_cost }}</label>
+                    <label>{{ supplierDetail.min_product_cost }}</label>
                 </div>
             </div>
         </div>

@@ -397,30 +397,41 @@ class ProductController extends BaseController
     ) {
         try {
             $query = DB::connection('webshopdb')
-                ->table('dbo.Supplier')
-                ->join('dbo.Product', 'Supplier.Id', '=', 'Product.SupplierId')
-                ->join(
+                ->table('dbo.Product as p')
+                ->leftJoin(
                     'dbo.Product_Category_Mapping',
-                    'Product.Id',
+                    'p.Id',
                     '=',
                     'Product_Category_Mapping.ProductId'
                 )
-                ->join(
-                    'dbo.Category',
-                    'Product_Category_Mapping.CategoryId',
-                    '=',
-                    'Category.Id'
-                )
-                ->select('Product.Id', 'Product.ProductCost')
-                ->where('Supplier.Id', $request->supplierId)
-                ->where('Category.Id', $request->categoryIds)
-                ->whereBetween('Product.ProductCost', [
-                    $request->minPrice,
-                    $request->maxPrice,
-                ])
-                ->get();
+                ->where('p.SupplierId', $request->supplierId);
+            if (in_array(null, $request->categoryIds)) {
+                // If $request->categoryIds contains null
+                $query->where(function ($query) use ($request) {
+                    $query
+                        ->whereNotExists(function ($query) {
+                            $query
+                                ->select(DB::raw(1))
+                                ->from('Product_Category_Mapping')
+                                ->whereRaw(
+                                    'Product_Category_Mapping.productId = p.Id'
+                                );
+                        })
+                        ->orWhereIn(
+                            'p.Id',
+                            array_filter($request->categoryIds, 'is_numeric')
+                        );
+                });
+            } elseif (!empty($request->categoryIds)) {
+                // If $request->categoryIds contains category IDs but not null
+                $query->whereIn('p.Id', $request->categoryIds);
+            }
+            $count = $query
+                ->where('p.ProductCost', '>', $request->minPrice)
+                ->where('p.ProductCost', '<', $request->maxPrice)
+                ->count();
 
-            return $query;
+            return $count;
         } catch (Exception $e) {
             return [
                 'exception' =>
