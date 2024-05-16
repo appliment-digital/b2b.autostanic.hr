@@ -362,11 +362,25 @@ class ProductController extends BaseController
             ->join('CarModel as cm', 'ct.CarModelId', '=', 'cm.Id')
             ->join('CarMake as mk', 'cm.CarMakeId', '=', 'mk.Id')
             ->where('pcm.ProductId', $id)
+            ->where('mk.Deleted', 0)
+            ->where('mk.Published', 1)
             ->where('ct.Deleted', 0)
             ->where('ct.Published', 1)
+            ->where('cm.Deleted', 0)
+            ->where('cm.Published', 1)
             ->get();
 
-        return $this->convertKeysToCamelCase($response);
+        $result = [];
+
+        foreach ($response as $item) {
+            $carMakeName = $item->CarMakeName;
+
+            unset($item->CarMakeId, $item->CarMakeName); // Remove redundant fields
+
+            $result[$carMakeName][] = $item;
+        }
+
+        return $result;
     }
 
     public function getProductsBySupplierCategoresAndPriceRange(
