@@ -79,7 +79,7 @@ export default {
                     <!-- Cart Icon -->
                     <!-- prettier-ignore -->
                     <span 
-                    v-if="shoppingCartStore.cart.length"
+                    v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
                     class="absolute block p-2 rounded bg-red-500 
                     text-white border-circle flex justify-content-center 
                     align-items-center font-bold text-sm cursor-pointer 
