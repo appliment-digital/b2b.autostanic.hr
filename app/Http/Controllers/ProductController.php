@@ -163,6 +163,7 @@ class ProductController extends BaseController
                 ->where('Product_Category_Mapping.CategoryId', $categoryId)
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
+                ->where('Product_Category_Mapping.Deleted', 0)
                 ->orderBy('Product.ManufacturerName', 'asc')
                 ->groupBy('ManufacturerName');
 
