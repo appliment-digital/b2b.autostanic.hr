@@ -75,3 +75,8 @@ body {
 .button--no-shadow:focus {
     box-shadow: none !important;
 }
+
+.p-image-preview,
+.p-image-preview-indicator {
+    border-radius: 8px;
+}
