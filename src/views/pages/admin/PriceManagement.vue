@@ -49,7 +49,7 @@ export default {
             productCount: null,
             suppliersWithDetails: [],
             selectedProduct: null,
-            companyName: null,
+            categoryName: null,
             productName: null,
             selectedDetailsId: null,
             disabledCategories: [],
@@ -104,6 +104,7 @@ export default {
             return supplierDetailService
                 .getCategoryName(categoryId)
                 .then((response) => {
+                    this.showDialog = true;
                     return response.data;
                 });
         },
@@ -121,9 +122,12 @@ export default {
                 this.selectedSuppier = this.suppliers.find(
                     (s) => s.id == data.web_db_supplier_id,
                 );
-                this.companyName = await this.getCategoryName(
-                    data.web_db_category_id,
-                );
+                if (data.web_db_category_id) {
+                    this.categoryName = await this.getCategoryName(
+                        data.web_db_category_id,
+                    );
+                }
+
                 this.supplierDetail.markUp = data.mark_up;
                 this.supplierDetail.min_product_cost =
                     data.min_product_cost ?? null;
@@ -454,9 +458,9 @@ export default {
         </div>
         <div class="field grid">
             <label class="col-3">Kategorija/e:</label>
-            <div v-if="companyName" class="col-9 font-semibold">
+            <div v-if="categoryName" class="col-9 font-semibold">
                 <div class="block">
-                    <label>{{ companyName }}</label>
+                    <label>{{ categoryName }}</label>
                 </div>
             </div>
             <div v-else class="col-9 font-semibold">
