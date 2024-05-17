@@ -45,12 +45,10 @@ export default {
                     hideOnOutsideClick: 'true',
                 }"
                 :label="userStore.initials"
-                class="flex justify-content-center"
+                class="button--no-shadow bg-white text-600 border-200 flex justify-content-center hover:bg-white-alpha-10"
                 severity="secondary"
                 v-ripple
                 icon="pi pi-user"
-                raised
-                text
             />
 
             <ul
