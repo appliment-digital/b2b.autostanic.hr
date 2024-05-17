@@ -5,6 +5,7 @@ import router from '@/router';
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
+import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
 // services
 import UserService from '../service/UserService.js';
@@ -25,7 +26,7 @@ export default {
     },
     watch: {},
     computed: {
-        ...mapStores(useUserStore),
+        ...mapStores(useUserStore, useShoppingCartStore),
     },
     methods: {
         handleLogoClick() {
@@ -60,22 +61,34 @@ export default {
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
-                <InputText class="w-full" placeholder="Pretraži" />
+                <InputText class="border-200 w-full" placeholder="Pretraži" />
             </IconField>
         </div>
 
         <!-- Header: User Info & Shopping Cart -->
         <div class="p-0 flex-order-1 col-6 flex justify-content-end sm:col">
             <div class="flex relative">
-                <Button
-                    class="mr-2"
-                    label="Košarica"
-                    severity="secondary"
-                    icon="pi pi-shopping-cart"
-                    @click="handleShoppingCartClick"
-                    raised
-                    text
-                />
+                <div class="relative">
+                    <Button
+                        class="button--no-shadow bg-white text-600 mr-2 border-200 hover:bg-white-alpha-10"
+                        label="Košarica"
+                        severity="secondary"
+                        icon="pi pi-shopping-cart"
+                        @click="handleShoppingCartClick"
+                    />
+                    <!-- Cart Icon -->
+                    <!-- prettier-ignore -->
+                    <span 
+                    v-if="shoppingCartStore.cart.length"
+                    class="absolute block p-2 rounded bg-red-500 
+                    text-white border-circle flex justify-content-center 
+                    align-items-center font-bold text-sm cursor-pointer 
+                    border-1 border-white"
+                    style="width: 24px; height: 24px; top: -8px; right:3px"
+                    >
+                        {{ shoppingCartStore.cart.length }}
+                    </span>
+                </div>
                 <UserMenu />
             </div>
         </div>
