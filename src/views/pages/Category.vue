@@ -39,7 +39,7 @@ export default {
 
             page: {
                 current: 1,
-                size: 9,
+                size: 24,
             },
         };
     },
@@ -55,8 +55,8 @@ export default {
         '$route.path': function (newPath) {
             this.handleNavigation();
 
-            // hide product results and show category cards 
-            this.products = null; 
+            // hide product results and show category cards
+            this.products = null;
         },
     },
     mounted() {
@@ -107,7 +107,6 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
-                    console.log('getProductsByCategoryId', { data });
 
                     // store response data
                     this.products = data.products;
@@ -122,7 +121,7 @@ export default {
          * Handle clicking subcategory cards.
          */
         handleSubcategoryClick(subcategory) {
-            // prevent user clicking on the next category if data still loads 
+            // prevent user clicking on the next category if data still loads
             if (this.UIStore.isDataLoading) return;
 
             // set selected category
@@ -135,13 +134,10 @@ export default {
             this.categoryStore.setSelectedCategory(subcategory);
             this.categoryStore.addHistory(subcategory);
 
-            this.$router.push(
-                `${this.$route.path}/${slug(subcategory.name)}`,
-            );
+            this.$router.push(`${this.$route.path}/${slug(subcategory.name)}`);
         },
 
         handleResultsPageChange(event) {
-            console.log('handleResultsPageChange', {event});
 
             // this.getProductsByCategoryId(
             //     this.selectedCategoryId,
@@ -150,9 +146,8 @@ export default {
         },
 
         handleFilterSelect(filters, categoryId) {
-            console.log('filters:', filters);
 
-            this.getProducts(categoryId, filters)
+            this.getProducts(categoryId, filters);
         },
 
         setDefaultImageToProducts(products) {
@@ -166,6 +161,11 @@ export default {
                     entry.picture_urls[0] = '/images/as_logo_single.png';
                 }
             });
+        },
+
+        handleNumOfResultsChange(val) {
+            this.page.size = val;
+            this.getProducts(this.categoryStore.selectedCategory.id, {});
         },
     },
 };
@@ -197,8 +197,10 @@ export default {
             :productCount="productCount"
             :products="products"
             :manufacturers="manufacturers"
+            :pageOptions="page"
             @on-page-change="handleResultsPageChange"
             @on-filter-select="handleFilterSelect"
+            @on-num-of-results-change="handleNumOfResultsChange"
         />
     </div>
 </template>

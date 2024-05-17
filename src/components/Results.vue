@@ -20,7 +20,7 @@ import { useUIStore } from '@/store/UIStore.js';
 setSlugCharMap(slug);
 
 export default {
-    props: ['productCount', 'products', 'manufacturers'],
+    props: ['productCount', 'products', 'manufacturers', 'pageOptions'],
     components: {
         Header,
         Breadcrumbs,
@@ -39,13 +39,21 @@ export default {
 
                 manufacturers: {},
             },
+
+            results: {
+                sort: {
+                    selected: null,
+                    options: [
+                        { label: 'Naziv: A do Z' },
+                        { label: 'Naziv: Z do A' },
+                        { label: 'Cijena: ⬆️' },
+                        { label: 'Cijena: ⬇️' },
+                    ],
+                },
+            },
         };
     },
     mounted() {
-        console.log('results mounted');
-        // logs
-        console.log(this.categoryStore.selectedCategory);
-
         // load category data from storage
         const selectedCategory = this.categoryStore.selectedCategory;
 
@@ -58,7 +66,6 @@ export default {
         });
     },
     updated() {
-        console.log('results updated', { products: this.products });
     },
     computed: {
         ...mapStores(
@@ -121,6 +128,10 @@ export default {
                 selectedFilters,
                 this.categoryStore.selectedCategory.id,
             );
+        },
+
+        handleNumOfResultsClick(val) {
+            this.$emit('on-num-of-results-change', val)
         },
 
         formatProductStockQuantity(val) {
@@ -238,37 +249,58 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
-                <!-- product count -->
-
-                <div class="ml-2 mb-4 flex align-items-center">
-                    <span class=""
-                        >Proizvodi
-                        <span class="text-red-400 font-bold">{{
-                            totalItems
-                        }}</span></span
-                    >
-                    <span class="ml-3 mr-1">Prikaz</span>
-                    <Button
-                        class="button--no-shadow mr-1 text-xs p-0"
-                        style="width: 32px; height: 32px"
-                        label="24"
-                        outlined
-                        severity="secondary"
-                    />
-                    <Button
-                        class="button--no-shadow mr-1 text-xs p-0"
-                        style="width: 32px; height: 32px"
-                        label="36"
-                        outlined
-                        severity="secondary"
-                    />
-                    <Button
-                        class="button--no-shadow mr-1 text-xs p-0"
-                        style="width: 32px; height: 32px"
-                        label="48"
-                        outlined
-                        severity="secondary"
-                    />
+                <div
+                    class="ml-2 mb-3 flex align-items-center justify-content-between"
+                >
+                    <div class="flex align-items-center">
+                        <span class="block mr-4"
+                            >Proizvodi
+                            <span class="text-red-400 font-bold">{{
+                                totalItems
+                            }}</span></span
+                        >
+                    </div>
+                    <div class="flex align-items-center">
+                        <label for="sort-dropdown" class="mr-2"
+                            >Poredaj po</label
+                        >
+                        <Dropdown
+                            inputId="sort-dropdown"
+                            v-model="results.sort.selected"
+                            :options="results.sort.options"
+                            optionLabel="label"
+                            placeholder="Pozicija"
+                            class="w-full md:w-12rem"
+                        />
+                        <span class="ml-3 mr-2">Broj rezultata</span>
+                        <Button
+                            class="button--no-shadow mr-1 text-xs p-0 border-100"
+                            :class="pageOptions.size === 24 && 'bg-blue-100 border-blue-200'"
+                            style="width: 32px; height: 32px"
+                            label="24"
+                            outlined
+                            severity="primary"
+                            @click="handleNumOfResultsClick(24)"
+                        />
+                        <Button
+                            class="button--no-shadow mr-1 text-xs p-0 border-100"
+                            :class="pageOptions.size === 36 && 'bg-blue-100 border-blue-200'"
+                            style="width: 32px; height: 32px"
+                            label="36"
+                            outlined
+                            severity="primary"
+                            @click="handleNumOfResultsClick(36)"
+                        />
+                        <Button
+                            class="button--no-shadow text-xs p-0 border-100"
+                            :class="pageOptions.size === 48 && 'bg-blue-100 border-blue-200'"
+                            style="width: 32px; height: 32px"
+                            label="48"
+                            outlined
+                            severity="primary"
+                            @click="handleNumOfResultsClick(48)"
+                        />
+                    </div>
                 </div>
 
                 <!-- <Paginator
@@ -303,9 +335,11 @@ export default {
                             @click="handleProductClick(product)"
                         >
                             <template #header>
+                                <!-- prettier-ignore -->
                                 <div
                                     v-if="product.hasDefaultImage"
-                                    class="card-header--fixed-height flex justify-content-center align-items-center"
+                                    class="card-header--fixed-height flex 
+                                    justify-content-center align-items-center"
                                     src="/images/as_logo_single.png"
                                 >
                                     <img
