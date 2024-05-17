@@ -107,10 +107,12 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
+                    console.log({data});
 
                     // store response data
                     this.products = data.products;
                     this.manufacturers = data.manufacturers;
+                    this.productCount = data.productCount;
 
                     this.UIStore.setIsDataLoading(false);
                 })
@@ -138,15 +140,11 @@ export default {
         },
 
         handleResultsPageChange(event) {
-
-            // this.getProductsByCategoryId(
-            //     this.selectedCategoryId,
-            //     event.page + 1,
-            // );
+            this.page.current = event.page + 1
+            this.getProducts(this.categoryStore.selectedCategory.id, {});
         },
 
         handleFilterSelect(filters, categoryId) {
-
             this.getProducts(categoryId, filters);
         },
 

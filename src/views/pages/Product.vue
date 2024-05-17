@@ -56,9 +56,7 @@ export default {
     },
     mounted() {
         // load and set product details
-        this.loadDetails();
-
-        console.log({ product: this.product });
+        // this.loadDetails();
     },
     methods: {
         /**
@@ -281,14 +279,13 @@ export default {
                                 </div>
 
                                 <!-- OEM Codes -->
-                                <div
+                                <!-- <div
                                     v-if="details && details.oemCodes.data"
                                     class="mt-4"
                                 >
                                     <span class="block uppercase mb-2"
                                         >OEM Kodovi</span
                                     >
-                                    <!-- prettier-ignore -->
                                     <p>OEM je skraćenica od „Original Equipment Manufacturer“ ili u prijevodu OEM se odnosi na originalne dijelove za automobilsku industriju. Na primjer, ako imate Audi i potreban vam je motor, možete ga kupiti od drugog proizvođača ili autentičan Audi motor. Iako proizvođač ne može napraviti identičan dio, OEM se odnosi na dio koji proizvođač koristi u originalnom vozilu. Ljudi često traže originalne OEM dijelove kako bi zamjenili potrgani dio jer mogu biti sigurni u kvalitetu dijela. U većini slučajeva proizvođač vozila ne proizvodi i OEM dijelove već angažira vanjsku tvrtku da bude službeni proizvođač tog dijela kao što je BOSCH, VALO, LUK itd. To znači da ti proizvođači mogu te dijelove prodavati i kasnije pod oznakom OEM dio samo bez oznake proizvođača vozila.</p>
                                     <div
                                         class="flex align-items-center justify-content-between"
@@ -310,7 +307,7 @@ export default {
                                             </li>
                                         </ul>
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <!-- Related Vehicles -->
                                 <!-- <div v-if="details && details.relatedVehicles" class="mt-4">

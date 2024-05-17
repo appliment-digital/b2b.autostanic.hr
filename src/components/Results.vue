@@ -66,6 +66,7 @@ export default {
         });
     },
     updated() {
+        // console.log('results updated -> num of products:', {products: this.products});
     },
     computed: {
         ...mapStores(
@@ -83,7 +84,7 @@ export default {
         },
 
         handlePageChangeClick(event) {
-            this.currentPage = event.page + 1;
+            // this.currentPage = event.page + 1;
             this.$emit('on-page-change', event);
         },
 
@@ -249,14 +250,16 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
+                <span v-if="!products.length" class="block h-2rem">Nema rezultata pretrage...</span>
                 <div
+                    v-else
                     class="ml-2 mb-3 flex align-items-center justify-content-between"
                 >
                     <div class="flex align-items-center">
                         <span class="block mr-4"
                             >Proizvodi
                             <span class="text-red-400 font-bold">{{
-                                totalItems
+                                Number(productCount)
                             }}</span></span
                         >
                     </div>
@@ -429,6 +432,7 @@ export default {
                 </div>
 
                 <Paginator
+                    v-if="products.length"
                     :rows="itemsPerPage"
                     :totalRecords="totalItems"
                     v-model:page="currentPage"
