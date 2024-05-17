@@ -34,7 +34,7 @@ export default {
 <template>
     <div class="layout mx-auto mb-8 mt-4 sm:p-2 md:p-0">
         <Toast></Toast>
-        <Header />
+        <Header></Header>
 
         <div
             v-if="!this.isHomePageMounted"

@@ -19,8 +19,6 @@ export default {
     components: {
         UserMenu,
     },
-    mounted() {},
-    updated() {},
     data() {
         return {};
     },
