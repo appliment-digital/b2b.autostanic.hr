@@ -20,7 +20,13 @@ import { useUIStore } from '@/store/UIStore.js';
 setSlugCharMap(slug);
 
 export default {
-    props: ['productCount', 'products', 'manufacturers', 'pageOptions'],
+    props: [
+        'productCount',
+        'products',
+        'status',
+        'manufacturers',
+        'pageOptions',
+    ],
     components: {
         Header,
         Breadcrumbs,
@@ -32,11 +38,7 @@ export default {
             isChecked: false,
 
             filters: {
-                condition: {
-                    isNewPart: false,
-                    isUsedPart: false,
-                },
-
+                status: [],
                 manufacturers: {},
             },
 
@@ -60,9 +62,16 @@ export default {
         // set total items in a category
         this.totalItems = Number(selectedCategory.productCount);
 
-        // set filters
         this.manufacturers.forEach((entry) => {
             this.filters.manufacturers[entry] = false;
+        });
+
+        this.status.forEach((s) => {
+            this.filters.status.push({
+                id: s.id,
+                name: s.name,
+                value: false,
+            });
         });
     },
     updated() {
@@ -94,24 +103,14 @@ export default {
         handleFilterSelect(event) {
             const { id } = event.target;
 
-            // 1. don't allow both condition-filters to be 'true' (checked)
-
-            if (id === 'isNewPart' && this.filters.condition.isUsedPart) {
-                this.filters.condition.isUsedPart = false;
-            }
-
-            if (id === 'isUsedPart' && this.filters.condition.isNewPart) {
-                this.filters.condition.isNewPart = false;
-            }
-
             // 2. create selected filters data
 
-            const selectedFilters = { manufacturerName: [] };
+            const selectedFilters = { statusId: [], manufacturerName: [] };
 
-            //  add condition filters
-            for (const key in this.filters.condition) {
-                if (this.filters.condition[key]) {
-                    selectedFilters[key] = this.filters.condition[key];
+            //  add status filters
+            for (const status of this.filters.status) {
+                if (status.value) {
+                    selectedFilters.statusId.push(status.id);
                 }
             }
 
@@ -132,7 +131,7 @@ export default {
         },
 
         handleNumOfResultsClick(val) {
-            this.$emit('on-num-of-results-change', val)
+            this.$emit('on-num-of-results-change', val);
         },
 
         formatProductStockQuantity(val) {
@@ -163,37 +162,31 @@ export default {
                             },
                         }"
                     >
-                        <div class="flex align-items-center mb-1">
-                            <Checkbox
-                                :pt="{
-                                    box: {
-                                        style: 'border-width: 1px',
-                                    },
-                                }"
-                                v-model="filters.condition.isNewPart"
-                                @change="handleFilterSelect"
-                                :binary="true"
-                                inputId="isNewPart"
-                            />
-                            <label for="ingredient2" class="ml-2 text-sm">
-                                NOVO
-                            </label>
-                        </div>
-                        <div class="flex align-items-center mb-1">
-                            <Checkbox
-                                :pt="{
-                                    box: {
-                                        style: 'border-width: 1px',
-                                    },
-                                }"
-                                v-model="filters.condition.isUsedPart"
-                                @change="handleFilterSelect"
-                                :binary="true"
-                                inputId="isUsedPart"
-                            />
-                            <label for="ingredient2" class="ml-2 text-sm">
-                                RABLJENO
-                            </label>
+                        <div class="mt-0">
+                            <div
+                                v-for="status in filters.status"
+                                class="flex align-items-center mb-1 px-1"
+                            >
+                                <!-- Checkbox -->
+                                <template v-if="status.id != 3">
+                                    <Checkbox
+                                        v-model="status.value"
+                                        @change="handleFilterSelect"
+                                        :binary="true"
+                                        :pt="{
+                                            box: {
+                                                style: 'border-width: 1px',
+                                            },
+                                        }"
+                                    />
+                                    <label
+                                        for="ingredient2"
+                                        class="text-sm ml-2"
+                                    >
+                                        {{ status.name }}
+                                    </label>
+                                </template>
+                            </div>
                         </div>
                     </AccordionTab>
                 </Accordion>
@@ -250,7 +243,9 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
-                <span v-if="!products.length" class="block h-2rem">Nema rezultata pretrage...</span>
+                <span v-if="!products.length" class="block h-2rem"
+                    >Nema rezultata pretrage...</span
+                >
                 <div
                     v-else
                     class="ml-2 mb-3 flex align-items-center justify-content-between"
@@ -278,7 +273,10 @@ export default {
                         <span class="ml-3 mr-2">Broj rezultata</span>
                         <Button
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
-                            :class="pageOptions.size === 24 && 'bg-blue-100 border-blue-200'"
+                            :class="
+                                pageOptions.size === 24 &&
+                                'bg-blue-100 border-blue-200'
+                            "
                             style="width: 32px; height: 32px"
                             label="24"
                             outlined
@@ -287,7 +285,10 @@ export default {
                         />
                         <Button
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
-                            :class="pageOptions.size === 36 && 'bg-blue-100 border-blue-200'"
+                            :class="
+                                pageOptions.size === 36 &&
+                                'bg-blue-100 border-blue-200'
+                            "
                             style="width: 32px; height: 32px"
                             label="36"
                             outlined
@@ -296,7 +297,10 @@ export default {
                         />
                         <Button
                             class="button--no-shadow text-xs p-0 border-100"
-                            :class="pageOptions.size === 48 && 'bg-blue-100 border-blue-200'"
+                            :class="
+                                pageOptions.size === 48 &&
+                                'bg-blue-100 border-blue-200'
+                            "
                             style="width: 32px; height: 32px"
                             label="48"
                             outlined
@@ -371,22 +375,29 @@ export default {
                                         >SKU: {{ product.sku }}</span
                                     >
                                     <!-- prettier-ignore -->
-                                    <span 
-                                    class="absolute top-0 right-0 inline-block
-                                    p-2 text-center opacity-90
-                                    text-white
-                                    "
-                                    style="margin-top: 1.25rem; margin-right: 1.25rem; border-radius: 4px; min-width: 74px; background-color: #123649;"
+                                    <span v-if="Boolean(Number(product.isNewPart)) || Boolean(Number(product.isUsedPart))"
+                                        class="absolute top-0 right-0 inline-block
+                                        p-2 text-center opacity-90
+                                        text-white
+                                        "
+                                        style="margin-top: 1.25rem; margin-right: 1.25rem; border-radius: 4px; min-width: 74px; background-color: #123649;"
                                     >
                                     <span 
-                                    class="text-xs font-bold"
-                                    style="letter-spacing: 1px"
+                                        class="text-xs font-bold"
+                                        style="letter-spacing: 1px"
                                         v-if="
                                             Boolean(Number(product.isNewPart))
                                         "
                                         >NOVO</span
                                     >
-                                    <span class="text-xs font-bold" v-else>RABLJENO</span>
+                                    <span 
+                                    class="text-xs font-bold"
+                                    style="letter-spacing: 1px"
+                                        v-if="
+                                            Boolean(Number(product.isUsedPart))
+                                        "
+                                        >RABLJENO</span
+                                    >
                                 </span>
                                 </span>
                             </template>

@@ -41,20 +41,17 @@ class ProductController extends BaseController
                     }
                 )
                 ->when(
-                    $filters->has('isUsedPart') && $filters->isUsedPart == true,
+                    $filters->has('statusId') && $filters->statusId !== [],
                     function ($query) use ($filters) {
-                        return $query->where('Product.IsUsedPart', 1);
-                    }
-                )
-                ->when(
-                    $filters->has('isNewPart') && $filters->isNewPart == true,
-                    function ($query) use ($filters) {
-                        return $query->where('Product.IsNewPart', 1);
+                        return $query->whereIn(
+                            'Product.ProductStatusId',
+                            $filters->statusId
+                        );
                     }
                 )
                 ->count();
 
-            $query = DB::connection('webshopdb')
+            $productsQuery = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
                     'Product.Id',
@@ -113,15 +110,12 @@ class ProductController extends BaseController
                     }
                 )
                 ->when(
-                    $filters->has('isUsedPart') && $filters->isUsedPart == true,
+                    $filters->has('statusId') && $filters->statusId !== [],
                     function ($query) use ($filters) {
-                        return $query->where('Product.IsUsedPart', 1);
-                    }
-                )
-                ->when(
-                    $filters->has('isNewPart') && $filters->isNewPart == true,
-                    function ($query) use ($filters) {
-                        return $query->where('Product.IsNewPart', 1);
+                        return $query->whereIn(
+                            'Product.ProductStatusId',
+                            $filters->statusId
+                        );
                     }
                 )
                 ->orderBy('Product.IsNewPart', 'desc')
@@ -167,8 +161,39 @@ class ProductController extends BaseController
                 ->orderBy('Product.ManufacturerName', 'asc')
                 ->groupBy('ManufacturerName');
 
+            // Query to get all unique product statuses for the category
+            $statusesQuery = DB::connection('webshopdb')
+                ->table('ProductStatus')
+                ->select('ProductStatus.Id', 'ProductStatus.Name')
+                ->join(
+                    'Product',
+                    'Product.ProductStatusId',
+                    '=',
+                    'ProductStatus.Id'
+                )
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->where('Product_Category_Mapping.CategoryId', $categoryId)
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->where('Product_Category_Mapping.Deleted', 0)
+                ->orderBy('ProductStatus.Name', 'asc')
+                ->distinct()
+                ->get()
+                ->map(function ($status) {
+                    return [
+                        'id' => $status->Id,
+                        'name' => $status->Name,
+                    ];
+                });
+
             $response = [
-                'products' => $this->convertKeysToCamelCase($query),
+                'products' => $this->convertKeysToCamelCase($productsQuery),
+                'status' => $this->convertKeysToCamelCase($statusesQuery),
                 'manufacturers' => $manufacturersQuery->pluck(
                     'ManufacturerName'
                 ),

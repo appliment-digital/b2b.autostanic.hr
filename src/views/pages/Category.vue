@@ -34,6 +34,7 @@ export default {
         return {
             subcategories: null,
             products: null,
+            status: null,
             productCount: null,
             manufacturers: null,
 
@@ -107,10 +108,10 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
-                    console.log({data});
 
                     // store response data
                     this.products = data.products;
+                    this.status = data.status;
                     this.manufacturers = data.manufacturers;
                     this.productCount = data.productCount;
 
@@ -140,7 +141,7 @@ export default {
         },
 
         handleResultsPageChange(event) {
-            this.page.current = event.page + 1
+            this.page.current = event.page + 1;
             this.getProducts(this.categoryStore.selectedCategory.id, {});
         },
 
@@ -194,6 +195,7 @@ export default {
         <Results
             :productCount="productCount"
             :products="products"
+            :status="status"
             :manufacturers="manufacturers"
             :pageOptions="page"
             @on-page-change="handleResultsPageChange"
