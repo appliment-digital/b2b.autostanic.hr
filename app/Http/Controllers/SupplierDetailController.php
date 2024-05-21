@@ -159,4 +159,29 @@ class SupplierDetailController extends BaseController
             ]);
         }
     }
+
+    public function getAddedPriceRange($supplierId, $categoryIds)
+    {
+        try {
+            return $categoryIds;
+            foreach ($categoryIds as $categoryId) {
+                $priceRange = SuppliersDetail::where(
+                    'web_db_supplier_id',
+                    $supplierId
+                )
+                    ->where('web_db_category_id', $categoryId)
+                    ->select(
+                        'web_db_category_id',
+                        'min_product_cost',
+                        'max_product_cost'
+                    )
+                    ->get();
+                return $priceRange;
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
 }

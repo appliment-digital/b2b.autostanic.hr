@@ -27,6 +27,16 @@ export default class SupplierDetailService {
         return Axios.get(this.apiResourceEndpoint + '/getUniqueCategories');
     }
 
+    async getAddedPriceRange(supplierId, categoryIds) {
+        return Axios.get(
+            this.apiResourceEndpoint +
+                '/getAddedPriceRange/' +
+                supplierId +
+                '/' +
+                categoryIds,
+        );
+    }
+
     async addDetailsforSupplier(object) {
         return Axios.post(
             this.apiResourceEndpoint + '/addDetailsforSupplier',

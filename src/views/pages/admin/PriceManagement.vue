@@ -61,6 +61,14 @@ export default {
                 this.getCategoriesForSupplier();
             }
         },
+        selectedCategories() {
+            if (
+                Array.isArray(this.selectedCategories) &&
+                this.selectedCategories.length > 0
+            ) {
+                this.getAddedPriceRange();
+            }
+        },
     },
     computed: {},
     methods: {
@@ -72,6 +80,7 @@ export default {
             this.selectedCategories = [];
             this.minPrice = this.maxPrice = 0;
             this.supplierDetail = {};
+            this.categoryName = null;
         },
         getWarrents() {
             WarrentService.getAll().then((response) => {
@@ -97,7 +106,6 @@ export default {
                         id: null,
                         name: 'PROIZVODI BEZ KATEGORIJE',
                     });
-                    this.getUniqueCategories();
                 });
         },
         getCategoryName(categoryId) {
@@ -108,14 +116,18 @@ export default {
                     return response.data;
                 });
         },
-        getUniqueCategories() {
-            supplierDetailService.getUniqueCategories().then((response) => {
-                this.disabledCategories = response.data;
-            });
+        getAddedPriceRange() {
+            const categoriesIds = this.selectedCategories.map(
+                (category) => category.id,
+            );
+            supplierDetailService
+                .getAddedPriceRange(this.selectedSuppier.id, categoriesIds)
+                .then((response) => {
+                    console.log(response.data);
+                });
         },
         async openDialog(data) {
             if (data) {
-                console.log(data);
                 this.selectedDetailsId = data.id;
                 this.getCategoryName(data.web_db_category_id);
 
@@ -150,7 +162,7 @@ export default {
         },
         closeDialog() {
             this.showDialog = false;
-            this.resetInputs();
+            //this.resetInputs();
         },
         getAllSuppliersWithDetails() {
             supplierDetailService
@@ -463,16 +475,31 @@ export default {
                     <label>{{ categoryName }}</label>
                 </div>
             </div>
-            <div v-else class="col-9 font-semibold">
+            <div
+                v-if="
+                    Array.isArray(this.selectedCategories) &&
+                    selectedCategories.length
+                "
+                class="col-9 font-semibold"
+            >
                 <template
                     v-for="(category, index) in selectedCategories"
                     :key="index"
                 >
-                    <div class="block">
+                    <div class="block mb-1">
                         <label>{{ category.name }}</label
                         ><br />
                     </div>
                 </template>
+            </div>
+            <div
+                v-if="
+                    !categoryName &&
+                    (!Array.isArray(selectedCategories) ||
+                        !selectedCategories.length)
+                "
+            >
+                PROIZVODI BEZ KATEGORIJE
             </div>
         </div>
 

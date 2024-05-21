@@ -431,6 +431,7 @@ class ProductController extends BaseController
                     'Product_Category_Mapping.ProductId'
                 )
                 ->where('p.SupplierId', $request->supplierId);
+            // Handling conditions for categoryIds
             if (in_array(null, $request->categoryIds)) {
                 // If $request->categoryIds contains null
                 $query->where(function ($query) use ($request) {
@@ -450,7 +451,10 @@ class ProductController extends BaseController
                 });
             } elseif (!empty($request->categoryIds)) {
                 // If $request->categoryIds contains category IDs but not null
-                $query->whereIn('p.Id', $request->categoryIds);
+                $query->whereIn(
+                    'Product_Category_Mapping.CategoryId',
+                    $request->categoryIds
+                );
             }
             $count = $query
                 ->where('p.ProductCost', '>', $request->minPrice)
