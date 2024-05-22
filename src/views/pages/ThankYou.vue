@@ -9,7 +9,6 @@ export default {
 </script>
 
 <template>
-    <Header />
     <div class="screen-75 flex flex-column justify-content-center align-items-center">
         <h2>Zahvaljujemo na narudžbi :)</h2>
         <span class="block">Vaša narudžba je uspješno zaprimljena!</span>

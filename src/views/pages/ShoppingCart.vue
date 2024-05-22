@@ -14,6 +14,7 @@ import { mapStores } from 'pinia';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
+import { useUIStore } from '@/store/UIStore.js';
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
@@ -33,6 +34,7 @@ export default {
             useShoppingCartStore,
             useBreadcrumbsStore,
             useResultsStore,
+            useUIStore,
         ),
 
         order() {
@@ -55,14 +57,11 @@ export default {
                 },
             ];
         },
+    },
 
-        shoppingCartProducts() {
-            if (this.shoppingCartStore.cart.length) {
-                return this.shoppingCartStore.cart;
-            } else {
-                return [];
-            }
-        },
+    mounted() {
+        console.log('shopping cart store', this.shoppingCartStore.cart);
+
     },
 
     methods: {
@@ -86,7 +85,9 @@ export default {
 
         handleProductTableItemClick(product) {
             const productSlug = slug(product.name, { lower: true });
-            this.resultsStore.addCurrentProduct(product);
+
+            // this.UIStore.setIsProductViewedFromCart(true);
+            this.resultsStore.setProduct(product);
             this.$router.push(`/${productSlug}`);
         },
     },
@@ -98,8 +99,8 @@ export default {
         <div class="col">
             <div class="card p-5 mb-0">
                 <DataTable
-                    v-if="shoppingCartProducts.length"
-                    :value="shoppingCartProducts"
+                    v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
+                    :value="shoppingCartStore.cart"
                 >
                     <Column field="image" header="Slika">
                         <template #body="{ data }">
@@ -167,7 +168,7 @@ export default {
             </div>
         </div>
 
-        <div v-if="shoppingCartProducts.length" class="col-12 lg:col-3">
+        <div v-if="shoppingCartStore.cart && shoppingCartStore.cart.length" class="col-12 lg:col-3">
             <div class="card p-5">
                 <div class="max-w-24rem mx-auto">
                     <DataTable :value="order">
