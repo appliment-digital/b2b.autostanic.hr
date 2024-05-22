@@ -42,17 +42,17 @@ export default {
                 manufacturers: {},
             },
 
-            results: {
-                sort: {
-                    selected: null,
-                    options: [
-                        { label: 'Naziv: A do Z' },
-                        { label: 'Naziv: Z do A' },
-                        { label: 'Cijena: ⬆️' },
-                        { label: 'Cijena: ⬇️' },
-                    ],
-                },
-            },
+            // results: {
+            //     sort: {
+            //         selected: null,
+            //         options: [
+            //             { label: 'Naziv: A do Z' },
+            //             { label: 'Naziv: Z do A' },
+            //             { label: 'Cijena: ⬆️' },
+            //             { label: 'Cijena: ⬇️' },
+            //         ],
+            //     },
+            // },
         };
     },
     mounted() {
@@ -259,7 +259,7 @@ export default {
                         >
                     </div>
                     <div class="flex align-items-center">
-                        <label for="sort-dropdown" class="mr-2"
+                        <!-- <label for="sort-dropdown" class="mr-2"
                             >Poredaj po</label
                         >
                         <Dropdown
@@ -269,7 +269,7 @@ export default {
                             optionLabel="label"
                             placeholder="Pozicija"
                             class="w-full md:w-12rem"
-                        />
+                        /> -->
                         <span class="ml-3 mr-2">Broj rezultata</span>
                         <Button
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
