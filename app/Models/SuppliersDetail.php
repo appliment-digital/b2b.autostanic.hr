@@ -27,27 +27,23 @@ class SuppliersDetail extends Model
     {
         $suppliersDetails = [];
 
-        foreach ($data['categoriesIds'] as $categoryId) {
-            $suppliersDetail = new self();
-            $suppliersDetail->web_db_supplier_id = $data['supplierId'];
-            $suppliersDetail->web_db_category_id = $categoryId;
-            $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
-            $suppliersDetail->warrent_id =
-                $data['supplierDetail']['warrent']['id'] ?? null;
-            $suppliersDetail->delivery_deadline_id =
-                $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
-            $suppliersDetail->min_product_cost =
-                $data['minProductCost'] ?? null;
-            $suppliersDetail->max_product_cost =
-                $data['maxProductCost'] ?? null;
-            $suppliersDetail->expenses =
-                $data['supplierDetail']['expenses'] ?? null;
+        $suppliersDetail = new self();
+        $suppliersDetail->web_db_supplier_id = $data['supplierId'];
+        $suppliersDetail->web_db_category_id = $data['categoryId'];
+        $suppliersDetail->mark_up = $data['supplierDetail']['markUp'];
+        $suppliersDetail->warrent_id =
+            $data['supplierDetail']['warrent']['id'] ?? null;
+        $suppliersDetail->delivery_deadline_id =
+            $data['supplierDetail']['deliveryDeadline']['id'] ?? null;
+        $suppliersDetail->min_product_cost = $data['minProductCost'] ?? null;
+        $suppliersDetail->max_product_cost = $data['maxProductCost'] ?? null;
+        $suppliersDetail->expenses =
+            $data['supplierDetail']['expenses'] ?? null;
 
-            $suppliersDetail->save();
-            $suppliersDetail->refresh();
+        $suppliersDetail->save();
+        $suppliersDetail->refresh();
 
-            $suppliersDetails[] = $suppliersDetail;
-        }
+        $suppliersDetails[] = $suppliersDetail;
 
         return $suppliersDetails;
     }

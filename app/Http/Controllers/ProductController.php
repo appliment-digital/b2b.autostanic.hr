@@ -422,7 +422,7 @@ class ProductController extends BaseController
         Request $request
     ) {
         try {
-            $query = DB::connection('webshopdb')
+            $count = DB::connection('webshopdb')
                 ->table('dbo.Product as p')
                 ->leftJoin(
                     'dbo.Product_Category_Mapping',
@@ -430,33 +430,11 @@ class ProductController extends BaseController
                     '=',
                     'Product_Category_Mapping.ProductId'
                 )
-                ->where('p.SupplierId', $request->supplierId);
-            // Handling conditions for categoryIds
-            if (in_array(null, $request->categoryIds)) {
-                // If $request->categoryIds contains null
-                $query->where(function ($query) use ($request) {
-                    $query
-                        ->whereNotExists(function ($query) {
-                            $query
-                                ->select(DB::raw(1))
-                                ->from('Product_Category_Mapping')
-                                ->whereRaw(
-                                    'Product_Category_Mapping.productId = p.Id'
-                                );
-                        })
-                        ->orWhereIn(
-                            'p.Id',
-                            array_filter($request->categoryIds, 'is_numeric')
-                        );
-                });
-            } elseif (!empty($request->categoryIds)) {
-                // If $request->categoryIds contains category IDs but not null
-                $query->whereIn(
+                ->where('p.SupplierId', $request->supplierId)
+                ->where(
                     'Product_Category_Mapping.CategoryId',
-                    $request->categoryIds
-                );
-            }
-            $count = $query
+                    $request->categoryId
+                )
                 ->where('p.ProductCost', '>', $request->minPrice)
                 ->where('p.ProductCost', '<', $request->maxPrice)
                 ->count();

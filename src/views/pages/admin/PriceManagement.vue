@@ -37,9 +37,9 @@ export default {
         return {
             filters: {},
             suppliers: [],
-            selectedSuppier: null,
+            selectedSupplier: null,
             categories: [],
-            selectedCategories: [],
+            selectedCategory: null,
             minPrice: 0,
             maxPrice: 0,
             showDialog: false,
@@ -53,34 +53,85 @@ export default {
             productName: null,
             selectedDetailsId: null,
             disabledCategories: [],
+            addedPricesForCategories: [],
+            errorMessageMin: '',
+            errorMessageMax: '',
+            buttonDisabled: true,
         };
     },
     watch: {
-        selectedSuppier() {
-            if (this.selectedSuppier) {
+        selectedSupplier() {
+            if (this.selectedSupplier) {
                 this.getCategoriesForSupplier();
             }
         },
-        selectedCategories() {
-            if (
-                Array.isArray(this.selectedCategories) &&
-                this.selectedCategories.length > 0
-            ) {
+        selectedCategory() {
+            if (this.selectedCategory && this.selectedCategory.id) {
                 this.getAddedPriceRange();
             }
         },
     },
-    computed: {},
+    computed: {
+        buttonDisabled() {
+            if (
+                this.selectedSupplier == null ||
+                this.selectedCategory == null ||
+                this.errorMessageMin != '' ||
+                this.errorMessageMax != ''
+            ) {
+                return true;
+            }
+            if (this.errorMessageMin != '' || this.errorMessageMax != '') {
+                return true;
+            }
+        },
+    },
     methods: {
+        validateMinPrices() {
+            let isOverlap = this.addedPricesForCategories.some((range) => {
+                if (
+                    this.minPrice >= parseFloat(range.min_product_cost) &&
+                    this.minPrice <= parseFloat(range.max_product_cost)
+                ) {
+                    return true;
+                }
+            });
+
+            if (isOverlap) {
+                this.errorMessageMin =
+                    'Za navedenu minimalnu cijenu je već definirano';
+            } else {
+                this.errorMessageMin = '';
+            }
+        },
+        validateMaxPrices() {
+            let isOverlap = this.addedPricesForCategories.some((range) => {
+                if (
+                    this.maxPrice >= parseFloat(range.min_product_cost) &&
+                    this.maxPrice <= parseFloat(range.max_product_cost)
+                ) {
+                    return true;
+                }
+            });
+
+            if (isOverlap) {
+                this.errorMessageMax =
+                    'Za navedenu maximalnu cijenu je već definirano';
+            } else {
+                this.errorMessageMax = '';
+            }
+        },
         resetInputs() {
-            this.selectedSuppier =
+            this.selectedSupplier =
                 this.selectedProduct =
                 this.productName =
                     null;
-            this.selectedCategories = [];
+            this.selectedCategory = null;
             this.minPrice = this.maxPrice = 0;
             this.supplierDetail = {};
             this.categoryName = null;
+            this.addedPricesForCategories = [];
+            this.errorMessageMin = this.errorMessageMax = '';
         },
         getWarrents() {
             WarrentService.getAll().then((response) => {
@@ -99,7 +150,7 @@ export default {
         },
         getCategoriesForSupplier() {
             supplierService
-                .getCategoriesForSupplier(this.selectedSuppier.id)
+                .getCategoriesForSupplier(this.selectedSupplier.id)
                 .then((response) => {
                     this.categories = response.data;
                     this.categories.push({
@@ -117,13 +168,13 @@ export default {
                 });
         },
         getAddedPriceRange() {
-            const categoriesIds = this.selectedCategories.map(
-                (category) => category.id,
-            );
             supplierDetailService
-                .getAddedPriceRange(this.selectedSuppier.id, categoriesIds)
+                .getAddedPriceRange({
+                    supplierId: this.selectedSupplier.id,
+                    categoryId: this.selectedCategory,
+                })
                 .then((response) => {
-                    console.log(response.data);
+                    this.addedPricesForCategories = response.data;
                 });
         },
         async openDialog(data) {
@@ -131,7 +182,7 @@ export default {
                 this.selectedDetailsId = data.id;
                 this.getCategoryName(data.web_db_category_id);
 
-                this.selectedSuppier = this.suppliers.find(
+                this.selectedSupplier = this.suppliers.find(
                     (s) => s.id == data.web_db_supplier_id,
                 );
                 if (data.web_db_category_id) {
@@ -162,7 +213,7 @@ export default {
         },
         closeDialog() {
             this.showDialog = false;
-            //this.resetInputs();
+            this.resetInputs();
         },
         getAllSuppliersWithDetails() {
             supplierDetailService
@@ -172,12 +223,9 @@ export default {
                 });
         },
         getProductsBySupplierCategoresAndPriceRange() {
-            const categoriesIds = this.selectedCategories.map(
-                (category) => category.id,
-            );
             ProductService.getProductsBySupplierCategoresAndPriceRange({
-                supplierId: this.selectedSuppier.id,
-                categoryIds: categoriesIds,
+                supplierId: this.selectedSupplier.id,
+                categoryId: this.selectedCategory,
                 minPrice: this.minPrice,
                 maxPrice: this.maxPrice,
             }).then((response) => {
@@ -211,14 +259,10 @@ export default {
                         }
                     });
             } else {
-                const categoriesIds = this.selectedCategories.map(
-                    (category) => category.id,
-                );
-
                 supplierDetailService
                     .addDetailsforSupplier({
-                        supplierId: this.selectedSuppier.id,
-                        categoriesIds: categoriesIds,
+                        supplierId: this.selectedSupplier.id,
+                        categoryId: this.selectedCategory.id,
                         minProductCost: this.minPrice,
                         maxProductCost: this.maxPrice,
                         supplierDetail: this.supplierDetail,
@@ -259,7 +303,7 @@ export default {
 
                     <div class="col-12 md:col-8">
                         <Dropdown
-                            v-model="selectedSuppier"
+                            v-model="selectedSupplier"
                             :options="suppliers"
                             optionLabel="name"
                             placeholder="Odaberite dobavljača"
@@ -272,17 +316,16 @@ export default {
                     <label class="col-12 md:col-4 mt-2"> Kategorija </label>
 
                     <div class="col-12 md:col-8">
-                        <MultiSelect
-                            v-if="selectedSuppier == null"
+                        <Dropdown
+                            v-if="selectedSupplier == null"
                             disabled
-                            placeholder="Odaberite kategorije"
+                            placeholder="Odaberite kategoriju"
                             class="w-full"
                         >
-                        </MultiSelect>
-
-                        <MultiSelect
+                        </Dropdown>
+                        <Dropdown
                             v-else
-                            v-model="selectedCategories"
+                            v-model="selectedCategory"
                             :options="categories"
                             display="chip"
                             optionLabel="name"
@@ -303,55 +346,91 @@ export default {
                                     {{ slotProps.option.name }}
                                 </div>
                             </template>
-                        </MultiSelect>
+                        </Dropdown>
+                    </div>
+                </div>
+                <div
+                    v-if="
+                        Array.isArray(this.addedPricesForCategories) &&
+                        this.addedPricesForCategories.length > 0
+                    "
+                    class="field grid"
+                >
+                    <label class="col-12 md:col-4 mt-2">
+                        Definirano za cijene
+                    </label>
+                    <div class="col-12 md:col-8">
+                        <div class="flex flex-wrap">
+                            <div
+                                v-for="(
+                                    detail, index
+                                ) in addedPricesForCategories"
+                                :key="detail.id"
+                            >
+                                <span class="mx-1">
+                                    {{ detail.min_product_cost }} € -
+                                    {{ detail.max_product_cost }} €
+                                </span>
+                                <span
+                                    v-if="
+                                        index <
+                                        addedPricesForCategories.length - 1
+                                    "
+                                    class="font-bold"
+                                    >|
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="field grid">
                     <label class="col-12 md:col-4 mt-2">
                         Minimalna cijena
                     </label>
-
                     <div class="col-12 md:col-8">
                         <InputNumber
-                            v-if="this.selectedCategories.length == 0"
-                            disabled
-                            class="w-full"
-                        />
-                        <InputNumber
-                            v-else
+                            v-if="selectedCategory"
                             v-model="minPrice"
+                            @blur="validateMinPrices()"
                             autofocus
                             class="w-full"
                         />
+                        <InputNumber v-else disabled class="w-full" />
+                        <div
+                            v-if="errorMessageMin"
+                            class="mt-1 text-red-500 text-xs"
+                        >
+                            {{ errorMessageMin }}
+                        </div>
                     </div>
                 </div>
                 <div class="field grid">
                     <label class="col-12 md:col-4 mt-2">
                         Maksimalna cijena
                     </label>
-
                     <div class="col-12 md:col-8">
                         <InputNumber
-                            v-if="this.selectedCategories.length == 0"
-                            disabled
-                            class="w-full"
-                        />
-                        <InputNumber
-                            v-else
+                            v-if="selectedCategory"
                             v-model="maxPrice"
+                            @blur="validateMaxPrices()"
                             autofocus
                             class="w-full"
                         />
+                        <InputNumber v-else disabled class="w-full" />
+                        <div
+                            v-if="errorMessageMax"
+                            class="mt-1 text-red-500 text-xs"
+                        >
+                            {{ errorMessageMax }}
+                        </div>
                     </div>
                 </div>
+
                 <div class="field grid">
                     <div class="col-12 md:col-4 mt-2"></div>
                     <div class="col-12 md:col-8">
                         <Button
-                            v-if="
-                                selectedSuppier == null &&
-                                selectedCategories.length == 0
-                            "
+                            v-if="buttonDisabled"
                             disabled
                             class="w-full mb-2"
                             label="Odaberi"
@@ -465,40 +544,17 @@ export default {
         <div class="field grid">
             <label class="col-3">Naziv:</label>
             <label class="col-9 font-semibold">{{
-                this.selectedSuppier.name
+                this.selectedSupplier.name
             }}</label>
         </div>
         <div class="field grid">
-            <label class="col-3">Kategorija/e:</label>
+            <label class="col-3">Kategorija:</label>
             <div v-if="categoryName" class="col-9 font-semibold">
                 <div class="block">
                     <label>{{ categoryName }}</label>
                 </div>
             </div>
-            <div
-                v-if="
-                    Array.isArray(this.selectedCategories) &&
-                    selectedCategories.length
-                "
-                class="col-9 font-semibold"
-            >
-                <template
-                    v-for="(category, index) in selectedCategories"
-                    :key="index"
-                >
-                    <div class="block mb-1">
-                        <label>{{ category.name }}</label
-                        ><br />
-                    </div>
-                </template>
-            </div>
-            <div
-                v-if="
-                    !categoryName &&
-                    (!Array.isArray(selectedCategories) ||
-                        !selectedCategories.length)
-                "
-            >
+            <div v-if="!categoryName" class="col-9 font-semibold">
                 PROIZVODI BEZ KATEGORIJE
             </div>
         </div>

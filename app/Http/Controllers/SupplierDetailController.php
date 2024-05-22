@@ -160,24 +160,28 @@ class SupplierDetailController extends BaseController
         }
     }
 
-    public function getAddedPriceRange($supplierId, $categoryIds)
+    public function getAddedPriceRange(Request $request)
     {
         try {
-            return $categoryIds;
-            foreach ($categoryIds as $categoryId) {
-                $priceRange = SuppliersDetail::where(
-                    'web_db_supplier_id',
-                    $supplierId
+            $supplierId = $request->supplierId;
+            $categoryId = $request->categoryId;
+
+            $categoryName = $this->getCategoryName($categoryId);
+
+            $priceRangeData = SuppliersDetail::where(
+                'web_db_supplier_id',
+                $supplierId
+            )
+                ->where('web_db_category_id', $categoryId)
+                ->select(
+                    'id',
+                    'web_db_category_id',
+                    'min_product_cost',
+                    'max_product_cost'
                 )
-                    ->where('web_db_category_id', $categoryId)
-                    ->select(
-                        'web_db_category_id',
-                        'min_product_cost',
-                        'max_product_cost'
-                    )
-                    ->get();
-                return $priceRange;
-            }
+                ->get();
+
+            return $priceRangeData;
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),

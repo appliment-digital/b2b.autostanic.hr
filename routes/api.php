@@ -167,10 +167,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'getUniqueCategories',
     ]);
 
-    Route::get(
-        '/supplierDetail/getAddedPriceRange/{supplierId}/{categoryIds}',
-        [SupplierDetailController::class, 'getAddedPriceRange']
-    );
+    Route::post('/supplierDetail/getAddedPriceRange', [
+        SupplierDetailController::class,
+        'getAddedPriceRange',
+    ]);
 
     Route::post('/supplierDetail/addDetailsforSupplier', [
         SupplierDetailController::class,
