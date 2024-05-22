@@ -115,6 +115,7 @@ export default {
                     this.manufacturers = data.manufacturers;
                     this.productCount = data.productCount;
 
+                    this.handleDefaultProductImage(this.products);
                     this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
@@ -149,15 +150,15 @@ export default {
             this.getProducts(categoryId, filters);
         },
 
-        setDefaultImageToProducts(products) {
+        handleDefaultProductImage(products) {
             products.forEach((entry) => {
                 if (
-                    entry.picture_urls &&
-                    entry.picture_urls[0] ===
+                    entry.pictureUrl &&
+                    entry.pictureUrl ===
                         'https://www.autostanic.hr/content/images/thumbs/default-image_280.png'
                 ) {
                     entry.hasDefaultImage = 'true';
-                    entry.picture_urls[0] = '/images/as_logo_single.png';
+                    entry.pictureUrl = '/images/as_logo_single.png';
                 }
             });
         },

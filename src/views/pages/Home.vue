@@ -20,6 +20,29 @@ import CategoryService from '@/service/CategoryService.js';
 
 setSlugCharMap(slug);
 
+const news = [
+    {
+        text: `Run flat gume su gume na kojima nakon probijanja ili
+        puknuća možete nastaviti voziti kako bi mogli stići
+        do vulkanizera ili pronaći sigurno, ravno mjesto za
+        promjenu gume bez da oštetite felge.`,
+    },
+    {
+        text: `Na našem području još uvijek ima više automobila s
+        ručnim mjenjačem nego s automatskim. Ipak, u novije
+        vrijeme sve je više automobila s automatskim
+        mjenjačem, a neki proizvođači polako ukidaju ručne
+        mjenjače.`,
+    },
+    {
+        text: `Tipični automatski mjenjači nemaju papučicu spojke
+        kao automobil s ručnim mjenjačem. Umjesto toga, oni
+        koriste uređaj koji se zove pretvarač okretnog
+        momenta. U nastavku ćemo objasniti što je DSG, kako
+        radi.`,
+    },
+];
+
 export default {
     components: {
         Header,
@@ -27,6 +50,7 @@ export default {
     data() {
         return {
             categories: null,
+            news,
         };
     },
     computed: {
@@ -66,6 +90,16 @@ export default {
 
         handleNewsCardClick(link) {
             window.open(link, '_blank');
+        },
+
+        handleNewsCardTextSize(text) {
+            const allowedNumOfChars = 200;
+
+            if (text.length > allowedNumOfChars) {
+                return text.substring(0, allowedNumOfChars) + ' ...,';
+            } else {
+                return text;
+            }
         },
 
         openCRMForm() {
@@ -170,7 +204,7 @@ export default {
             class="categories py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center justify-content-center"
         >
             <div
-                class="grid justify-content-center row-gap-1 column-gap-1 px-2 align-items-start"
+                class="grid justify-content-center row-gap-1 column-gap-1 align-items-start"
             >
                 <!-- prettier-ignore -->
                 <ProgressSpinner v-if="UIStore.isDataLoading" class="mx-auto" strokeWidth="2"/>
@@ -181,11 +215,11 @@ export default {
                     @click="handleCategoryClick(category)"
                 >
                     <div
-                        class="shadow-1 py-3 border-1 border-100 p-4 border-round hover:shadow-3"
+                        class="py-3 border-1 border-100 p-4 border-round hover:shadow-2"
                     >
                         <img
                             :src="category.pictureUrl"
-                            style="width: 62px"
+                            style="width: 68px"
                             class="block mx-auto"
                         />
                     </div>
@@ -202,7 +236,7 @@ export default {
         <h3 class="text-700 mt-0 mb-2 text-center">
             Savjeti za Vas i Vaš automobil
         </h3>
-        <span class="block text-500 mb-7 text-center"
+        <span class="block text-500 mb-6 text-center"
             >Pročitajte kratke zanimljivosti vezane uz vašeg limenog
             ljubimca.</span
         >
@@ -212,8 +246,12 @@ export default {
         >
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="height: 440px"
-                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    :pt="{
+                        title: {
+                            class: 'mb-0',
+                        },
+                    }"
+                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
                     @click="
                         handleNewsCardClick(
                             'https://www.autostanic.hr/blog/sto-su-run-flat-gume',
@@ -221,33 +259,35 @@ export default {
                     "
                 >
                     <template #header>
-                        <div class="p-4">
+                        <div class="p-4 pb-0">
                             <img
                                 src="https://www.autostanic.hr/Content/Images/uploaded/test/run flat gume.jpeg"
-                                class="h-10rem w-full border-round"
+                                class="h-10rem w-full border-1 border-200 border-round"
                                 style="object-fit: cover"
                             />
                         </div>
                     </template>
                     <template #title
-                        ><span class="h-2rem"
+                        ><span class="text-xl"
                             >Prednosti i mane run flat guma</span
                         ></template
                     >
                     <template #content>
                         <p>
-                            Run flat gume su gume na kojima nakon probijanja ili
-                            puknuća možete nastaviti voziti kako bi mogli stići
-                            do vulkanizera ili pronaći sigurno, ravno mjesto za
-                            promjenu gume bez da oštetite felge.
+                            {{ handleNewsCardTextSize(news[0].text) }}
+                            <span class="font-bold">saznaj više.</span>
                         </p>
                     </template>
                 </Card>
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="height: 440px"
-                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    :pt="{
+                        title: {
+                            class: 'mb-0',
+                        },
+                    }"
+                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
                     @click="
                         handleNewsCardClick(
                             'https://www.autostanic.hr/blog/simptomi-kvara-kvacila',
@@ -255,22 +295,23 @@ export default {
                     "
                 >
                     <template #header>
-                        <div class="p-4">
+                        <div class="p-4 pb-0">
                             <img
                                 src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
-                                class="h-10rem w-full border-round"
+                                class="h-10rem w-full border-1 border-200 border-round"
                                 style="object-fit: cover"
                             />
                         </div>
                     </template>
-                    <template #title>5 Simptoma Kvara Kvačila</template>
+                    <template #title
+                        ><span class="text-xl"
+                            >5 Simptoma Kvara Kvačila</span
+                        ></template
+                    >
                     <template #content>
                         <p>
-                            Na našem području još uvijek ima više automobila s
-                            ručnim mjenjačem nego s automatskim. Ipak, u novije
-                            vrijeme sve je više automobila s automatskim
-                            mjenjačem, a neki proizvođači polako ukidaju ručne
-                            mjenjače.
+                            {{ handleNewsCardTextSize(news[1].text) }}
+                            <span class="font-bold">saznaj više.</span>
                         </p>
                     </template>
                     hello
@@ -278,8 +319,12 @@ export default {
             </div>
             <div class="mx-auto col-12 sm:col-8 md:col">
                 <Card
-                    style="height: 440px"
-                    class="cursor-pointer border-1 border-100 shadow-2 hover:shadow-5"
+                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
+                    :pt="{
+                        title: {
+                            class: 'mb-0',
+                        },
+                    }"
                     @click="
                         handleNewsCardClick(
                             'https://www.autostanic.hr/blog/simptomi-kvara-dsg-mjenjaca',
@@ -287,22 +332,23 @@ export default {
                     "
                 >
                     <template #header>
-                        <div class="p-4">
+                        <div class="p-4 pb-0">
                             <img
                                 src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
-                                class="h-10rem w-full border-round"
+                                class="h-10rem w-full border-1 border-200 border-round"
                                 style="object-fit: cover"
                             />
                         </div>
                     </template>
-                    <template #title>4 Simptoma Kvara DSG Mjenjača</template>
+                    <template #title
+                        ><span class="text-xl"
+                            >4 Simptoma kvara DSG Mjenjača</span
+                        ></template
+                    >
                     <template #content>
                         <p>
-                            Tipični automatski mjenjači nemaju papučicu spojke
-                            kao automobil s ručnim mjenjačem. Umjesto toga, oni
-                            koriste uređaj koji se zove pretvarač okretnog
-                            momenta. U nastavku ćemo objasniti što je DSG, kako
-                            radi.
+                            {{ handleNewsCardTextSize(news[2].text) }}
+                            <span class="font-bold">saznaj više.</span>
                         </p>
                     </template>
                 </Card>
