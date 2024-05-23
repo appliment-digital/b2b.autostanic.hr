@@ -99,4 +99,11 @@ class DiscountType extends Model
             return $discountType->delete();
         }
     }
+
+    public static function getDiscountForUser($id)
+    {
+        $discountType = self::find($id)->discount;
+
+        return $discountType;
+    }
 }

@@ -34,6 +34,13 @@ export default class SupplierDetailService {
         );
     }
 
+    async getDetailsForProduct(object) {
+        return Axios.post(
+            this.apiResourceEndpoint + '/getDetailsForProduct',
+            object,
+        );
+    }
+
     async addDetailsforSupplier(object) {
         return Axios.post(
             this.apiResourceEndpoint + '/addDetailsforSupplier',

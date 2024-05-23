@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\SuppliersDetail;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -63,6 +64,8 @@ class ProductController extends BaseController
                     'Product.IsNewPart',
                     'Product.IsUsedPart',
                     'Product.ManufacturerName',
+                    'Product.SupplierId',
+                    'Product_Category_Mapping.CategoryId',
                     'Picture.SeoFilename',
                     'Picture.MimeType',
                     'Product_Picture_Mapping.PictureId as PictureId'
@@ -125,6 +128,41 @@ class ProductController extends BaseController
                 ->distinct()
                 ->get()
                 ->map(function ($product) {
+                    // Fetch supplier details
+                    $supplierDetails = SuppliersDetail::where(
+                        'web_db_supplier_id',
+                        $product->SupplierId
+                    )
+                        ->where('web_db_category_id', $product->CategoryId)
+                        ->select('id', 'mark_up', 'expenses')
+                        ->when(!is_null($product->Price), function (
+                            $query
+                        ) use ($product) {
+                            return $query
+                                ->where(
+                                    'min_product_cost',
+                                    '<=',
+                                    $product->Price
+                                )
+                                ->where(
+                                    'max_product_cost',
+                                    '>=',
+                                    $product->Price
+                                );
+                        })
+                        ->first();
+
+                    // Calculate new price with mark up and expenses
+                    if ($supplierDetails) {
+                        $markup = $supplierDetails->mark_up ?? 0;
+                        $expenses = $supplierDetails->expenses ?? 0;
+                        $product->Price =
+                            $product->Price +
+                            $product->Price * ($markup / 100) +
+                            $expenses;
+                    }
+
+                    // Generate picture URL
                     $pictureUrl = '';
                     if (!is_null($product->PictureId)) {
                         $paddedPictureId = str_pad(
@@ -141,6 +179,7 @@ class ProductController extends BaseController
                             'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
                     }
                     $product->pictureUrl = $pictureUrl;
+
                     return $product;
                 })
                 ->toArray();
@@ -437,6 +476,9 @@ class ProductController extends BaseController
                 )
                 ->where('p.ProductCost', '>', $request->minPrice)
                 ->where('p.ProductCost', '<', $request->maxPrice)
+                ->where('p.Deleted', 0)
+                ->where('p.Published', 1)
+                ->where('Product_Category_Mapping.Deleted', 0)
                 ->count();
 
             return $count;

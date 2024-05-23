@@ -172,6 +172,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'getAddedPriceRange',
     ]);
 
+    Route::post('/supplierDetail/getDetailsForProduct', [
+        SupplierDetailController::class,
+        'getDetailsForProduct',
+    ]);
+
     Route::post('/supplierDetail/addDetailsforSupplier', [
         SupplierDetailController::class,
         'addDetailsforSupplier',

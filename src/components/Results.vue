@@ -15,6 +15,12 @@ import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
+import { useUserStore } from '@/store/userStore.js';
+
+// services
+import SupplierDetailService from '@/service/SupplierDetailService';
+
+const supplierDetailService = new SupplierDetailService();
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
@@ -42,6 +48,7 @@ export default {
                 manufacturers: {},
             },
 
+            formattedMpcPrices: [],
             // results: {
             //     sort: {
             //         selected: null,
@@ -83,8 +90,10 @@ export default {
             useShoppingCartStore,
             useCategoryStore,
             useUIStore,
+            useUserStore,
         ),
     },
+    watch: {},
     methods: {
         handleProductClick(product) {
             this.resultsStore.setProduct(product);
@@ -140,6 +149,23 @@ export default {
 
         formatProductPrice(val) {
             return formatPrice(val);
+        },
+        discountedPrice(price) {
+            if (this.userStore.discount) {
+                let discountAmount = (this.userStore.discount / 100) * price;
+                return this.formatProductPrice(price - discountAmount);
+            }
+        },
+        getDetailsForProduct(product) {
+            return supplierDetailService
+                .getDetailsForProduct({
+                    supplierId: product.supplierId,
+                    categoryId: product.categoryId,
+                    price: product.price,
+                })
+                .then((response) => {
+                    return response.data;
+                });
         },
     },
 };
@@ -243,6 +269,9 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
+                <div class="flex justify-content-center text-red-400">
+                    Cijene su iskazane bez PDV-a
+                </div>
                 <span v-if="!products.length" class="block h-2rem"
                     >Nema rezultata pretrage...</span
                 >
@@ -319,7 +348,11 @@ export default {
                 /> -->
 
                 <div id="search-results" class="grid">
-                    <div v-for="product in products" class="col-4">
+                    <div
+                        v-for="(product, index) in products"
+                        :key="product.id"
+                        class="col-4"
+                    >
                         <!-- Product -->
                         <Card
                             :pt="{
@@ -405,28 +438,29 @@ export default {
                                 <div
                                     class="flex align-items-center justify-content-between"
                                 >
-                                    <div>
-                                        <span
-                                            class="text-red-500 line-through mr-2"
-                                            >{{
+                                    <div class="flex flex-column">
+                                        <span class="text-blue-500 mr-2"
+                                            >VPC
+                                            {{
                                                 formatProductPrice(
                                                     product.price,
                                                 )
                                             }}
                                             €</span
                                         >
+
                                         <span class="text-green-500"
-                                            >{{
-                                                formatProductPrice(
-                                                    product.price -
-                                                        product.price * 0.25,
-                                                )
-                                            }}
+                                            >MPC
+                                            {{ discountedPrice(product.price) }}
                                             €</span
                                         >
                                     </div>
-                                    <span class="block mt-1 text-sm">
-                                        <span v-if="product.stockQuantity > 0"
+                                    <span
+                                        class="block mt-1 text-sm border-1 border-solid border-round-sm px-2 py-1"
+                                    >
+                                        <span
+                                            v-if="product.stockQuantity > 0"
+                                            class=""
                                             >Dostupno:
                                             <span class="font-bold">{{
                                                 formatProductStockQuantity(

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\DiscountType;
 use Exception;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
@@ -32,6 +33,8 @@ class AuthController extends BaseController
 
             $authUserWithRoles = $authUser->load('roles');
 
+            $discount = DiscountType::getDiscountForUser($authUser->id);
+
             $success['token'] = $authUser->createToken(
                 'MyAuthApp'
             )->plainTextToken;
@@ -40,6 +43,7 @@ class AuthController extends BaseController
             $success['last_name'] = $authUser->last_name;
             $success['email'] = $authUser->email;
             $success['role'] = $authUserWithRoles->roles;
+            $success['discount'] = $discount;
 
             return $this->sendResponse($success, 'Dobro došli');
         } else {

@@ -63,4 +63,23 @@ class SuppliersDetail extends Model
 
         return $suppliersDetail;
     }
+
+    public function getDetailsForProduct($data)
+    {
+        $price = $data['price'];
+        $details = SuppliersDetail::where(
+            'web_db_supplier_id',
+            $data['supplierId']
+        )
+            ->where('web_db_category_id', $data['categoryId'])
+            ->select('id', 'mark_up', 'expenses')
+            ->when(!is_null($price), function ($query) use ($price) {
+                return $query
+                    ->where('min_product_cost', '<=', $price)
+                    ->where('max_product_cost', '>=', $price);
+            })
+            ->first();
+
+        return $details;
+    }
 }

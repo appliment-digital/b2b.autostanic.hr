@@ -166,8 +166,6 @@ class SupplierDetailController extends BaseController
             $supplierId = $request->supplierId;
             $categoryId = $request->categoryId;
 
-            $categoryName = $this->getCategoryName($categoryId);
-
             $priceRangeData = SuppliersDetail::where(
                 'web_db_supplier_id',
                 $supplierId
@@ -182,6 +180,31 @@ class SupplierDetailController extends BaseController
                 ->get();
 
             return $priceRangeData;
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getDetailsForProduct(Request $request)
+    {
+        try {
+            $supplierId = $request->supplierId;
+            $categoryId = $request->categoryId;
+            $price = $request->price;
+
+            $details = SuppliersDetail::where('web_db_supplier_id', $supplierId)
+                ->where('web_db_category_id', $categoryId)
+                ->select('id', 'mark_up', 'expenses')
+                ->when(!is_null($price), function ($query) use ($price) {
+                    return $query
+                        ->where('min_product_cost', '<=', $price)
+                        ->where('max_product_cost', '>=', $price);
+                })
+                ->first();
+
+            return $details;
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Exception: ' . $e->getMessage(),

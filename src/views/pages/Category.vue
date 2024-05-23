@@ -142,6 +142,7 @@ export default {
         },
 
         handleResultsPageChange(event) {
+            console.log(event);
             this.page.current = event.page + 1;
             this.getProducts(this.categoryStore.selectedCategory.id, {});
         },

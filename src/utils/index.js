@@ -54,7 +54,7 @@ export const formatPrice = (number) => {
 };
 
 export const formatNumber = (number) => {
-    return Number(number).toLocaleString('en-US', {
+    return Number(number).toLocaleString('de-DE', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });

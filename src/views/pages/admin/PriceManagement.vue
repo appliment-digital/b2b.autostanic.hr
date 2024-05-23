@@ -394,6 +394,9 @@ export default {
                             @blur="validateMinPrices()"
                             autofocus
                             class="w-full"
+                            mode="currency"
+                            currency="EUR"
+                            locale="de-DE"
                         />
                         <InputNumber v-else disabled class="w-full" />
                         <div
@@ -415,6 +418,9 @@ export default {
                             @blur="validateMaxPrices()"
                             autofocus
                             class="w-full"
+                            mode="currency"
+                            currency="EUR"
+                            locale="de-DE"
                         />
                         <InputNumber v-else disabled class="w-full" />
                         <div

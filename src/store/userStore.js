@@ -41,10 +41,22 @@ export const useUserStore = defineStore('user', {
                 return JSON.parse(sessionStorage.getItem('user-isAdmin'));
             }
         },
+        discount: (state) => {
+            if (state.user && state.user.discount) {
+                return state.user.discount;
+            } else {
+                const discount = JSON.parse(
+                    localStorage.getItem('userData'),
+                ).discount;
+                return discount;
+            }
+        },
     },
     actions: {
         addUser(data) {
             this.user = data;
+
+            localStorage.setItem('userData', JSON.stringify(data));
 
             this.setIsAdmin(false);
 
