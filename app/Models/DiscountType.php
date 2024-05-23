@@ -102,8 +102,8 @@ class DiscountType extends Model
 
     public static function getDiscountForUser($id)
     {
-        $discountType = self::find($id)->discount;
+        $discountAmount = self::find($id)->discount;
 
-        return $discountType;
+        return $discountAmount ?? 0;
     }
 }
