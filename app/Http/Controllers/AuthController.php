@@ -43,7 +43,7 @@ class AuthController extends BaseController
             $success['last_name'] = $authUser->last_name;
             $success['email'] = $authUser->email;
             $success['role'] = $authUserWithRoles->roles;
-            $success['discount'] = $discount;
+            $success['discount'] = $discount ?? 0;
 
             return $this->sendResponse($success, 'Dobro došli');
         } else {
