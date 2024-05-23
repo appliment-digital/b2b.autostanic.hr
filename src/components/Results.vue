@@ -155,6 +155,7 @@ export default {
                 let discountAmount = (this.userStore.discount / 100) * price;
                 return this.formatProductPrice(price - discountAmount);
             }
+            return this.formatProductPrice(price);
         },
         getDetailsForProduct(product) {
             return supplierDetailService
