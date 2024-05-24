@@ -26,21 +26,31 @@ const supplierDetailService = new SupplierDetailService();
 setSlugCharMap(slug);
 
 export default {
-    props: [
-        'productCount',
-        'products',
-        'status',
-        'manufacturers',
-        'pageOptions',
-    ],
+    props: {
+        productCount: {
+            type: Number,
+        },
+        products: {
+            type: Array,
+        },
+        status: {
+            type: Array,
+        },
+        manufacturers: {
+            type: Object,
+        },
+        pageOptions: {
+            type: Object,
+        },
+    },
     components: {
         Header,
         Breadcrumbs,
     },
     data() {
         return {
-            itemsPerPage: 9,
-            totalItems: Number(this.productCount),
+            first: 1,
+            itemsPerPage: this.pageOptions.size,
             isChecked: false,
 
             filters: {
@@ -66,24 +76,12 @@ export default {
         // load category data from storage
         const selectedCategory = this.categoryStore.selectedCategory;
 
-        // set total items in a category
-        this.totalItems = Number(selectedCategory.productCount);
-
-        this.manufacturers.forEach((entry) => {
-            this.filters.manufacturers[entry] = false;
-        });
-
-        this.status.forEach((s) => {
-            this.filters.status.push({
-                id: s.id,
-                name: s.name,
-                value: false,
-            });
-        });
+        this.setFilters();
     },
     updated() {
         // console.log('results updated -> num of products:', {products: this.products});
     },
+    watch: {},
     computed: {
         ...mapStores(
             useResultsStore,
@@ -92,9 +90,48 @@ export default {
             useUIStore,
             useUserStore,
         ),
+        isAnyFilterActive() {
+            // Check manufacturers filters
+            const manufacturerActive = Object.values(
+                this.filters.manufacturers,
+            ).some((value) => value);
+            // Check status filters
+            const statusActive = this.filters.status.some(
+                (filter) => filter.value,
+            );
+
+            return manufacturerActive || statusActive;
+        },
     },
-    watch: {},
+    watch: {
+        filters: {
+            handler: function (newValue) {
+                this.filters.status = newValue.status || [];
+                this.filters.manufacturers = newValue.manufacturers || {};
+
+                this.first = 1;
+                this.$emit('on-reset-paginator');
+            },
+            deep: true,
+        },
+    },
     methods: {
+        setFilters() {
+            this.filters.status = [];
+            this.filters.manufacturers = {};
+
+            this.manufacturers.forEach((entry) => {
+                this.filters.manufacturers[entry] = false;
+            });
+
+            this.status.forEach((s) => {
+                this.filters.status.push({
+                    id: s.id,
+                    name: s.name,
+                    value: false,
+                });
+            });
+        },
         handleProductClick(product) {
             this.resultsStore.setProduct(product);
 
@@ -102,7 +139,7 @@ export default {
         },
 
         handlePageChangeClick(event) {
-            // this.currentPage = event.page + 1;
+            this.currentPage = event.page + 1;
             this.$emit('on-page-change', event);
         },
 
@@ -177,6 +214,14 @@ export default {
         <!-- Filters -->
         <div class="col-3">
             <div class="flex flex-column">
+                <Button
+                    v-if="isAnyFilterActive"
+                    class="button--no-shadow text-blue-500 bg-blue-100 border-blue-200 text-600 hover:bg-white-alpha-10 mb-2"
+                    label="Poništi filtere"
+                    severity="secondary"
+                    icon="pi pi-filter-slash"
+                    @click="setFilters()"
+                />
                 <Accordion :activeIndex="0">
                     <AccordionTab
                         header="Stanje"
@@ -269,8 +314,11 @@ export default {
 
         <!-- Results -->
         <div class="col">
-            <div class="border-1 border-100 bg-white-alpha-60 border-round p-4">
-                <div class="flex justify-content-center text-red-400">
+            <div class="border-1 border-100 bg-white-alpha-60 border-round p-3">
+                <div
+                    v-if="products.length > 0"
+                    class="flex justify-content-center text-red-400"
+                >
                     Cijene su iskazane bez PDV-a
                 </div>
                 <span v-if="!products.length" class="block h-2rem"
@@ -284,7 +332,7 @@ export default {
                         <span class="block mr-4"
                             >Proizvodi
                             <span class="text-red-400 font-bold">{{
-                                Number(productCount)
+                                productCount
                             }}</span></span
                         >
                     </div>
@@ -302,6 +350,7 @@ export default {
                         /> -->
                         <span class="ml-3 mr-2">Broj rezultata</span>
                         <Button
+                            v-if="productCount > 24"
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
                             :class="
                                 pageOptions.size === 24 &&
@@ -314,6 +363,7 @@ export default {
                             @click="handleNumOfResultsClick(24)"
                         />
                         <Button
+                            v-if="productCount > 36"
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
                             :class="
                                 pageOptions.size === 36 &&
@@ -326,6 +376,7 @@ export default {
                             @click="handleNumOfResultsClick(36)"
                         />
                         <Button
+                            v-if="productCount > 48"
                             class="button--no-shadow text-xs p-0 border-100"
                             :class="
                                 pageOptions.size === 48 &&
@@ -340,19 +391,11 @@ export default {
                     </div>
                 </div>
 
-                <!-- <Paginator
-                    :rows="itemsPerPage"
-                    :totalRecords="totalItems"
-                    v-model:page="currentPage"
-                    @page="handlePageChangeClick"
-                    class="p-0 mb-4"
-                /> -->
-
                 <div id="search-results" class="grid">
                     <div
                         v-for="(product, index) in products"
                         :key="product.id"
-                        class="col-4"
+                        class="col-12 md:col-4"
                     >
                         <!-- Product -->
                         <Card
@@ -476,15 +519,17 @@ export default {
                         </Card>
                     </div>
                 </div>
-
                 <Paginator
-                    v-if="products.length"
+                    v-if="productCount > 24"
                     :rows="itemsPerPage"
-                    :totalRecords="totalItems"
+                    :totalRecords="productCount"
+                    v-model:first="first"
                     v-model:page="currentPage"
                     @page="handlePageChangeClick"
                     class="p-0 mt-4"
-                />
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+                >
+                </Paginator>
             </div>
         </div>
     </div>

@@ -113,7 +113,7 @@ export default {
                     this.products = data.products;
                     this.status = data.status;
                     this.manufacturers = data.manufacturers;
-                    this.productCount = data.productCount;
+                    this.productCount = data.productCount[0];
 
                     this.handleDefaultProductImage(this.products);
                     this.UIStore.setIsDataLoading(false);
@@ -168,6 +168,11 @@ export default {
             this.page.size = val;
             this.getProducts(this.categoryStore.selectedCategory.id, {});
         },
+
+        handleResetPaginator() {
+            this.page.current = 1;
+            this.page.size = 24;
+        },
     },
 };
 </script>
@@ -203,6 +208,7 @@ export default {
             @on-page-change="handleResultsPageChange"
             @on-filter-select="handleFilterSelect"
             @on-num-of-results-change="handleNumOfResultsChange"
+            @on-reset-paginator="handleResetPaginator"
         />
     </div>
 </template>
