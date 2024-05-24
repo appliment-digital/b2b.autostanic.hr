@@ -348,7 +348,9 @@ export default {
                             placeholder="Pozicija"
                             class="w-full md:w-12rem"
                         /> -->
-                        <span class="ml-3 mr-2">Broj rezultata</span>
+                        <span v-if="productCount > 24" class="ml-3 mr-2"
+                            >Broj rezultata</span
+                        >
                         <Button
                             v-if="productCount > 24"
                             class="button--no-shadow mr-1 text-xs p-0 border-100"
