@@ -120,6 +120,13 @@ export default {
             this.filters.status = [];
             this.filters.manufacturers = {};
 
+            const selectedFilters = { statusId: [], manufacturerName: [] };
+            this.$emit(
+                'on-filter-select',
+                selectedFilters,
+                this.categoryStore.selectedCategory.id,
+            );
+
             this.manufacturers.forEach((entry) => {
                 this.filters.manufacturers[entry] = false;
             });
