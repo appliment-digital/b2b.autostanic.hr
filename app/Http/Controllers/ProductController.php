@@ -59,6 +59,8 @@ class ProductController extends BaseController
                     'Product.Name',
                     'Product.Sku',
                     'Product.StockQuantity',
+                    'Product.ShortDescription',
+                    'Product.FullDescription',
                     'Product.Price',
                     'Product.OldPrice',
                     'Product.IsNewPart',
@@ -256,8 +258,6 @@ class ProductController extends BaseController
                 ->select(
                     'Product.Id',
                     'Product.Name',
-                    'Product.ShortDescription',
-                    'Product.FullDescription',
                     'Product.Sku',
                     'Product.StockQuantity',
                     'Product.Price',
@@ -275,7 +275,8 @@ class ProductController extends BaseController
                     'Product_Category_Mapping.ProductId'
                 )
                 ->where('Product.Id', $id)
-                ->first();
+                // ->first()
+                ->get();
 
             if ($productData) {
                 // Fetch supplier details
@@ -320,8 +321,6 @@ class ProductController extends BaseController
                 $id
             );
             $productData->car_types = $this->getCarTypesForProduct($id);
-
-            return $productData;
         } catch (\Exception $e) {
             return redirect()
                 ->back()

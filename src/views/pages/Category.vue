@@ -108,6 +108,7 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
+                    console.log('getProductsByCategoryId', {filters, data});
 
                     // store response data
                     this.products = data.products;
@@ -141,10 +142,9 @@ export default {
             this.$router.push(`${this.$route.path}/${slug(subcategory.name)}`);
         },
 
-        handleResultsPageChange(event) {
-            console.log(event);
+        handleResultsPageChange(event, filters) {
             this.page.current = event.page + 1;
-            this.getProducts(this.categoryStore.selectedCategory.id, {});
+            this.getProducts(this.categoryStore.selectedCategory.id, filters);
         },
 
         handleFilterSelect(filters, categoryId) {

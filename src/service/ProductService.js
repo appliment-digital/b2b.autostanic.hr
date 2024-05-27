@@ -5,13 +5,31 @@ export default class ProductService {
 
     // get all related product data
 
-    static async getDetails(productID) {
-        const pictures = await this.getProductPictures(productID);
-        const specifications =
-            await this.getSpecificationAttributeForProduct(productID);
+    static async getDetails(id) {
+        try {
+            const pictures = await this.getProductPictures(id);
+            const specifications =
+                await this.getSpecificationAttributeForProduct(id);
+            const carTypes = await axios.get(this.apiResourceEndpoint + '/getCarTypesForProduct/' + id)
+            const oemCodes = await axios.get(this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id)
+ 
+            return {
+                data: {
+                    oemCodes: oemCodes.data,
+                    carTypes: carTypes.data,
+                    pictures: pictures.data,
+                    specifications: specifications.data,
+                },
+            };
+        } catch (error) {
+            return { data: null, error };
+        }
+    }
 
-        console.log({ pictures, oemCodes, specifications, relatedVehicles });
-        return { pictures, oemCodes, specifications, relatedVehicles };
+    static async getProductById(id) {
+        return axios.get(
+            this.apiResourceEndpoint + '/getProductById/' + id,
+        );
     }
 
     // get
