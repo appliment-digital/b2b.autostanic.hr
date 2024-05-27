@@ -258,10 +258,11 @@ class ProductController extends BaseController
                 ->select(
                     'Product.Id',
                     'Product.Name',
+                    'Product.ShortDescription',
+                    'Product.FullDescription',
                     'Product.Sku',
                     'Product.StockQuantity',
                     'Product.Price',
-                    'Product.OldPrice',
                     'Product.IsNewPart',
                     'Product.IsUsedPart',
                     'Product.ManufacturerName',
@@ -275,8 +276,7 @@ class ProductController extends BaseController
                     'Product_Category_Mapping.ProductId'
                 )
                 ->where('Product.Id', $id)
-                // ->first()
-                ->get();
+                ->first();
 
             if ($productData) {
                 // Fetch supplier details
@@ -315,12 +315,14 @@ class ProductController extends BaseController
                 }
             }
 
-            $productData->pictures = $this->getProductPictures($id);
-            $productData->oem_codes = $this->getOEMCodeForProduct($id);
-            $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
-                $id
-            );
-            $productData->car_types = $this->getCarTypesForProduct($id);
+            return $productData;
+
+            // $productData->pictures = $this->getProductPictures($id);
+            // $productData->oem_codes = $this->getOEMCodeForProduct($id);
+            // $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
+            //     $id
+            // );
+            // $productData->car_types = $this->getCarTypesForProduct($id);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
