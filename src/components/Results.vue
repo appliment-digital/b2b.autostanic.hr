@@ -53,23 +53,16 @@ export default {
             itemsPerPage: this.pageOptions.size,
             isChecked: false,
 
+            // pagination
+            currentPage: 1,
+            selectedFilters: null,
+
             filters: {
                 status: [],
                 manufacturers: {},
             },
 
             formattedMpcPrices: [],
-            // results: {
-            //     sort: {
-            //         selected: null,
-            //         options: [
-            //             { label: 'Naziv: A do Z' },
-            //             { label: 'Naziv: Z do A' },
-            //             { label: 'Cijena: ⬆️' },
-            //             { label: 'Cijena: ⬇️' },
-            //         ],
-            //     },
-            // },
         };
     },
     mounted() {
@@ -140,14 +133,19 @@ export default {
             });
         },
         handleProductClick(product) {
+            console.log({product});
             this.resultsStore.setProduct(product);
 
             this.$router.push(`/${slug(product.name)}`);
         },
 
         handlePageChangeClick(event) {
+            console.log('handlePageChangeClick', event, {
+                selectedFilters: this.selectedFilters,
+            });
+
             this.currentPage = event.page + 1;
-            this.$emit('on-page-change', event);
+            this.$emit('on-page-change', event, this.selectedFilters);
         },
 
         /**
@@ -176,6 +174,7 @@ export default {
 
             // 3. emit event to call parent handler ('handleFilterSelect')
 
+            this.selectedFilters = selectedFilters;
             this.$emit(
                 'on-filter-select',
                 selectedFilters,
@@ -322,12 +321,6 @@ export default {
         <!-- Results -->
         <div class="col">
             <div class="border-1 border-100 bg-white-alpha-60 border-round p-3">
-                <div
-                    v-if="products.length > 0"
-                    class="flex justify-content-center text-red-400"
-                >
-                    Cijene su iskazane bez PDV-a
-                </div>
                 <span v-if="!products.length" class="block h-2rem"
                     >Nema rezultata pretrage...</span
                 >
@@ -340,7 +333,10 @@ export default {
                             >Proizvodi
                             <span class="text-red-400 font-bold">{{
                                 productCount
-                            }}</span></span
+                            }}</span>
+                            <span class=""
+                                > (Cijene su iskazane <span class="text-red-400 font-bold">bez PDV-a</span>)</span
+                            ></span
                         >
                     </div>
                     <div class="flex align-items-center">
@@ -529,7 +525,7 @@ export default {
                     </div>
                 </div>
                 <Paginator
-                    v-if="productCount > 24"
+                    v-if="products.length"
                     :rows="itemsPerPage"
                     :totalRecords="productCount"
                     v-model:first="first"
