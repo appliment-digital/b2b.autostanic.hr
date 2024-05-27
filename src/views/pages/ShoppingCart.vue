@@ -3,7 +3,11 @@
 import slug from 'slug';
 
 // utils
-import { setSlugCharMap } from '@/utils';
+import {
+    setSlugCharMap,
+    calcProductPrice,
+    stringifyProductPrice,
+} from '@/utils';
 
 // components
 import Header from '@/components/Header.vue';
@@ -15,6 +19,7 @@ import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 import { useResultsStore } from '@/store/resultsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
+import { useUserStore } from '@/store/userStore.js';
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
@@ -34,6 +39,7 @@ export default {
             useShoppingCartStore,
             useBreadcrumbsStore,
             useResultsStore,
+            useUserStore,
             useUIStore,
         ),
 
@@ -61,7 +67,6 @@ export default {
 
     mounted() {
         console.log('shopping cart store', this.shoppingCartStore.cart);
-
     },
 
     methods: {
@@ -70,9 +75,22 @@ export default {
         },
 
         handleNewProductQuantity(product) {
-            if (product.quantity < 1) return;
+            if (product.quantity > product.stockQuantity) {
+                this.$toast.add({
+                    severity: 'warn',
+                    summary: 'Količina proizvoda:',
+                    detail: 'Nema dovoljno na stanju.',
+                    life: 3000,
+                });
 
-            this.shoppingCartStore.updateQuantity(product);
+                product.quantity = product.stockQuantity;
+            }
+        },
+
+        handlePrice(price) {
+            return stringifyProductPrice(
+                calcProductPrice(price, this.userStore.discount),
+            );
         },
 
         handleDeleteProduct(product) {
@@ -99,7 +117,9 @@ export default {
         <div class="col">
             <div class="card p-5 mb-0">
                 <DataTable
-                    v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
+                    v-if="
+                        shoppingCartStore.cart && shoppingCartStore.cart.length
+                    "
                     :value="shoppingCartStore.cart"
                 >
                     <Column field="image" header="Slika">
@@ -130,7 +150,7 @@ export default {
                         <template #body="{ data }">
                             <span
                                 >{{
-                                    calcPrice(data.price, data.quantity)
+                                    handlePrice(data.price * data.quantity)
                                 }}
                                 €</span
                             >
@@ -147,6 +167,8 @@ export default {
                                 @update:modelValue="
                                     handleNewProductQuantity(data)
                                 "
+                                @keyup.enter="handleNewProductQuantity(data)"
+                                min="1"
                             />
                         </template>
                     </Column>
@@ -168,7 +190,10 @@ export default {
             </div>
         </div>
 
-        <div v-if="shoppingCartStore.cart && shoppingCartStore.cart.length" class="col-12 lg:col-3">
+        <div
+            v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
+            class="col-12 lg:col-3"
+        >
             <div class="card p-5">
                 <div class="max-w-24rem mx-auto">
                     <DataTable :value="order">

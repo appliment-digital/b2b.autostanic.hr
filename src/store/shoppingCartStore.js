@@ -48,7 +48,9 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
 
         totalWithFees: (state) => {
             if (state.currentTotalWithoutFees) {
-                return (state.currentTotalWithoutFees + DELIVERY + TAX).toFixed(2);
+                return (state.currentTotalWithoutFees + DELIVERY + TAX).toFixed(
+                    2,
+                );
             }
         },
 
@@ -65,7 +67,15 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
             );
 
             if (entryId != -1) {
-                this.shoppingCart[entryId].quantity += product.quantity;
+                let newQuantity =
+                    Number(this.shoppingCart[entryId].quantity) +
+                    Number(product.quantity);
+
+                if (newQuantity > product.stockQuantity) {
+                    newQuantity = Number(product.stockQuantity);
+                }
+
+                this.shoppingCart[entryId].quantity = newQuantity;
             } else {
                 this.shoppingCart.push(product);
             }

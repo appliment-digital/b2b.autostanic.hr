@@ -154,27 +154,22 @@ export default {
         handleFilterSelect(event) {
             const { id } = event.target;
 
-            // 2. create selected filters data
-
             const selectedFilters = { statusId: [], manufacturerName: [] };
 
-            //  add status filters
             for (const status of this.filters.status) {
                 if (status.value) {
                     selectedFilters.statusId.push(status.id);
                 }
             }
 
-            //  add manufacturer filters
             for (const key in this.filters.manufacturers) {
                 if (this.filters.manufacturers[key]) {
                     selectedFilters.manufacturerName.push(`${key}`);
                 }
             }
 
-            // 3. emit event to call parent handler ('handleFilterSelect')
-
             this.selectedFilters = selectedFilters;
+
             this.$emit(
                 'on-filter-select',
                 selectedFilters,
@@ -505,7 +500,7 @@ export default {
                                         >
                                     </div>
                                     <span
-                                        class="block mt-1 text-sm border-1 border-solid border-round-sm px-2 py-1"
+                                        class="block mt-1 text-sm"
                                     >
                                         <span
                                             v-if="product.stockQuantity > 0"
