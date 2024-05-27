@@ -52,11 +52,13 @@ export default {
     beforeMount() {
         // load and set product data
         this.loadProduct();
-
     },
     mounted() {
         // load and set product details
-        // this.loadDetails();
+        this.loadDetails();
+
+        // ProductService.getProductById(this.product.id).then((res) => {
+        // });
     },
     methods: {
         /**
@@ -72,22 +74,25 @@ export default {
             } else {
                 this.product = this.resultsStore.product;
             }
+
+            console.log('loaded product...', { product: this.product });
         },
 
         /**
          * Load product details.
          */
         loadDetails() {
+            console.log('loading details...');
             this.UIStore.setIsDataLoading(true);
 
             ProductService.getDetails(this.product.id)
-                .then((res) => {
-                    this.details = res;
+                .then((response) => {
+                    this.details = response.data;
+                    console.log({ response });
 
                     this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
-
         },
 
         handleSendInquiry() {
@@ -118,42 +123,21 @@ export default {
     <!-- Product: Image & Description -->
     <div class="grid column-gap-6 justify-content-between">
         <div class="col-12 md:col-5 md:h-auto">
-            <!-- Feature Image -->
-            <!-- prettier-ignore -->
-            <div
-                v-if="details && details.pictures.data.url550.length"
-                class="bg-white-alpha-50 border-1 border-100 border-round"
-            >
+            <!-- featured image -->
+            <div class="p-4 border-1 border-100 border-round bg-white" style="width: 100% ;height: 360px; overflow: hidden;">
                 <Image
-                    class="block w-full"
-                    imageClass="block border-round max-w-full"
-                    :src="details.pictures.data.url550[0]"
-                    alt="Image"
+                    v-if="details && details.pictures.url550.length"
+                    :src="details.pictures.url550[0]"
+                    style="width: 100%; height: 100%;"
+                    imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
                     preview
-                    :pt="{
-                        preview: {
-                            class: 'bg-blue-200'
-                        },
-                    }"
                 />
             </div>
-            <!-- Thumbnails -->
-            <div
-                v-if="details && details.pictures.data.url100"
-                class="flex mt-2"
-            >
-                <div class="flex align-items-center justify-content-center">
-                    <Image
-                        v-for="img in details.pictures.data.url550"
-                        class="mr-2 p-0 border-1 border-100 border-round"
-                        imageClass="border-round"
-                        imageStyle="width:100%; height: 60px; object-fit: cover;"
-                        :src="img"
-                        preview
-                        width="62"
-                    />
-                </div>
-            </div>
+
+            <!-- thumbnails -->
+            <!-- <div class="mt-4 flex border-1 border-round border-100" style="height: 64px;">
+
+            </div> -->
         </div>
 
         <div class="col">

@@ -59,6 +59,8 @@ class ProductController extends BaseController
                     'Product.Name',
                     'Product.Sku',
                     'Product.StockQuantity',
+                    'Product.ShortDescription',
+                    'Product.FullDescription',
                     'Product.Price',
                     'Product.OldPrice',
                     'Product.IsNewPart',
@@ -249,14 +251,13 @@ class ProductController extends BaseController
 
     public function getProductById($id)
     {
+
         try {
             $productData = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
                     'Product.Id',
                     'Product.Name',
-                    'Product.ShortDescription',
-                    'Product.FullDescription',
                     'Product.Sku',
                     'Product.StockQuantity',
                     'Product.Price',
@@ -266,14 +267,14 @@ class ProductController extends BaseController
                     'Product.ManufacturerName',
                     'Product.SupplierId',
                     'Product_Category_Mapping.CategoryId',
-                    DB::raw('
-            CASE 
-                WHEN SuppliersDetail.mark_up IS NOT NULL AND SuppliersDetail.expenses IS NOT NULL THEN 
-                    Product.Price + Product.Price * (SuppliersDetail.mark_up / 100) + SuppliersDetail.expenses
-                ELSE 
-                    Product.Price 
-            END AS AdjustedPrice
-        ')
+        //             DB::raw('
+        //     CASE 
+        //         WHEN SuppliersDetail.mark_up IS NOT NULL AND SuppliersDetail.expenses IS NOT NULL THEN 
+        //             Product.Price + Product.Price * (SuppliersDetail.mark_up / 100) + SuppliersDetail.expenses
+        //         ELSE 
+        //             Product.Price 
+        //     END AS AdjustedPrice
+        // ')
                 )
                 ->join(
                     'Product_Category_Mapping',
@@ -281,40 +282,42 @@ class ProductController extends BaseController
                     '=',
                     'Product_Category_Mapping.ProductId'
                 )
-                ->leftJoin('SuppliersDetail', function ($join) {
-                    $join
-                        ->on(
-                            'Product.SupplierId',
-                            '=',
-                            'SuppliersDetail.web_db_supplier_id'
-                        )
-                        ->on(
-                            'Product_Category_Mapping.CategoryId',
-                            '=',
-                            'SuppliersDetail.web_db_category_id'
-                        )
-                        ->whereColumn(
-                            'Product.Price',
-                            '>=',
-                            'SuppliersDetail.min_product_cost'
-                        )
-                        ->whereColumn(
-                            'Product.Price',
-                            '<=',
-                            'SuppliersDetail.max_product_cost'
-                        );
-                })
+                // ->leftJoin('SuppliersDetail', function ($join) {
+                //     $join
+                //         ->on(
+                //             'Product.SupplierId',
+                //             '=',
+                //             'SuppliersDetail.web_db_supplier_id'
+                //         )
+                //         ->on(
+                //             'Product_Category_Mapping.CategoryId',
+                //             '=',
+                //             'SuppliersDetail.web_db_category_id'
+                //         )
+                //         ->whereColumn(
+                //             'Product.Price',
+                //             '>=',
+                //             'SuppliersDetail.min_product_cost'
+                //         )
+                //         ->whereColumn(
+                //             'Product.Price',
+                //             '<=',
+                //             'SuppliersDetail.max_product_cost'
+                //         );
+                // })
                 ->where('Product.Id', $id)
-                ->first();
+                // ->first()
+                ->get();
 
-            $productData->pictures = $this->getProductPictures($id);
-            $productData->oem_codes = $this->getOEMCodeForProduct($id);
-            $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
-                $id
-            );
-            $productData->car_types = $this->getCarTypesForProduct($id);
+            return $this->convertKeysToCamelCase($productData);
 
-            return $productData;
+            // $productData->pictures = $this->getProductPictures($id);
+            // $productData->oem_codes = $this->getOEMCodeForProduct($id);
+            // $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
+            //     $id
+            // );
+            // $productData->car_types = $this->getCarTypesForProduct($id);
+
         } catch (\Exception $e) {
             return redirect()
                 ->back()
