@@ -47,6 +47,7 @@ class User extends Authenticatable
     {
         $user = new self();
 
+        $user->name = $data['name'];
         $user->last_name = $data['last_name'];
         $user->email = $data['email'];
         $user->password = $data['password'];
