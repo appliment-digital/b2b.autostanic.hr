@@ -56,9 +56,6 @@ export default {
     mounted() {
         // load and set product details
         this.loadDetails();
-
-        // ProductService.getProductById(this.product.id).then((res) => {
-        // });
     },
     methods: {
         /**
@@ -82,13 +79,11 @@ export default {
          * Load product details.
          */
         loadDetails() {
-            console.log('loading details...');
             this.UIStore.setIsDataLoading(true);
 
             ProductService.getDetails(this.product.id)
                 .then((response) => {
                     this.details = response.data;
-                    console.log({ response });
 
                     this.UIStore.setIsDataLoading(false);
                 })
@@ -142,15 +137,15 @@ export default {
                 v-if="details && details.pictures.url550"
                 class="mt-2 flex overflow-x-scroll"
             >
-                <Image 
+                <Image
                     v-for="img in details.pictures.url550"
                     :src="img"
                     class="bg-white border-round mr-1 border-100 border-1 p-1"
-                    style="height: 64px; width: 64px;"
+                    style="min-width: 64px; height: 64px;"
                     imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
                     preview
                 />
-        </div>
+            </div>
         </div>
 
         <div class="col">
