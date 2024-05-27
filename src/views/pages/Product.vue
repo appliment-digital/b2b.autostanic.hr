@@ -1,6 +1,13 @@
 <script>
+// lib
+import camelcaseKeys from 'camelcase-keys';
+
 // utils
-import { capitalizeFirstLetter, formatPrice } from '@/utils';
+import {
+    capitalizeFirstLetter,
+    calcProductPrice,
+    stringifyProductPrice,
+} from '@/utils';
 
 // pinia
 import { mapStores } from 'pinia';
@@ -56,6 +63,9 @@ export default {
     mounted() {
         // load and set product details
         this.loadDetails();
+
+        // testing getting more data
+        console.log(this.userStore.discount);
     },
     methods: {
         /**
@@ -77,15 +87,32 @@ export default {
 
         /**
          * Load product details.
+         * TODO: refactor backend response (product details) to one function.
          */
         loadDetails() {
             this.UIStore.setIsDataLoading(true);
+            let details = {};
 
+            // details 1
             ProductService.getDetails(this.product.id)
                 .then((response) => {
-                    this.details = response.data;
+                    details = { ...response.data };
 
                     this.UIStore.setIsDataLoading(false);
+                })
+                .then(() => {
+                    // details 2
+                    ProductService.getProductById(this.product.id).then(
+                        (response) => {
+                            details = {
+                                ...details,
+                                ...camelcaseKeys(response.data),
+                            };
+
+                            // set state (details)
+                            this.details = details;
+                        },
+                    );
                 })
                 .catch((err) => console.error(err));
         },
@@ -97,11 +124,25 @@ export default {
         handleAddProdcutToShoppingCart(product) {
             const productDetails = { ...product, quantity: this.itemQuantity };
 
+            const productDetails2 = {
+                id: product.id,
+                name: product.name,
+                image: product.pictureUrl,
+                stockQuantity: product.stockQuantity,
+                quantity: this.itemQuantity,
+                price: this.details.price,
+                priceString: this.details.priceString,
+            };
+
+            console.log('adding product to the shopping cart..', {
+                productDetails2,
+            });
+
             this.shoppingCartStore.add(productDetails);
         },
 
-        formatProductPrice(val) {
-            return formatPrice(val);
+        handlePrice(price, discount) {
+            return stringifyProductPrice(calcProductPrice(price, discount));
         },
 
         openCRMForm() {
@@ -141,7 +182,7 @@ export default {
                     v-for="img in details.pictures.url550"
                     :src="img"
                     class="bg-white border-round mr-1 border-100 border-1 p-1"
-                    style="min-width: 64px; height: 64px;"
+                    style="min-width: 64px; height: 64px"
                     imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
                     preview
                 />
@@ -178,13 +219,18 @@ export default {
             >
                 <div>
                     <span class="mb-0 mr-2 mb-2 text-lg">Cijena</span>
-                    <span class="font-bold"
-                        >{{ formatProductPrice(product.price) }} €</span
+                    <span v-if="details" class="font-bold">
+                        {{ handlePrice(details.price) }} €</span
                     >
                 </div>
                 <div>
                     <span class="m-0 mr-2 mb-2 text-lg">Cijena s popustom</span>
-                    <span class="font-bold">{{ product.price }} €</span>
+                    <span v-if="details" class="font-bold"
+                        >{{
+                            handlePrice(details.price, this.userStore.discount)
+                        }}
+                        €</span
+                    >
                 </div>
             </div>
 

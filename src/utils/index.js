@@ -76,3 +76,24 @@ export const getLastUrlPart = (url) => {
         .map((entry) => decodeURIComponent(entry))
         .pop();
 };
+
+export const calcProductPrice = (price, discountPercentage) => {
+    if (!discountPercentage) return price;
+    
+    price = Number(price);
+    discountPercentage = Number(discountPercentage);
+
+    console.log({ price, discountPercentage });
+
+    const discount = price * (discountPercentage / 100);
+    const finalPrice = price - discount;
+
+    return finalPrice;
+}
+
+export const stringifyProductPrice = (price) => {
+    return price.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+}

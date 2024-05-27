@@ -315,6 +315,8 @@ class ProductController extends BaseController
                 }
             }
 
+            $productData->Price = round($productData->Price, 2);
+            $productData->PriceString = number_format($productData->Price, 2, ',', '.');
             return $productData;
 
             // $productData->pictures = $this->getProductPictures($id);
@@ -532,7 +534,7 @@ class ProductController extends BaseController
         } catch (Exception $e) {
             return [
                 'exception' =>
-                    $e->getMessage() .
+                $e->getMessage() .
                     ' on line ' .
                     $e->getLine() .
                     ' in file ' .

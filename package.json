@@ -17,6 +17,7 @@
         "@fullcalendar/vue3": "^6.1.8",
         "@sindresorhus/slugify": "^2.2.1",
         "axios": "^1.6.8",
+        "camelcase-keys": "^9.1.3",
         "chart.js": "^4.3.0",
         "laravel-vite-plugin": "^0.8.1",
         "pinia": "^2.1.7",
