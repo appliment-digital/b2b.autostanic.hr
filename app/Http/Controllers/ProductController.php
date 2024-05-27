@@ -263,8 +263,47 @@ class ProductController extends BaseController
                     'Product.OldPrice',
                     'Product.IsNewPart',
                     'Product.IsUsedPart',
-                    'Product.ManufacturerName'
+                    'Product.ManufacturerName',
+                    'Product.SupplierId',
+                    'Product_Category_Mapping.CategoryId',
+                    DB::raw('
+            CASE 
+                WHEN SuppliersDetail.mark_up IS NOT NULL AND SuppliersDetail.expenses IS NOT NULL THEN 
+                    Product.Price + Product.Price * (SuppliersDetail.mark_up / 100) + SuppliersDetail.expenses
+                ELSE 
+                    Product.Price 
+            END AS AdjustedPrice
+        ')
                 )
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->leftJoin('SuppliersDetail', function ($join) {
+                    $join
+                        ->on(
+                            'Product.SupplierId',
+                            '=',
+                            'SuppliersDetail.web_db_supplier_id'
+                        )
+                        ->on(
+                            'Product_Category_Mapping.CategoryId',
+                            '=',
+                            'SuppliersDetail.web_db_category_id'
+                        )
+                        ->whereColumn(
+                            'Product.Price',
+                            '>=',
+                            'SuppliersDetail.min_product_cost'
+                        )
+                        ->whereColumn(
+                            'Product.Price',
+                            '<=',
+                            'SuppliersDetail.max_product_cost'
+                        );
+                })
                 ->where('Product.Id', $id)
                 ->first();
 
