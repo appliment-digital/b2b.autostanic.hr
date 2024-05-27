@@ -250,6 +250,7 @@ class ProductController extends BaseController
     public function getProductById($id)
     {
         try {
+            // Fetch the product data
             $productData = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select(
@@ -265,15 +266,7 @@ class ProductController extends BaseController
                     'Product.IsUsedPart',
                     'Product.ManufacturerName',
                     'Product.SupplierId',
-                    'Product_Category_Mapping.CategoryId',
-                    DB::raw('
-            CASE 
-                WHEN SuppliersDetail.mark_up IS NOT NULL AND SuppliersDetail.expenses IS NOT NULL THEN 
-                    Product.Price + Product.Price * (SuppliersDetail.mark_up / 100) + SuppliersDetail.expenses
-                ELSE 
-                    Product.Price 
-            END AS AdjustedPrice
-        ')
+                    'Product_Category_Mapping.CategoryId'
                 )
                 ->join(
                     'Product_Category_Mapping',
@@ -281,31 +274,45 @@ class ProductController extends BaseController
                     '=',
                     'Product_Category_Mapping.ProductId'
                 )
-                ->leftJoin('SuppliersDetail', function ($join) {
-                    $join
-                        ->on(
-                            'Product.SupplierId',
-                            '=',
-                            'SuppliersDetail.web_db_supplier_id'
-                        )
-                        ->on(
-                            'Product_Category_Mapping.CategoryId',
-                            '=',
-                            'SuppliersDetail.web_db_category_id'
-                        )
-                        ->whereColumn(
-                            'Product.Price',
-                            '>=',
-                            'SuppliersDetail.min_product_cost'
-                        )
-                        ->whereColumn(
-                            'Product.Price',
-                            '<=',
-                            'SuppliersDetail.max_product_cost'
-                        );
-                })
                 ->where('Product.Id', $id)
                 ->first();
+
+            if ($productData) {
+                // Fetch supplier details
+                $supplierDetails = SuppliersDetail::where(
+                    'web_db_supplier_id',
+                    $productData->SupplierId
+                )
+                    ->where('web_db_category_id', $productData->CategoryId)
+                    ->select('id', 'mark_up', 'expenses')
+                    ->when(!is_null($productData->Price), function (
+                        $query
+                    ) use ($productData) {
+                        return $query
+                            ->where(
+                                'min_product_cost',
+                                '<=',
+                                $productData->Price
+                            )
+                            ->where(
+                                'max_product_cost',
+                                '>=',
+                                $productData->Price
+                            );
+                    })
+                    ->first();
+
+                // Calculate the adjusted price
+                if ($supplierDetails) {
+                    $markup = $supplierDetails->mark_up ?? 0;
+                    $expenses = $supplierDetails->expenses ?? 0;
+                    $adjustedPrice =
+                        $productData->Price +
+                        $productData->Price * ($markup / 100) +
+                        $expenses;
+                    $productData->Price = $adjustedPrice;
+                }
+            }
 
             $productData->pictures = $this->getProductPictures($id);
             $productData->oem_codes = $this->getOEMCodeForProduct($id);
