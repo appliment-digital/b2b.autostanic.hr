@@ -124,20 +124,33 @@ export default {
     <div class="grid column-gap-6 justify-content-between">
         <div class="col-12 md:col-5 md:h-auto">
             <!-- featured image -->
-            <div class="p-4 border-1 border-100 border-round bg-white" style="width: 100% ;height: 360px; overflow: hidden;">
+            <div
+                class="p-2 border-1 border-100 border-round bg-white"
+                style="width: 100%; height: 360px; overflow: hidden"
+            >
                 <Image
                     v-if="details && details.pictures.url550.length"
                     :src="details.pictures.url550[0]"
-                    style="width: 100%; height: 100%;"
+                    style="width: 100%; height: 100%"
                     imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
                     preview
                 />
             </div>
 
             <!-- thumbnails -->
-            <!-- <div class="mt-4 flex border-1 border-round border-100" style="height: 64px;">
-
-            </div> -->
+            <div
+                v-if="details && details.pictures.url550"
+                class="mt-2 flex overflow-x-scroll"
+            >
+                <Image 
+                    v-for="img in details.pictures.url550"
+                    :src="img"
+                    class="bg-white border-round mr-1 border-100 border-1 p-1"
+                    style="height: 64px; width: 64px;"
+                    imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
+                    preview
+                />
+        </div>
         </div>
 
         <div class="col">
