@@ -42,11 +42,17 @@ class SupplierController extends BaseController
                     '=',
                     'Category.Id'
                 )
+                ->leftJoin(
+                    'dbo.Category as subcategories',
+                    'Category.Id',
+                    '=',
+                    'subcategories.ParentCategoryId'
+                )
                 ->select('Category.Id', 'Category.Name')
                 ->where('Supplier.Id', $id)
+                ->whereNull('subcategories.Id')
                 ->distinct()
                 ->get();
-
             return $this->convertKeysToCamelCase($query);
         } catch (Exception $e) {
             return response()->json([
