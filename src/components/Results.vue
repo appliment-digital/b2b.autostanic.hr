@@ -133,7 +133,7 @@ export default {
             });
         },
         handleProductClick(product) {
-            console.log({product});
+            console.log({ product });
             this.resultsStore.setProduct(product);
 
             this.$router.push(`/${slug(product.name)}`);
@@ -329,8 +329,11 @@ export default {
                             <span class="text-red-400 font-bold">{{
                                 productCount
                             }}</span>
-                            <span class=""
-                                > (Cijene su iskazane <span class="text-red-400 font-bold">bez PDV-a</span>)</span
+                            <span class="">
+                                (Cijene su iskazane
+                                <span class="text-red-400 font-bold"
+                                    >bez PDV-a</span
+                                >)</span
                             ></span
                         >
                     </div>
@@ -485,6 +488,12 @@ export default {
                                     <div class="flex flex-column">
                                         <span class="text-blue-500 mr-2"
                                             >VPC
+                                            {{ discountedPrice(product.price) }}
+                                            €</span
+                                        >
+
+                                        <span class="text-green -500"
+                                            >MPC
                                             {{
                                                 formatProductPrice(
                                                     product.price,
@@ -492,16 +501,8 @@ export default {
                                             }}
                                             €</span
                                         >
-
-                                        <span class="text-green-500"
-                                            >MPC
-                                            {{ discountedPrice(product.price) }}
-                                            €</span
-                                        >
                                     </div>
-                                    <span
-                                        class="block mt-1 text-sm"
-                                    >
+                                    <span class="block mt-1 text-sm">
                                         <span
                                             v-if="product.stockQuantity > 0"
                                             class=""
