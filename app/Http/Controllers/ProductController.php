@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\SuppliersDetail;
+use App\Models\DiscountType;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -62,7 +64,6 @@ class ProductController extends BaseController
                     'Product.ShortDescription',
                     'Product.FullDescription',
                     'Product.Price',
-                    'Product.OldPrice',
                     'Product.IsNewPart',
                     'Product.IsUsedPart',
                     'Product.ManufacturerName',
@@ -181,6 +182,34 @@ class ProductController extends BaseController
                             'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
                     }
                     $product->pictureUrl = $pictureUrl;
+
+                    // Fetch discount for the current user
+                    $authUser = Auth::user();
+                    $discountPercentage =
+                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+
+                    // Calculate price with discount
+                    $product->PriceWithDiscount =
+                        $product->Price -
+                        $product->Price * ($discountPercentage / 100);
+
+                    $product->PriceWithDiscount = round(
+                        $product->PriceWithDiscount,
+                        2
+                    );
+
+                    $product->PriceString = number_format(
+                        $product->Price,
+                        2,
+                        ',',
+                        '.'
+                    );
+                    $product->PriceWithDiscountString = number_format(
+                        $product->PriceWithDiscount,
+                        2,
+                        ',',
+                        '.'
+                    );
 
                     return $product;
                 })
@@ -316,7 +345,12 @@ class ProductController extends BaseController
             }
 
             $productData->Price = round($productData->Price, 2);
-            $productData->PriceString = number_format($productData->Price, 2, ',', '.');
+            $productData->PriceString = number_format(
+                $productData->Price,
+                2,
+                ',',
+                '.'
+            );
             return $productData;
 
             // $productData->pictures = $this->getProductPictures($id);
@@ -352,7 +386,6 @@ class ProductController extends BaseController
                 ->get();
 
             $url550Array = [];
-            $url100Array = [];
 
             foreach ($productPictures as $picture) {
                 $pictureId = str_pad($picture->PictureId, 7, '0', STR_PAD_LEFT);
@@ -363,24 +396,17 @@ class ProductController extends BaseController
 
                 $url550 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_550.{$fileExtension}";
                 $url550Array[] = $url550;
-
-                $url100 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_100.{$fileExtension}";
-                $url100Array[] = $url100;
             }
 
             if (empty($url550Array) && empty($url100Array)) {
                 $url550Array[] =
                     'https://www.autostanic.hr/content/images/default-image.png';
-                $url100Array[] =
-                    'https://www.autostanic.hr/content/images/default-image.png';
                 return [
                     'url550' => $url550Array,
-                    'url100' => $url100Array,
                 ];
             }
             return [
                 'url550' => $url550Array,
-                'url100' => $url100Array,
             ];
         } catch (Exception $e) {
             return response()->json([
@@ -534,7 +560,7 @@ class ProductController extends BaseController
         } catch (Exception $e) {
             return [
                 'exception' =>
-                $e->getMessage() .
+                    $e->getMessage() .
                     ' on line ' .
                     $e->getLine() .
                     ' in file ' .

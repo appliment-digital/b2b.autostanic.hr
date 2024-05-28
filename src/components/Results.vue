@@ -486,18 +486,16 @@ export default {
                                     class="flex align-items-center justify-content-between"
                                 >
                                     <div class="flex flex-column">
-                                        <span class="text-blue-500 mr-2"
+                                        <span class="text-green-500 mr-2"
                                             >VPC
-                                            {{ discountedPrice(product.price) }}
+                                            {{ product.priceString }}
                                             €</span
                                         >
 
-                                        <span class="text-green -500"
+                                        <span class="text-blue-500"
                                             >MPC
                                             {{
-                                                formatProductPrice(
-                                                    product.price,
-                                                )
+                                                product.priceWithDiscountString
                                             }}
                                             €</span
                                         >
