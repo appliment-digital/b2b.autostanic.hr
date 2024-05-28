@@ -88,8 +88,10 @@ class User extends Authenticatable
         $user->postal_code = $data['postal_code'] ?? null;
         $user->city = $data['city'] ?? null;
         $user->state_province = $data['state_province'] ?? null;
-        $user->country = $data['country'] ? $data['country']['NAME'] : null;
 
+        if ($data['country']['NAME']) {
+            $user->country = $data['country']['NAME'];
+        }
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];
         }

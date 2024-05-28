@@ -488,15 +488,15 @@ export default {
                                     <div class="flex flex-column">
                                         <span class="text-green-500 mr-2"
                                             >VPC
-                                            {{ product.priceString }}
+                                            {{
+                                                product.priceWithDiscountString
+                                            }}
                                             €</span
                                         >
 
                                         <span class="text-blue-500"
                                             >MPC
-                                            {{
-                                                product.priceWithDiscountString
-                                            }}
+                                            {{ product.priceString }}
                                             €</span
                                         >
                                     </div>

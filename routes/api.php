@@ -13,6 +13,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierDetailController;
 use App\Http\Controllers\WarrentController;
 use App\Http\Controllers\DeliveryDeadlineController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,4 +198,8 @@ Route::middleware('auth:sanctum')->group(function () {
         DeliveryDeadlineController::class,
         'getAll',
     ]);
+
+    //****************   Order CONTOLLER ******************
+
+    Route::post('/order/createOrder', [OrderController::class, 'createOrder']);
 });

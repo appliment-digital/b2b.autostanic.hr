@@ -9,10 +9,12 @@ import Sidebar from '@/components/admin/Sidebar.vue';
 import UserService from '@/service/UserService.js';
 import DiscountTypeService from '@/service/DiscountTypeService.js';
 import BitrixService from '@/service/BitrixService.js';
+import OrderService from '@/service/OrderService.js';
 
 const userService = new UserService();
 const discountTypeService = new DiscountTypeService();
 const bitrixService = new BitrixService();
+const orderService = new OrderService();
 
 export default {
     components: {
@@ -29,6 +31,7 @@ export default {
         this.getRoles();
         this.getDiscountTypes();
         this.getCountriesList();
+        this.test();
     },
     data() {
         return {
@@ -109,6 +112,11 @@ export default {
         },
     },
     methods: {
+        test() {
+            orderService.createOrder().then((response) => {
+                console.log(response.data);
+            });
+        },
         getCountriesList() {
             bitrixService.getCountriesList().then((response) => {
                 this.countries = response.data;
@@ -293,6 +301,9 @@ export default {
             :useGrouping="false"
         />
 
+        <label>Grad</label>
+        <InputText v-model="user.city" class="w-full mt-2 mb-3" />
+
         <label>Županija</label>
         <InputText v-model="user.state_province" class="w-full mt-2 mb-3" />
 
@@ -431,14 +442,20 @@ export default {
                         </IconField>
                     </div>
                 </template>
-                <Column field="name" header="Ime" sortable></Column>
-                <Column field="last_name" header="Prezime" sortable></Column>
+                <Column field="name" header="Ime i prezime" sortable>
+                    <template #body="{ data }">
+                        {{ data.name }} {{ data.last_name }}
+                    </template></Column
+                >
                 <Column field="email" header="E-mail" sortable></Column>
                 <Column header="Adresa dostave">
                     <template #body="{ data }">
                         <span v-if="data.address">{{ data.address }}</span>
                         <span v-if="data.postal_code"
-                            >, {{ data.postal_code }}</span
+                            >, {{ data.postal_code }}
+                        </span>
+                        <span v-if="data.city"
+                            ><span> </span> {{ data.city }}</span
                         >
                         <span v-if="data.state_province"
                             >, {{ data.state_province }}
