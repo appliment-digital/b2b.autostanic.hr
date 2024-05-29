@@ -343,13 +343,42 @@ class ProductController extends BaseController
                         $productData->Price * ($markup / 100) +
                         $expenses;
                     $productData->Price = $adjustedPrice;
+                } else {
+                    $authUser = Auth::user();
+                    $discountPercentage =
+                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+
+                    // Calculate price with discount
+                    $productData->PriceWithDiscount =
+                        $productData->Price -
+                        $productData->Price * ($discountPercentage / 100);
+
+                    $productData->PriceWithDiscount = round(
+                        abs($productData->PriceWithDiscount),
+                        2
+                    );
+
+                    $productData->PriceString = number_format(
+                        abs($productData->Price),
+                        2,
+                        ',',
+                        '.'
+                    );
+                    $productData->PriceWithDiscountString = number_format(
+                        abs($productData->PriceWithDiscount),
+                        2,
+                        ',',
+                        '.'
+                    );
+
+                    $productData->Price = abs($productData->Price);
                 }
             }
 
             $productData->Price = round($productData->Price, 2);
             $productData->PriceString = number_format($productData->Price, 2, ',', '.');
-            return $productData;
 
+            return $productData;
             // $productData->pictures = $this->getProductPictures($id);
             // $productData->oem_codes = $this->getOEMCodeForProduct($id);
             // $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
@@ -522,7 +551,11 @@ class ProductController extends BaseController
 
             unset($item->CarMakeId, $item->CarMakeName); // Remove redundant fields
 
-            $item->CarModelYearFromTo = explode("/", $item->CarModelYearFrom)[1] . "-" . explode("/", $item->CarModelYearTO)[1];
+            if ($item->CarModelYearFrom && $item->CarModelYearTO) {
+                $item->CarModelYearFromTo = explode("/", $item->CarModelYearFrom)[1] . "-" . explode("/", $item->CarModelYearTO)[1];
+            } else {
+                $item->CarModelYearFromTo = '-';
+            }
 
             // remove unused fields
             unset($item->CarModelYearFrom);

@@ -12,7 +12,6 @@ import {
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
-import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
@@ -32,14 +31,6 @@ export default {
     data() {
         return {
             product: null,
-            details: null,
-
-            featuredImage: null,
-            thumbnails: null,
-
-            itemQuantity: '1',
-
-            displayBasic: false,
 
             details: {
                 pictures: null,
@@ -47,6 +38,8 @@ export default {
                 oemCodes: null,
                 carTypes: null,
             },
+
+            itemQuantity: '1',
         };
     },
     watch: {
@@ -59,78 +52,76 @@ export default {
     computed: {
         ...mapStores(
             useUserStore,
-            useResultsStore,
             useShoppingCartStore,
             useBreadcrumbsStore,
             useUIStore,
         ),
 
         isProductInShoppingCart() {
-            const { id } = this.resultsStore.product;
-            const product = this.shoppingCartStore.cart.find(
-                (product) => product.id == id,
-            );
+            const cart = this.shoppingCartStore.cart;
 
-            console.log({ id, product });
+            if (cart) {
+                const product = this.shoppingCartStore.cart.find(
+                    (product) => product.id == this.product.id,
+                );
 
-            if (product) return true;
-            else false;
+                if (product) return true;
+            }
         },
     },
+
     beforeMount() {
-        // load and set product data
-        this.loadProduct();
-
-        // get mages
-        ProductService.getPictures(this.resultsStore.product.id)
-            .then((response) => {
-                if (response.data && response.data.url550) {
-                    this.details.pictures = response.data.url550;
-                }
-            })
-            .catch((err) => console.log(err));
-
-        // get specifications
-        ProductService.getSpecifications(this.resultsStore.product.id)
-            .then((response) => {
-                if (response.data) {
-                    this.details.specifications = response.data;
-                }
-            })
-            .catch((err) => console.log(err));
-
-        // get oem codes
-        ProductService.getOEMCodes(this.resultsStore.product.id)
-            .then((response) => {
-                if (response.data) {
-                    this.details.oemCodes = response.data;
-                }
-            })
-            .catch((err) => console.log(err));
-
-        // get car types
-        ProductService.getCarTypes(this.resultsStore.product.id)
-            .then((response) => {
-                if (response) {
-                    this.details.carTypes = response.data;
-                }
-            })
-            .catch((err) => console.log(err));
+        this.loadProduct(this.$route.query.id);
+        this.loadProductDetails(this.$route.query.id);
     },
-    methods: {
-        /**
-         * Load product data.
-         */
-        loadProduct() {
-            const productSlug = decodeURIComponent(this.$route.path.slice(1));
-            const productHistoryData =
-                this.resultsStore.getProductFromHistory(productSlug)();
 
-            if (productHistoryData) {
-                this.product = productHistoryData;
-            } else {
-                this.product = this.resultsStore.product;
-            }
+    methods: {
+        loadProduct(id) {
+            ProductService.getProductById(id)
+                .then((response) => {
+                    if (response.data) {
+                        this.product = camelcaseKeys(response.data);
+                    }
+                })
+                .catch((err) => console.error(err));
+        },
+
+        loadProductDetails(id) {
+            // get pictures
+            ProductService.getPictures(id)
+                .then((response) => {
+                    if (response.data && response.data.url550) {
+                        this.details.pictures = response.data.url550;
+                    }
+                })
+                .catch((err) => console.error(err));
+
+            // get specifications
+            ProductService.getSpecifications(id)
+                .then((response) => {
+                    if (response.data) {
+                        this.details.specifications = response.data;
+                    }
+                })
+                .catch((err) => console.error(err));
+
+            // get oem codes
+            ProductService.getOEMCodes(id)
+                .then((response) => {
+                    if (response.data) {
+                        this.details.oemCodes = response.data;
+                    }
+                })
+                .catch((err) => console.error(err));
+
+            // get car types
+            ProductService.getCarTypes(id)
+                .then((response) => {
+                    if (response) {
+                        this.details.carTypes = response.data;
+                    }
+                })
+                .catch((err) => console.error(err));
         },
 
         handleSendInquiry() {
@@ -139,14 +130,15 @@ export default {
 
         handleAddProdcutToShoppingCart(product) {
             const productDetails = {
-                id: product.id,
-                name: product.name,
-                pictureUrl: product.pictureUrl,
-                stockQuantity: product.stockQuantity,
-                price: product.price,
+                ...product,
                 quantity: this.itemQuantity,
-                breadcrumbs: this.breadcrumbsStore.currentBreadcrumbs,
+                picture: this.details.pictures[0],
             };
+
+            this.breadcrumbsStore.addProductCrumbs(
+                product.id,
+                this.breadcrumbsStore.current,
+            );
 
             this.shoppingCartStore.add(productDetails);
 
@@ -154,7 +146,7 @@ export default {
                 severity: 'success',
                 summary: 'Status',
                 detail: 'Proizvod dodan u košaricu!',
-                life: 500,
+                life: 1000,
             });
         },
 
@@ -168,334 +160,373 @@ export default {
                 '_blank',
             );
         },
+
+        capitalize(text) {
+            return capitalizeFirstLetter(text);
+        },
     },
 };
 </script>
 
 <template>
-    <!-- Product: Image & Description -->
-    <div class="grid column-gap-6 justify-content-between pb-8">
-        <div class="col-12 md:col-5 md:h-auto">
-            <!-- featured image -->
+    <section v-if="product && details">
+        <div class="mt-3 flex justify-content-between align-items-center">
+            <Breadcrumbs
+                page="product"
+                :product="product"
+                :crumbs="this.breadcrumbsStore.current"
+            />
             <div
-                class="p-2 border-1 border-100 border-round bg-white"
-                style="width: 100%; height: 360px; overflow: hidden"
+                v-if="this.UIStore.isDataLoading"
+                class="flex align-items-center column-gap-2"
             >
-                <Image
-                    v-if="details.pictures && details.pictures.length"
-                    :src="details.pictures[0]"
-                    style="width: 100%; height: 100%"
-                    imageStyle="display: block; border-radius: 8px; max-width: 100%; width: 100%; height: 100%; object-fit: cover;"
-                    preview
+                <ProgressSpinner
+                    class="w-2rem h-3rem text-400"
+                    strokeWidth="3"
                 />
-            </div>
-
-            <!-- thumbnails -->
-            <div v-if="details.pictures" class="mt-2 flex overflow-x-scroll">
-                <Image
-                    v-for="img in details.pictures"
-                    :src="img"
-                    class="bg-white border-round mr-1 border-100 border-1 p-1"
-                    style="min-width: 64px; width: 64px; height: 64px"
-                    imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: cover;"
-                    preview
-                />
+                učitavanje podataka...
             </div>
         </div>
-        <div class="col">
-            <h2 class="mt-4 md:mt-0">{{ product.name }}</h2>
-            <span class="block font-bold border-bottom-2 border-100 pb-2"
-                >SKU: <span class="font-normal">{{ product.sku }}</span></span
-            >
 
-            <p class="mt-3" v-html="product.shortDescription" />
-            <p class="mt-3" v-html="product.fullDescription" />
-
-            <!-- Stock -->
-            <span class="block mt-5"
-                ><span
-                    class="font-bold"
-                    :class="
-                        product.stockQuantity == 0
-                            ? 'text-red-500'
-                            : 'text-green-500'
-                    "
-                    >{{ product.stockQuantity }}</span
-                >
-                na stanju.</span
-            >
-
-            <div
-                class="mt-5 flex flex-column row-gap-1 justify-content-between"
-            >
-                <div>
-                    <span class="mb-0 mr-2 mb-2 text-lg"
-                        >Veleprodajna cijena (VPC):</span
-                    >
-                    <span v-if="details" class="font-bold">
-                        {{ product.priceString }} €</span
-                    >
-                </div>
-                <div>
-                    <span class="m-0 mr-2 mb-2 text-lg"
-                        >Maloprodajna cijena (MPC):
-                    </span>
-                    <span v-if="details" class="font-bold"
-                        >{{ product.priceWithDiscountString }} €</span
-                    >
-                </div>
-            </div>
-
-            <div
-                class="mt-5 bg-white-alpha-10 border-2 border-100 py-2 border-noround border-left-none border-right-none"
-                :class="
-                    product.stockQuantity > 0 && 'flex justify-content-between'
-                "
-            >
+        <!-- Product: Image & Description -->
+        <div class="grid column-gap-6 justify-content-between pb-8">
+            <div class="col-12 md:col-5 md:h-auto">
+                <!-- featured image -->
                 <div
-                    class="w-full flex justify-content-between align-items-center"
+                    class="p-2 border-1 border-100 border-round bg-white"
+                    style="width: 100%; height: 360px; overflow: hidden"
                 >
-                    <div
-                        v-if="
-                            product.stockQuantity > 0 &&
-                            !isProductInShoppingCart
-                        "
-                    >
-                        <Button
-                            class="button--no-shadow mr-1"
-                            icon="pi pi-minus"
-                            severity="secondary"
-                            outlined
-                            @click="itemQuantity--"
-                        />
-                        <Button
-                            class="button--no-shadow mr-1"
-                            severity="primary"
-                            :label="itemQuantity"
-                        />
-                        <Button
-                            icon="pi pi-plus"
-                            class="button--no-shadow"
-                            :disabled="itemQuantity >= product.stockQuantity"
-                            outlined
-                            severity="secondary"
-                            @click="itemQuantity++"
-                        />
-                        <Button
-                            class="button--no-shadow ml-1 text-sm"
-                            label="Dodaj u košaricu"
-                            severity="primary"
-                            @click="handleAddProdcutToShoppingCart(product)"
-                        />
-                    </div>
-                    <div v-if="isProductInShoppingCart">
-                        <i class="pi pi-shopping-cart text-blue-500"></i>
-                        <span class="ml-2"
-                            >Proizvod
-                            <span class="font-bold">u košarici.</span></span
-                        >
-                    </div>
-                    <Button
-                        class="button--no-shadow text-sm"
-                        label="Pošalji upit"
-                        outlined
-                        severity="primary"
-                        @click="handleSendInquiry"
+                    <Image
+                        v-if="details.pictures && details.pictures.length"
+                        :src="details.pictures[0]"
+                        style="width: 100%; height: 100%"
+                        imageStyle="display: block; border-radius: 8px; max-width: 100%; width: 100%; height: 100%; object-fit: contain; transform: scale(.5)"
+                        preview
+                    />
+                </div>
+
+                <!-- thumbnails -->
+                <div
+                    v-if="details.pictures"
+                    class="mt-2 flex overflow-x-scroll"
+                >
+                    <Image
+                        v-for="img in details.pictures"
+                        :src="img"
+                        class="bg-white border-round mr-1 border-100 border-1 p-1"
+                        style="min-width: 64px; width: 64px; height: 64px"
+                        imageStyle="display: block; border-radius: 8px; max-width: 100%; height: 100%; object-fit: contain;"
+                        preview
                     />
                 </div>
             </div>
-        </div>
-        <div class="w-full mx-auto mt-6 grid">
-            <div class="col-12">
-                <TabView
-                    :pt="{
-                        panelContainer: {
-                            style: 'background-color: transparent',
-                            class: 'p-0 pt-4',
-                        },
-                        nav: {
-                            style: 'background-color: transparent',
-                        },
-                    }"
+            <div class="col">
+                <h2 class="mt-4 md:mt-0">{{ capitalize(product.name) }}</h2>
+                <span class="block font-bold border-bottom-1 border-100 pb-2"
+                    >SKU:
+                    <span class="font-normal">{{ product.sku }}</span></span
                 >
-                    <TabPanel
-                        header="Dodatne informacije"
-                        :pt="{
-                            headerAction: {
-                                style: 'background-color: transparent',
-                            },
-                        }"
-                    >
-                        <div>
-                            <!-- Manufacturer -->
-                            <div
-                                v-for="(key, val, i) in details.specifications"
-                                class="grid surface-100 mt-1"
-                                :class="
-                                    i % 2 === 0
-                                        ? 'surface-50'
-                                        : 'bg-transparent'
-                                "
-                            >
-                                <div class="col-6">
-                                    {{ val }}
-                                </div>
-                                <div class="col-6">{{ key }}</div>
-                            </div>
-                        </div>
-                    </TabPanel>
-                    <TabPanel
-                        header="Garancija"
-                        :pt="{
-                            headerAction: {
-                                style: 'background-color: transparent',
-                            },
-                        }"
-                    >
-                        <ul>
-                            <li class="mb-2">Nova roba 12-36 mjeseci</li>
-                            <li>Rabljena roba 1-6 mjeseci</li>
-                        </ul>
 
-                        <div style="max-width: 600px">
-                            <p class="mt-5">
-                                Svi proizvođači NOVIH auto dijelova garantiraju
-                                da su njihovi proizvodi bez nedostataka u
-                                materijalu i izradi, te da su testirani prije
-                                stavljanja u prodaju.
-                            </p>
-                            <p>
-                                Garancija se daje krajnjem korisniku i odnosi se
-                                na proizvode koji su kupljeni, instalirani i
-                                korišteni u svrhe za koje su prvobitno
-                                dizajnirani. Garancija prokriva nedostatke
-                                nastale u uobičajenoj uporabi i ne pokriva
-                                neispravnost ili kvarove uslijed zloupotrebe,
-                                zanemarivanja, nepravilne instalacije ili
-                                kvarova kod održavanja.
-                            </p>
-                            <p>
-                                Tijekom garancijskog razdoblja, proizvođač će
-                                ili popraviti ili zamjenitit bez naknade
-                                proizvod koji je neispravan u materijalu ili
-                                izradi.
-                            </p>
-                        </div>
-                    </TabPanel>
-                    <TabPanel
-                        header="OEM Kodovi"
-                        :pt="{
-                            headerAction: {
-                                style: 'background-color: transparent',
-                            },
-                        }"
+                <p class="mt-3" v-html="product.shortDescription" />
+                <p class="mt-3" v-html="product.fullDescription" />
+
+                <!-- Stock -->
+                <span class="block mt-5"
+                    ><span
+                        class="font-bold"
+                        :class="
+                            product.stockQuantity == 0
+                                ? 'text-red-500'
+                                : 'text-green-500'
+                        "
+                        >{{ product.stockQuantity }}</span
                     >
-                        <p style="max-width: 600px">
-                            OEM je skraćenica od „Original Equipment
-                            Manufacturer“ ili u prijevodu OEM se odnosi na
-                            originalne dijelove za automobilsku industriju. Na
-                            primjer, ako imate Audi i potreban vam je motor,
-                            možete ga kupiti od drugog proizvođača ili
-                            autentičan Audi motor. <br /><br />
-                            Iako proizvođač ne može napraviti identičan dio, OEM
-                            se odnosi na dio koji proizvođač koristi u
-                            originalnom vozilu. Ljudi često traže originalne OEM
-                            dijelove kako bi zamjenili potrgani dio jer mogu
-                            biti sigurni u kvalitetu dijela. U većini slučajeva
-                            proizvođač vozila ne proizvodi i OEM dijelove već
-                            angažira vanjsku tvrtku da bude službeni proizvođač
-                            tog dijela kao što je BOSCH, VALO, LUK itd. To znači
-                            da ti proizvođači mogu te dijelove prodavati i
-                            kasnije pod oznakom OEM dio samo bez oznake
-                            proizvođača vozila.
-                        </p>
-                        <div v-if="details.oemCodes" class="mt-4">
-                            <div
-                                v-for="(
-                                    codes, manufacturer, i
-                                ) in details.oemCodes"
-                                class="mt-1 grid"
-                                :class="
-                                    i % 2 === 0
-                                        ? 'surface-100'
-                                        : 'bg-transparent'
-                                "
-                            >
-                                <div class="col-6">{{ manufacturer }}</div>
-                                <div class="col-6">
-                                    <span
-                                        class="inline-block mr-2"
-                                        v-for="(code, i) in codes"
-                                        >{{ code }}{{ i > 0 ? '' : ',' }}</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </TabPanel>
-                    <TabPanel
-                        header="Povezana vozila"
-                        :pt="{
-                            headerAction: {
-                                style: 'background-color: transparent',
-                            },
-                        }"
+                    na stanju.</span
+                >
+
+                <div
+                    class="mt-5 flex flex-column row-gap-1 justify-content-between"
+                >
+                    <div>
+                        <span class="mb-0 mr-2 mb-2 text-lg"
+                            >Veleprodajna cijena (VPC):</span
+                        >
+                        <span v-if="details" class="font-bold">
+                            {{ product.priceWithDiscountString }} €</span
+                        >
+                    </div>
+                    <div>
+                        <span class="m-0 mr-2 mb-2 text-lg"
+                            >Maloprodajna cijena (MPC):
+                        </span>
+                        <span v-if="details" class="font-bold"
+                            >{{ product.priceString }} €</span
+                        >
+                    </div>
+                </div>
+
+                <div
+                    class="mt-5 bg-white-alpha-10 border-1 border-100 py-2 border-noround border-left-none border-right-none"
+                    :class="
+                        product.stockQuantity > 0 &&
+                        'flex justify-content-between'
+                    "
+                >
+                    <div
+                        class="w-full flex justify-content-between align-items-center"
                     >
                         <div
-                            v-if="details.carTypes"
-                            v-for="(
-                                details, carType, index
-                            ) in details.carTypes"
+                            v-if="
+                                product.stockQuantity > 0 &&
+                                !isProductInShoppingCart
+                            "
                         >
-                            <Accordion :activeIndex="index">
-                                <AccordionTab
-                                    :header="carType"
-                                    :pt="{
-                                        headerAction: {
-                                            class: 'p-4',
-                                        },
-                                        content: {
-                                            class: 'p-4',
-                                        },
-                                    }"
+                            <Button
+                                class="button--no-shadow mr-1"
+                                icon="pi pi-minus"
+                                severity="secondary"
+                                outlined
+                                @click="itemQuantity--"
+                            />
+                            <Button
+                                class="button--no-shadow mr-1"
+                                severity="primary"
+                                :label="itemQuantity"
+                            />
+                            <Button
+                                icon="pi pi-plus"
+                                class="button--no-shadow"
+                                :disabled="
+                                    itemQuantity >= product.stockQuantity
+                                "
+                                outlined
+                                severity="secondary"
+                                @click="itemQuantity++"
+                            />
+                            <Button
+                                class="button--no-shadow ml-1 text-sm"
+                                label="Dodaj u košaricu"
+                                severity="primary"
+                                @click="handleAddProdcutToShoppingCart(product)"
+                            />
+                        </div>
+                        <div v-if="isProductInShoppingCart">
+                            <i class="pi pi-shopping-cart text-blue-500"></i>
+                            <span class="ml-2"
+                                >Proizvod
+                                <span class="font-bold">u košarici</span></span
+                            >
+                        </div>
+                        <Button
+                            class="button--no-shadow text-sm"
+                            label="Pošalji upit"
+                            outlined
+                            severity="primary"
+                            @click="handleSendInquiry"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="w-full mx-auto mt-6 grid">
+                <div class="col-12">
+                    <TabView
+                        :pt="{
+                            panelContainer: {
+                                style: 'background-color: transparent',
+                                class: 'p-0 pt-4',
+                            },
+                            nav: {
+                                style: 'background-color: transparent',
+                                class: 'border-bottom-1',
+                            },
+                        }"
+                    >
+                        <TabPanel
+                            header="Dodatne informacije"
+                            :pt="{
+                                headerAction: {
+                                    style: 'background-color: transparent',
+                                },
+                            }"
+                        >
+                            <div>
+                                <!-- Manufacturer -->
+                                <div
+                                    v-for="(
+                                        key, val, i
+                                    ) in details.specifications"
+                                    class="grid surface-100 mt-1"
+                                    :class="
+                                        i % 2 === 0
+                                            ? 'surface-50'
+                                            : 'bg-transparent'
+                                    "
                                 >
-                                    <table
-                                        style="
-                                            width: 100%;
-                                            border-collapse: collapse;
-                                        "
-                                    >
-                                        <tr class="text-left">
-                                            <th class="p-2">Marka</th>
-                                            <th>Model</th>
-                                            <th>Tip</th>
-                                            <th>kW</th>
-                                            <th>Tip motora</th>
-                                            <th>Godina</th>
-                                        </tr>
+                                    <div class="col-6">
+                                        {{ val }}
+                                    </div>
+                                    <div class="col-6">{{ key }}</div>
+                                </div>
+                            </div>
+                        </TabPanel>
+                        <TabPanel
+                            header="Garancija"
+                            :pt="{
+                                headerAction: {
+                                    style: 'background-color: transparent',
+                                },
+                            }"
+                        >
+                            <ul>
+                                <li class="mb-2">Nova roba 12-36 mjeseci</li>
+                                <li>Rabljena roba 1-6 mjeseci</li>
+                            </ul>
 
-                                        <tr
-                                            v-for="(entry, index) in details"
-                                            :class="
-                                                index % 2 === 0
-                                                    ? 'surface-50'
-                                                    : 'bg-transparent'
+                            <div style="max-width: 600px">
+                                <p class="mt-5">
+                                    Svi proizvođači NOVIH auto dijelova
+                                    garantiraju da su njihovi proizvodi bez
+                                    nedostataka u materijalu i izradi, te da su
+                                    testirani prije stavljanja u prodaju.
+                                </p>
+                                <p>
+                                    Garancija se daje krajnjem korisniku i
+                                    odnosi se na proizvode koji su kupljeni,
+                                    instalirani i korišteni u svrhe za koje su
+                                    prvobitno dizajnirani. Garancija prokriva
+                                    nedostatke nastale u uobičajenoj uporabi i
+                                    ne pokriva neispravnost ili kvarove uslijed
+                                    zloupotrebe, zanemarivanja, nepravilne
+                                    instalacije ili kvarova kod održavanja.
+                                </p>
+                                <p>
+                                    Tijekom garancijskog razdoblja, proizvođač
+                                    će ili popraviti ili zamjenitit bez naknade
+                                    proizvod koji je neispravan u materijalu ili
+                                    izradi.
+                                </p>
+                            </div>
+                        </TabPanel>
+                        <TabPanel
+                            header="OEM Kodovi"
+                            :pt="{
+                                headerAction: {
+                                    style: 'background-color: transparent',
+                                },
+                            }"
+                        >
+                            <p style="max-width: 600px">
+                                OEM je skraćenica od „Original Equipment
+                                Manufacturer“ ili u prijevodu OEM se odnosi na
+                                originalne dijelove za automobilsku industriju.
+                                Na primjer, ako imate Audi i potreban vam je
+                                motor, možete ga kupiti od drugog proizvođača
+                                ili autentičan Audi motor. <br /><br />
+                                Iako proizvođač ne može napraviti identičan dio,
+                                OEM se odnosi na dio koji proizvođač koristi u
+                                originalnom vozilu. Ljudi često traže originalne
+                                OEM dijelove kako bi zamjenili potrgani dio jer
+                                mogu biti sigurni u kvalitetu dijela. U većini
+                                slučajeva proizvođač vozila ne proizvodi i OEM
+                                dijelove već angažira vanjsku tvrtku da bude
+                                službeni proizvođač tog dijela kao što je BOSCH,
+                                VALO, LUK itd. To znači da ti proizvođači mogu
+                                te dijelove prodavati i kasnije pod oznakom OEM
+                                dio samo bez oznake proizvođača vozila.
+                            </p>
+                            <div v-if="details.oemCodes" class="mt-4">
+                                <div
+                                    v-for="(
+                                        codes, manufacturer, i
+                                    ) in details.oemCodes"
+                                    class="mt-1 grid"
+                                    :class="
+                                        i % 2 === 0
+                                            ? 'surface-100'
+                                            : 'bg-transparent'
+                                    "
+                                >
+                                    <div class="col-6">{{ manufacturer }}</div>
+                                    <div class="col-6">
+                                        <span
+                                            class="inline-block mr-2"
+                                            v-for="(code, i) in codes"
+                                            >{{ code
+                                            }}{{ i > 0 ? '' : ',' }}</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </TabPanel>
+                        <TabPanel
+                            header="Povezana vozila"
+                            :pt="{
+                                headerAction: {
+                                    style: 'background-color: transparent',
+                                },
+                            }"
+                        >
+                            <div
+                                v-if="details.carTypes"
+                                v-for="(
+                                    details, carType, index
+                                ) in details.carTypes"
+                            >
+                                <Accordion :activeIndex="index">
+                                    <AccordionTab
+                                        :header="carType"
+                                        :pt="{
+                                            headerAction: {
+                                                class: 'p-4',
+                                            },
+                                            content: {
+                                                class: 'p-4',
+                                            },
+                                        }"
+                                    >
+                                        <table
+                                            style="
+                                                width: 100%;
+                                                border-collapse: collapse;
                                             "
                                         >
-                                            <td class="p-2">{{ carType }}</td>
-                                            <td v-for="(x, y) in entry">
-                                                {{ x }}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </AccordionTab>
-                            </Accordion>
-                        </div>
-                        <div v-else>Nema povezanih vozila...</div>
-                    </TabPanel>
-                </TabView>
+                                            <tr class="text-left">
+                                                <th class="p-2">Marka</th>
+                                                <th>Model</th>
+                                                <th>Tip</th>
+                                                <th>kW</th>
+                                                <th>Tip motora</th>
+                                                <th>Godina</th>
+                                            </tr>
+
+                                            <tr
+                                                v-for="(
+                                                    entry, index
+                                                ) in details"
+                                                :class="
+                                                    index % 2 === 0
+                                                        ? 'surface-50'
+                                                        : 'bg-transparent'
+                                                "
+                                            >
+                                                <td class="p-2">
+                                                    {{ carType }}
+                                                </td>
+                                                <td v-for="(x, y) in entry">
+                                                    {{ x }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </AccordionTab>
+                                </Accordion>
+                            </div>
+                            <div v-else>Nema povezanih vozila...</div>
+                        </TabPanel>
+                    </TabView>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 </template>
 
 <style scoped>

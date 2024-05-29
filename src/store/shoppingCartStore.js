@@ -1,76 +1,71 @@
 import { defineStore } from 'pinia';
 
-const calcTotal = (items) => {
-    return items.reduce((total, item) => total + +item.price, 0);
-};
+// utils
+import { session, local } from '@/utils';
 
 export const useShoppingCartStore = defineStore('shoppingCart', {
     state: () => {
         return {
-            shoppingCart:
-                JSON.parse(localStorage.getItem('shopping-cart')) || [],
-
-            currentTotalWithoutFees: 0,
-            currentTotalWithFees: 0,
+            store: {
+                local: {
+                    cart: local.load('shopping-cart-store')?.cart || [],
+                },
+            },
         };
     },
     getters: {
         cart: (state) => {
-            if (state.shoppingCart.length) {
-                return state.shoppingCart;
-            } else {
-                return JSON.parse(localStorage.getItem('shopping-cart'));
-            }
+            return state.store.local.cart;
         },
 
         total: (state) => {
-            if (state.shoppingCart.length) {
-                const total = state.shoppingCart.reduce((total, product) => {
+            return state.store.local.cart.reduce((total, product) => {
+                const amount = Number(product.price * product.quantity);
 
-                    total += Number(product.price * product.quantity);
-                    return total;
-                }, 0);
+                total += amount;
 
                 return total;
-            }
+            }, 0);
         },
     },
     actions: {
         add(product) {
-            // figure out if product already exists in the cart
-            const entryId = this.shoppingCart.findIndex(
+            const entryId = this.store.local.cart.findIndex(
                 (entry) => entry.id == product.id,
             );
 
             if (entryId != -1) {
+                // item exists in the cart
                 let newQuantity =
-                    Number(this.shoppingCart[entryId].quantity) +
+                    Number(this.store.local.cart[entryId].quantity) +
                     Number(product.quantity);
 
                 if (newQuantity > product.stockQuantity) {
                     newQuantity = Number(product.stockQuantity);
                 }
 
-                this.shoppingCart[entryId].quantity = newQuantity;
+                this.store.local.cart[entryId].quantity = newQuantity;
             } else {
-                this.shoppingCart.push(product);
+                // item doesn't exists in the cart
+                this.store.local.cart.push(product);
             }
 
-            localStorage.setItem(
-                'shopping-cart',
-                JSON.stringify(this.shoppingCart),
-            );
+            local.save('shopping-cart-store', this.store.local);
         },
 
         delete(product) {
-            this.shoppingCart = this.shoppingCart.filter(
+            const filteredCart = this.store.local.cart.filter(
                 (entry) => entry.id !== product.id,
             );
 
-            localStorage.setItem(
-                'shopping-cart',
-                JSON.stringify(this.shoppingCart),
-            );
+            this.store.local.cart = filteredCart;
+            local.save('shopping-cart-store', this.store.local);
+        },
+
+        clear() {
+            console.log('clearing cart...');
+            this.store.local.cart = [];
+            local.save('shopping-cart-store', this.store.local);
         },
     },
 });

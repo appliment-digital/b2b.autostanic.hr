@@ -11,7 +11,6 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 // pinia
 import { mapStores } from 'pinia';
-import { useResultsStore } from '@/store/resultsStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
@@ -61,34 +60,26 @@ export default {
                 status: [],
                 manufacturers: {},
             },
-
-            formattedMpcPrices: [],
         };
     },
     mounted() {
-        // load category data from storage
-        const selectedCategory = this.categoryStore.selectedCategory;
-
-        this.setFilters();
+        this.resetFilters();
     },
-    updated() {
-        // console.log('results updated -> num of products:', {products: this.products});
-    },
-    watch: {},
     computed: {
         ...mapStores(
-            useResultsStore,
             useShoppingCartStore,
             useCategoryStore,
             useUIStore,
             useUserStore,
         ),
+
         isAnyFilterActive() {
-            // Check manufacturers filters
+            // check manufacturers filters
             const manufacturerActive = Object.values(
                 this.filters.manufacturers,
             ).some((value) => value);
-            // Check status filters
+
+            // check status filters
             const statusActive = this.filters.status.some(
                 (filter) => filter.value,
             );
@@ -109,16 +100,9 @@ export default {
         },
     },
     methods: {
-        setFilters() {
+        resetFilters() {
             this.filters.status = [];
             this.filters.manufacturers = {};
-
-            const selectedFilters = { statusId: [], manufacturerName: [] };
-            this.$emit(
-                'on-filter-select',
-                selectedFilters,
-                this.categoryStore.selectedCategory.id,
-            );
 
             this.manufacturers.forEach((entry) => {
                 this.filters.manufacturers[entry] = false;
@@ -132,18 +116,34 @@ export default {
                 });
             });
         },
-        handleProductClick(product) {
-            console.log({ product });
-            this.resultsStore.setProduct(product);
 
-            this.$router.push(`/${slug(product.name)}`);
+        fetchInitialProducts() {
+            this.$emit(
+                'on-filter-select',
+                {},
+                this.categoryStore.selectedCategory.id,
+            );
+        },
+
+        handleProductDataReset() {
+            if (
+                this.filters.status.length ||
+                Object.keys(this.filters.manufacturers).length
+            ) {
+                this.fetchInitialProducts();
+            }
+
+            this.resetFilters();
+        },
+
+        handleProductClick(product) {
+            this.$router.push({
+                path: `/${slug(product.name)}`,
+                query: { id: product.id },
+            });
         },
 
         handlePageChangeClick(event) {
-            console.log('handlePageChangeClick', event, {
-                selectedFilters: this.selectedFilters,
-            });
-
             this.currentPage = event.page + 1;
             this.$emit('on-page-change', event, this.selectedFilters);
         },
@@ -188,6 +188,7 @@ export default {
         formatProductPrice(val) {
             return formatPrice(val);
         },
+
         discountedPrice(price) {
             if (this.userStore.discount) {
                 let discountAmount = (this.userStore.discount / 100) * price;
@@ -195,6 +196,7 @@ export default {
             }
             return this.formatProductPrice(price);
         },
+
         getDetailsForProduct(product) {
             return supplierDetailService
                 .getDetailsForProduct({
@@ -213,7 +215,7 @@ export default {
 <template>
     <div class="grid column-gap-1">
         <!-- Filters -->
-        <div class="col-3">
+        <div v-if="productCount > 0" class="col-3">
             <div class="flex flex-column">
                 <Button
                     v-if="isAnyFilterActive"
@@ -221,7 +223,7 @@ export default {
                     label="Poništi filtere"
                     severity="secondary"
                     icon="pi pi-filter-slash"
-                    @click="setFilters()"
+                    @click="handleProductDataReset"
                 />
                 <Accordion :activeIndex="0">
                     <AccordionTab
@@ -338,17 +340,6 @@ export default {
                         >
                     </div>
                     <div class="flex align-items-center">
-                        <!-- <label for="sort-dropdown" class="mr-2"
-                            >Poredaj po</label
-                        >
-                        <Dropdown
-                            inputId="sort-dropdown"
-                            v-model="results.sort.selected"
-                            :options="results.sort.options"
-                            optionLabel="label"
-                            placeholder="Pozicija"
-                            class="w-full md:w-12rem"
-                        /> -->
                         <span v-if="productCount > 24" class="ml-3 mr-2"
                             >Broj rezultata</span
                         >
@@ -488,7 +479,9 @@ export default {
                                     >
                                         <div class="flex flex-column row-gap-1">
                                             <span
-                                                ><span class="inline-block" style="width: 40px;"
+                                                ><span
+                                                    class="inline-block"
+                                                    style="width: 40px"
                                                     >VPC:
                                                 </span>
                                                 <span
@@ -501,10 +494,13 @@ export default {
                                                 </span>
                                             </span>
                                             <span class=""
-                                                ><span class="inline-block" style="width: 40px"
+                                                ><span
+                                                    class="inline-block"
+                                                    style="width: 40px"
                                                     >MPC:
                                                 </span>
-                                                <span class="text-blue-500 font-bold"
+                                                <span
+                                                    class="text-blue-500 font-bold"
                                                     >{{
                                                         product.priceString
                                                     }}
@@ -517,11 +513,14 @@ export default {
                                                 v-if="product.stockQuantity > 0"
                                                 class=""
                                                 >Dostupno:
-                                                <span class="font-bold text-base">{{
-                                                    formatProductStockQuantity(
-                                                        product.stockQuantity,
-                                                    )
-                                                }}</span>
+                                                <span
+                                                    class="font-bold text-base"
+                                                    >{{
+                                                        formatProductStockQuantity(
+                                                            product.stockQuantity,
+                                                        )
+                                                    }}</span
+                                                >
                                             </span>
                                             <span v-else> Nedostupno </span>
                                         </span>

@@ -25,30 +25,28 @@ export default {
         login() {
             userService
                 .login(this.email, this.password)
-                .then((data) => {
-                    if (data.error) {
+                .then((response) => {
+                    if (response.error) {
                         this.$toast.add({
                             severity: 'error',
                             summary: 'Error',
-                            detail: data.error,
+                            detail: response.error,
                             life: 3000,
                         });
                     }
-                    if (data.success) {
+                    if (response.success) {
                         this.$toast.add({
                             severity: 'success',
                             summary: 'Uspješna prijava',
                             detail:
-                                data.message +
+                                response.message +
                                 ', ' +
-                                data.data.name +
+                                response.data.name +
                                 ' ' +
-                                data.data.last_name,
+                                response.data.last_name,
                             life: 3000,
                         });
-                        const { data: userData } = data;
-                        this.userStore.addUser(userData);
-                        this.userStore.login();
+                        this.userStore.add(response.data);
                         this.$router.push('/');
                     }
                 })
@@ -79,6 +77,7 @@ export default {
             type="text"
             v-model="email"
             placeholder="E-mail"
+            @keyup.enter="login()"
         />
         <Password
             class="w-full"

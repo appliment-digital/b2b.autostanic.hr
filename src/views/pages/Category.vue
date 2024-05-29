@@ -14,7 +14,6 @@ import Results from '@/components/Results.vue';
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
-import { useResultsStore } from '@/store/resultsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
 
 // services
@@ -48,12 +47,11 @@ export default {
         ...mapStores(
             useUserStore,
             useCategoryStore,
-            useResultsStore,
             useUIStore,
         ),
     },
     watch: {
-        '$route.path': function (newPath) {
+        '$route.path': function () {
             this.handleNavigation();
 
             // hide product results and show category cards
@@ -63,6 +61,11 @@ export default {
     mounted() {
         this.handleNavigation();
     },
+
+    updated() {
+
+    },
+
     methods: {
         /**
          * Handle navigating categories.
@@ -103,12 +106,11 @@ export default {
             ProductService.getProductsByCategoryId(
                 id,
                 this.page.current,
-                this.page.size,
+                this.page.size, 
                 filters,
             )
                 .then((response) => {
                     const { data } = response;
-                    console.log('getProductsByCategoryId', {filters, data});
 
                     // store response data
                     this.products = data.products;
@@ -178,6 +180,17 @@ export default {
 </script>
 
 <template>
+    <div class="mt-3 flex justify-content-between align-items-center">
+        <Breadcrumbs />
+        <div
+            v-if="this.UIStore.isDataLoading"
+            class="flex align-items-center column-gap-2"
+        >
+            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
+            učitavanje podataka...
+        </div>
+    </div>
+
     <div v-if="subcategories && !products" class="grid">
         <div
             v-for="subcategory in subcategories"
@@ -185,7 +198,7 @@ export default {
             @click="handleSubcategoryClick(subcategory)"
         >
             <!-- prettier-ignore -->
-            <div class="w-full h-full border-1 border-100 pl-0 pr-0
+            <div class="w-full h-full border-1 border-100 px-1 
                 flex flex-column justify-content-center align-items-center 
                 border-round bg-white transition-ease-in transition-color
                 hover:shadow-3"

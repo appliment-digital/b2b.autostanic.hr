@@ -1,102 +1,38 @@
 // lib
 import { defineStore } from 'pinia';
 
-// utild
-import { session } from '@/utils';
+// utils
+import { session, local } from '@/utils';
 
 export const useBreadcrumbsStore = defineStore('breadcrumbs', {
     state: () => {
         return {
-            currentBreadcrumbs:
-                JSON.parse(sessionStorage.getItem('current-breadcrumbs')) ||
-                null,
-            isProductLastSeen: null,
-
             store: {
-                productBreadcrumbsHistory:
-                    session.load('breadcrumbs-store')
-                        ?.productBreadcrumbsHistory || {},
-
-                shoppingCartBreadcrumbsHistory:
-                    session.load('breadcrumbs-store')
-                        ?.shoppingCartBreadcrumbsHistory || [],
+                local: {
+                    products: local.load('breadcrumbs-store')?.products || {},
+                    current: local.load('breadcrumbs-store')?.current || [],
+                },
             },
         };
     },
     getters: {
         current: (state) => {
-            if (state.currentBreadcrumbs) {
-                return state.currentBreadcrumbs;
-            } else {
-                return JSON.parse(
-                    sessionStorage.getItem('current-breadcrumbs'),
-                );
-            }
+            return state.store.local.current;
         },
-        isProductLast: (state) => {
-            if (state.isProductLastSeen === null) {
-                return JSON.parse(
-                    sessionStorage.getItem('isProduct-last-seen'),
-                );
-            } else {
-                return state.isProductLastSeen;
-            }
-        },
-        productBreadcrumbsHistory: (state) => {
-            if (state.store.productBreadcrumbsHistory) {
-                return state.store.productBreadcrumbsHistory;
-            } else {
-                return session.load('breadcrumbs-store')
-                    ?.productBreadcrumbsHistory;
-            }
-        },
-        shoppingCartBreadcrumbsHistory: (state) => {
-            if (state.store.shoppingCartBreadcrumbsHistory) {
-                return state.store.shoppingCartBreadcrumbsHistory;
-            } else {
-                return session.load('breadcrumbs-store')
-                    ?.shoppingCartBreadcrumbsHistory;
-            }
+
+        products: (state) => {
+            return state.store.local.products;
         },
     },
     actions: {
         set(breadcrumbs) {
-            console.log('setting breadcrumbs', { breadcrumbs });
-            this.currentBreadcrumbs = breadcrumbs;
-
-            sessionStorage.setItem(
-                'current-breadcrumbs',
-                JSON.stringify(this.currentBreadcrumbs),
-            );
+            this.store.local.current = breadcrumbs;
+            local.save('breadcrumbs-store', this.store.local);
         },
-        setIsProductLastSeen(val) {
-            this.isProductLastSeen = Boolean(val);
 
-            sessionStorage.setItem(
-                'isProduct-last-seen',
-                JSON.stringify(this.isProductLastSeen),
-            );
-        },
-        addProductBreadcrumbsHistory(product, breadcrumbs) {
-            this.store.productBreadcrumbsHistory[product] = breadcrumbs;
-
-            console.log('adding product breadcrumbs history', {
-                product,
-                breadcrumbs,
-                store: this.store.productBreadcrumbsHistory,
-            });
-
-            session.save('breadcrumbs-store', this.store);
-        },
-        addShoppingCartBreadcrumbsHistory(breadcrumbs) {
-            this.store.shoppingCartBreadcrumbsHistory = breadcrumbs;
-
-            console.log('adding product breadcrumbs history', {
-                breadcrumbs,
-                store: this.store.shoppingCartBreadcrumbsHistory,
-            });
-
-            session.save('breadcrumbs-store', this.store);
+        addProductCrumbs(id, breadcrumbs) {
+            this.store.local.products[id] = breadcrumbs;
+            local.save('breadcrumbs-store', this.store.local);
         },
     },
 });
