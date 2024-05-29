@@ -80,3 +80,9 @@ body {
 .p-image-preview-indicator {
     border-radius: 8px;
 }
+
+#shopping-cart {
+    table tr:last-child td {
+        border: none;
+    }
+}
