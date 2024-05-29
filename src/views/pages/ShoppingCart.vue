@@ -48,32 +48,34 @@ export default {
         ),
 
         order() {
+            const userDiscount = this.userStore.discount;
+            const cartTotal = this.shoppingCartStore.total;
+
+            const discount = cartTotal * (userDiscount / 100);
+            const discountedAmount = cartTotal - discount;
+
+            const tax = discountedAmount * 0.25;
+            const totalAmount = discountedAmount + tax;
+
             return [
                 {
                     name: 'Ukupno',
-                    value: stringifyProductPrice(this.shoppingCartStore.total),
+                    value: `${stringifyProductPrice(this.shoppingCartStore.total)} €`,
                 },
                 {
-                    name: 'Rabat',
-                    value: 1,
-                    // value: this.shoppingCartStore.fees.delivery,
+                    name: `Rabat (${userDiscount}%)`,
+                    value: `${stringifyProductPrice(discountedAmount)} €`,
                 },
                 {
-                    name: 'Porez',
-                    value: 1,
-                    // value: this.shoppingCartStore.fees.tax,
+                    name: 'PDV (25%)',
+                    value: `${stringifyProductPrice(tax)} €`,
                 },
                 {
                     name: 'Sveukupno',
-                    value: 1,
-                    // value: this.shoppingCartStore.totalWithFees,
+                    value: `${stringifyProductPrice(totalAmount)} €`,
                 },
             ];
         },
-    },
-
-    mounted() {
-        console.log('shopping cart store', this.shoppingCartStore.cart);
     },
 
     methods: {
@@ -131,8 +133,8 @@ export default {
                         },
                     },
                     bodyRow: {
-                        style: 'border-color: red;'
-                    }
+                        style: 'border-color: red;',
+                    },
                 }"
                 v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
                 :value="shoppingCartStore.cart"
@@ -215,11 +217,16 @@ export default {
                 >
                     <Column header="Ukupna narudžba">
                         <template #body="{ data }">
-                            <div class="flex justify-content-between">
+                            <div
+                                class="flex justify-content-between"
+                                :class="
+                                    data.name === 'Sveukupno' ? 'font-bold' : ''
+                                "
+                            >
                                 <span>{{ data.name }}</span>
                                 <span class="text-right"
-                                    >{{ data.value }} €</span
-                                >
+                                    >{{ data.value }}
+                                </span>
                             </div>
                         </template>
                     </Column>
