@@ -345,12 +345,7 @@ class ProductController extends BaseController
             }
 
             $productData->Price = round($productData->Price, 2);
-            $productData->PriceString = number_format(
-                $productData->Price,
-                2,
-                ',',
-                '.'
-            );
+            $productData->PriceString = number_format($productData->Price, 2, ',', '.');
             return $productData;
 
             // $productData->pictures = $this->getProductPictures($id);
@@ -386,6 +381,7 @@ class ProductController extends BaseController
                 ->get();
 
             $url550Array = [];
+            $url100Array = [];
 
             foreach ($productPictures as $picture) {
                 $pictureId = str_pad($picture->PictureId, 7, '0', STR_PAD_LEFT);
@@ -396,17 +392,24 @@ class ProductController extends BaseController
 
                 $url550 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_550.{$fileExtension}";
                 $url550Array[] = $url550;
+
+                $url100 = "https://www.autostanic.hr/content/images/thumbs/{$pictureId}_{$picture->SeoFilename}_100.{$fileExtension}";
+                $url100Array[] = $url100;
             }
 
             if (empty($url550Array) && empty($url100Array)) {
                 $url550Array[] =
                     'https://www.autostanic.hr/content/images/default-image.png';
+                $url100Array[] =
+                    'https://www.autostanic.hr/content/images/default-image.png';
                 return [
                     'url550' => $url550Array,
+                    'url100' => $url100Array,
                 ];
             }
             return [
                 'url550' => $url550Array,
+                'url100' => $url100Array,
             ];
         } catch (Exception $e) {
             return response()->json([
@@ -517,6 +520,14 @@ class ProductController extends BaseController
 
             unset($item->CarMakeId, $item->CarMakeName); // Remove redundant fields
 
+            $item->CarModelYearFromTo = explode("/", $item->CarModelYearFrom)[1] . "-" . explode("/", $item->CarModelYearTO)[1];
+
+            // remove unused fields
+            unset($item->CarModelYearFrom);
+            unset($item->CarTypeId);
+            unset($item->CarModelId);
+            unset($item->CarModelYearTO);
+
             $result[$carMakeName][] = $item;
         }
 
@@ -560,7 +571,7 @@ class ProductController extends BaseController
         } catch (Exception $e) {
             return [
                 'exception' =>
-                    $e->getMessage() .
+                $e->getMessage() .
                     ' on line ' .
                     $e->getLine() .
                     ' in file ' .

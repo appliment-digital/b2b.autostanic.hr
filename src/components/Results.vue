@@ -449,9 +449,9 @@ export default {
                                 }}</span>
                             </template>
                             <template #subtitle>
-                                <span class="block text-sm h-4rem">
+                                <span class="block mt-3 text-base h-6rem">
                                     {{ product.name }}
-                                    <span class="block mt-1 text-sm"
+                                    <span class="block mt-2 text-sm"
                                         >SKU: {{ product.sku }}</span
                                     >
                                     <!-- prettier-ignore -->
@@ -482,37 +482,50 @@ export default {
                                 </span>
                             </template>
                             <template #content>
-                                <div
-                                    class="flex align-items-center justify-content-between"
-                                >
-                                    <div class="flex flex-column">
-                                        <span class="text-green-500 mr-2"
-                                            >VPC
-                                            {{
-                                                product.priceWithDiscountString
-                                            }}
-                                            €</span
-                                        >
-
-                                        <span class="text-blue-500"
-                                            >MPC
-                                            {{ product.priceString }}
-                                            €</span
-                                        >
-                                    </div>
-                                    <span class="block mt-1 text-sm">
-                                        <span
-                                            v-if="product.stockQuantity > 0"
-                                            class=""
-                                            >Dostupno:
-                                            <span class="font-bold">{{
-                                                formatProductStockQuantity(
-                                                    product.stockQuantity,
-                                                )
-                                            }}</span>
+                                <div>
+                                    <div
+                                        class="flex justify-content-between align-items-end"
+                                    >
+                                        <div class="flex flex-column row-gap-1">
+                                            <span
+                                                ><span class="inline-block" style="width: 40px;"
+                                                    >VPC:
+                                                </span>
+                                                <span
+                                                    class="text-green-500 mr-2 font-bold"
+                                                >
+                                                    {{
+                                                        product.priceWithDiscountString
+                                                    }}
+                                                    €
+                                                </span>
+                                            </span>
+                                            <span class=""
+                                                ><span class="inline-block" style="width: 40px"
+                                                    >MPC:
+                                                </span>
+                                                <span class="text-blue-500 font-bold"
+                                                    >{{
+                                                        product.priceString
+                                                    }}
+                                                    €</span
+                                                >
+                                            </span>
+                                        </div>
+                                        <span class="block mt-1 text-base">
+                                            <span
+                                                v-if="product.stockQuantity > 0"
+                                                class=""
+                                                >Dostupno:
+                                                <span class="font-bold text-base">{{
+                                                    formatProductStockQuantity(
+                                                        product.stockQuantity,
+                                                    )
+                                                }}</span>
+                                            </span>
+                                            <span v-else> Nedostupno </span>
                                         </span>
-                                        <span v-else> Nedostupno </span>
-                                    </span>
+                                    </div>
                                 </div>
                             </template>
                         </Card>

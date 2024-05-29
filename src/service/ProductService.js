@@ -3,50 +3,15 @@ import axios from 'axios';
 export default class ProductService {
     static apiResourceEndpoint = '/api/product';
 
-    // get all related product data
-
-    static async getDetails(id) {
-        try {
-            const pictures = await this.getProductPictures(id);
-            const specifications =
-                await this.getSpecificationAttributeForProduct(id);
-            const carTypes = await axios.get(this.apiResourceEndpoint + '/getCarTypesForProduct/' + id)
-            const oemCodes = await axios.get(this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id)
- 
-            return {
-                data: {
-                    oemCodes: oemCodes.data,
-                    carTypes: carTypes.data,
-                    pictures: pictures.data,
-                    specifications: specifications.data,
-                },
-            };
-        } catch (error) {
-            return { data: null, error };
-        }
-    }
-
-    static async getProductById(id) {
-        return axios.get(
-            this.apiResourceEndpoint + '/getProductById/' + id,
-        );
-    }
-
     // get
 
-    static async getProductPictures(id) {
+    static async getPictures(id) {
         return axios.get(
             this.apiResourceEndpoint + '/getProductPictures/' + id,
         );
     }
 
-    static async getOEMCodeForProduct(id) {
-        return axios.get(
-            this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id,
-        );
-    }
-
-    static async getSpecificationAttributeForProduct(id) {
+    static async getSpecifications(id) {
         return axios.get(
             this.apiResourceEndpoint +
                 '/getSpecificationAttributeForProduct/' +
@@ -54,7 +19,14 @@ export default class ProductService {
         );
     }
 
-    static async getCarTypesForProduct(id) {
+    static async getOEMCodes(id) {
+        return axios.get(
+            this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id,
+        );
+    }
+
+
+    static async getCarTypes(id) {
         return axios.get(
             this.apiResourceEndpoint + '/getCarTypesForProduct/' + id,
         );
