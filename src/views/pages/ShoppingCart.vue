@@ -1,6 +1,7 @@
 <script>
 // lib
 import slug from 'slug';
+import camelcaseKeys from 'camelcase-keys';
 
 // utils
 import {
@@ -20,6 +21,9 @@ import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
 import { useUserStore } from '@/store/userStore.js';
 
+// services
+import UserService from '../../service/UserService.js';
+
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
 
@@ -37,6 +41,10 @@ export default {
             },
 
             shoppingNote: '',
+
+            tableData: {
+                delivery: null,
+            },
         };
     },
     computed: {
@@ -78,6 +86,25 @@ export default {
         },
     },
 
+    mounted() {
+        UserService.getCurrentUserData()
+            .then((response) => {
+                const data = camelcaseKeys(response.data);
+
+                this.tableData.delivery = [
+                    {
+                        name: 'Korisnik',
+                        value: `${data.name} ${data.lastName}`,
+                    },
+                    { name: 'Grad', value: data.city },
+                    { name: 'Država', value: data.country },
+                    { name: 'Adresa', value: data.address },
+                    { name: 'Način plaćanja', value: data.paymentMethod },
+                ];
+            })
+            .catch((err) => console.error(err));
+    },
+
     methods: {
         calcPrice(price, quantity) {
             return `${Number(quantity * price).toFixed(2)}`;
@@ -106,7 +133,7 @@ export default {
 
         handleFinishOrderClick() {
             this.$router.push('/hvala');
-            this.shoppingCartStore.clear()
+            this.shoppingCartStore.clear();
         },
 
         handleProductTableItemClick(product) {
@@ -232,6 +259,39 @@ export default {
                     }"
                 >
                     <Column header="Ukupna narudžba">
+                        <template #body="{ data }">
+                            <div
+                                class="flex justify-content-between"
+                                :class="
+                                    data.name === 'Sveukupno' ? 'font-bold' : ''
+                                "
+                            >
+                                <span>{{ data.name }}</span>
+                                <span class="text-right"
+                                    >{{ data.value }}
+                                </span>
+                            </div>
+                        </template>
+                    </Column>
+                </DataTable>
+
+                <DataTable
+                    v-if="
+                        shoppingCartStore.cart &&
+                        shoppingCartStore.cart.length &&
+                        tableData.delivery
+                    "
+                    class="mt-4"
+                    :value="tableData.delivery"
+                    :pt="{
+                        column: {
+                            headerCell: {
+                                class: 'bg-transparent',
+                            },
+                        },
+                    }"
+                >
+                    <Column header="Dostava">
                         <template #body="{ data }">
                             <div
                                 class="flex justify-content-between"
