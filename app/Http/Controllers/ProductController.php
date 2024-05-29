@@ -194,22 +194,24 @@ class ProductController extends BaseController
                         $product->Price * ($discountPercentage / 100);
 
                     $product->PriceWithDiscount = round(
-                        $product->PriceWithDiscount,
+                        abs($product->PriceWithDiscount),
                         2
                     );
 
                     $product->PriceString = number_format(
-                        $product->Price,
+                        abs($product->Price),
                         2,
                         ',',
                         '.'
                     );
                     $product->PriceWithDiscountString = number_format(
-                        $product->PriceWithDiscount,
+                        abs($product->PriceWithDiscount),
                         2,
                         ',',
                         '.'
                     );
+
+                    $product->Price = abs($product->Price);
 
                     return $product;
                 })
