@@ -36,23 +36,6 @@ export default {
         <Toast></Toast>
         <Header />
 
-        <div
-            v-if="!this.isHomePageMounted"
-            class="mt-3 flex justify-content-between align-items-center"
-        >
-            <Breadcrumbs />
-            <div
-                v-if="this.UIStore.isDataLoading"
-                class="flex align-items-center column-gap-2"
-            >
-                <ProgressSpinner
-                    class="w-2rem h-3rem text-400"
-                    strokeWidth="3"
-                />
-                učitavanje podataka...
-            </div>
-        </div>
-
         <router-view></router-view>
     </div>
 </template>

@@ -17,7 +17,6 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { mapStores } from 'pinia';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
-import { useResultsStore } from '@/store/resultsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
 import { useUserStore } from '@/store/userStore.js';
 
@@ -36,13 +35,14 @@ export default {
             fees: {
                 taxPercentage: 25,
             },
+
+            shoppingNote: '',
         };
     },
     computed: {
         ...mapStores(
             useShoppingCartStore,
             useBreadcrumbsStore,
-            useResultsStore,
             useUserStore,
             useUIStore,
         ),
@@ -87,8 +87,8 @@ export default {
             if (product.quantity > product.stockQuantity) {
                 this.$toast.add({
                     severity: 'warn',
-                    summary: 'Količina proizvoda:',
-                    detail: 'Nema dovoljno na stanju.',
+                    summary: 'Količina proizvoda',
+                    detail: 'Nema dovoljno na stanju',
                     life: 3000,
                 });
 
@@ -106,20 +106,36 @@ export default {
 
         handleFinishOrderClick() {
             this.$router.push('/hvala');
+            this.shoppingCartStore.clear()
         },
 
         handleProductTableItemClick(product) {
             const productSlug = slug(product.name, { lower: true });
 
-            // this.UIStore.setIsProductViewedFromCart(true);
-            this.resultsStore.setProduct(product);
-            this.$router.push(`/${productSlug}`);
+            this.$router.push({
+                path: `/${productSlug}`,
+                query: { id: product.id },
+            });
         },
     },
 };
 </script>
 
 <template>
+    <div class="mt-3 flex justify-content-between align-items-center">
+        <Breadcrumbs
+            page="shoppingCart"
+            :crumbs="this.breadcrumbsStore.current"
+        />
+        <div
+            v-if="this.UIStore.isDataLoading"
+            class="flex align-items-center column-gap-2"
+        >
+            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
+            učitavanje podataka...
+        </div>
+    </div>
+
     <div
         class="grid grid-nogutter justify-content-between bg-white border-round p-5 border-1 border-100"
     >
@@ -142,7 +158,7 @@ export default {
                 <Column field="image" header="Slika">
                     <template #body="{ data }">
                         <img
-                            :src="data.pictureUrl"
+                            :src="data.picture"
                             class="table-image border-round cursor-pointer"
                             @click="handleProductTableItemClick(data)"
                         />
@@ -231,6 +247,15 @@ export default {
                         </template>
                     </Column>
                 </DataTable>
+
+                <Textarea
+                    class="w-full mt-3"
+                    v-model="shoppingNote"
+                    rows="5"
+                    cols="30"
+                    placeholder="Napomena.."
+                />
+
                 <Button
                     class="button--no-shadow w-full mt-3"
                     label="Završi narudžbu"

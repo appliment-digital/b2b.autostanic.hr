@@ -5,6 +5,32 @@ export default class ProductService {
 
     // get
 
+    // static async getDetails(id) {
+    //     try {
+    //         const pictures = await this.getPictures(id);
+    //         const specifications = await this.getSpecifications(id);
+    //         const oemCodes = await this.getOEMCodes(id);
+    //         const carTypes = await this.getCarTypes(id);
+
+    //         return {
+    //             data: {
+    //                 pictures: pictures.data.url550,
+    //                 specifications: specifications.data,
+    //                 oemCodes: oemCodes.data,
+    //                 carTypes: carTypes.data,
+    //             },
+    //         };
+    //     } catch (error) {
+    //         return {
+    //             error,
+    //         };
+    //     }
+    // }
+
+    static async getProductById(id) {
+        return axios.get(this.apiResourceEndpoint + '/getProductById/' + id);
+    }
+
     static async getPictures(id) {
         return axios.get(
             this.apiResourceEndpoint + '/getProductPictures/' + id,
@@ -24,7 +50,6 @@ export default class ProductService {
             this.apiResourceEndpoint + '/getOEMCodeForProduct/' + id,
         );
     }
-
 
     static async getCarTypes(id) {
         return axios.get(

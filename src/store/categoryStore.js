@@ -5,7 +5,7 @@ import { defineStore } from 'pinia';
 import slug from 'slug';
 
 // utils
-import { setSlugCharMap, session } from '@/utils';
+import { setSlugCharMap, session, local } from '@/utils';
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
@@ -13,65 +13,43 @@ setSlugCharMap(slug);
 export const useCategoryStore = defineStore('category', {
     state: () => {
         return {
-            categoryHistory:
-                JSON.parse(sessionStorage.getItem('category-history')) || [],
-
             store: {
-                mainCategories: session.load('category-store')?.mainCategories || null,
-                selectedCategory: session.load('category-store')?.selectedCategory || null,
+                mainCategories:
+                    session.load('category-store')?.mainCategories || null,
+                selectedCategory:
+                    session.load('category-store')?.selectedCategory || null,
+
+                local: {
+                    history: local.load('category-store')?.history || [],
+                },
             },
         };
     },
     getters: {
         history: (state) => {
-            if (state.categoryHistory.length) {
-                return state.categoryHistory;
-            } else {
-                return JSON.parse(sessionStorage.getItem('category-history'));
-            }
+            return state.store.local.history;
         },
         mainCategories: (state) => {
-            if (state.store.mainCategories) {
-                return state.store.mainCategories
-            } else {
-                return session.load('category-store')?.mainCategories
-            }
+            return state.store.mainCategories;
         },
         selectedCategory: (state) => {
-            if (state.store.selectedCategory) {
-                return state.store.selectedCategory
-            } else {
-                return session.load('category-store')?.selectedCategory
-            }
-        }
+            return state.store.selectedCategory;
+        },
     },
     actions: {
-        // not using
-        clearHistory() {
-            this.categoryHistory = [];
-
-            sessionStorage.setItem(
-                'category-history',
-                JSON.stringify(this.categoryHistory),
-            );
-        },
         addHistory(category) {
-            const entry = this.categoryHistory.find(
+            const entry = this.store.local.history.find(
                 (entry) => entry.id == category.id,
             );
 
             if (entry) return;
 
-            this.categoryHistory.push({
+            this.store.local.history.push({
                 id: category.id,
-                name: category.name,
-                url: slug(category.name, { lower: true }),
+                url: slug(category.name),
             });
 
-            sessionStorage.setItem(
-                'category-history',
-                JSON.stringify(this.categoryHistory),
-            );
+            local.save('category-store', this.store.local);
         },
         addMainCategories(categories) {
             this.store.mainCategories = categories;
@@ -79,9 +57,9 @@ export const useCategoryStore = defineStore('category', {
             session.save('category-store', this.store);
         },
         setSelectedCategory(category) {
-            this.store.selectedCategory = category
+            this.store.selectedCategory = category;
 
             session.save('category-store', this.store);
-        }
+        },
     },
 });

@@ -69,6 +69,15 @@ export const session = {
     },
 };
 
+export const local = {
+    save: (key, data) => {
+        localStorage.setItem(key, JSON.stringify(data));
+    },
+    load: (key) => {
+        return JSON.parse(localStorage.getItem(key));
+    },
+};
+
 export const getLastUrlPart = (url) => {
     return url
         .slice(1)
@@ -82,8 +91,6 @@ export const calcProductPrice = (price, discountPercentage) => {
     
     price = Number(price);
     discountPercentage = Number(discountPercentage);
-
-    console.log({ price, discountPercentage });
 
     const discount = price * (discountPercentage / 100);
     const finalPrice = price - discount;

@@ -1,100 +1,46 @@
 import { defineStore } from 'pinia';
 
+// utils
+import { local } from '@/utils';
+
 export const useUserStore = defineStore('user', {
     state: () => {
         return {
-            count: 0,
-            user: null,
-            isLoggedIn: false,
-            robohashName: '',
-            isAdmin: false,
+            store: {
+                local: {
+                    user: local.load('user-store')?.user || {},
+                },
+            },
         };
     },
     getters: {
-        counter: (state) => state.count,
         initials: (state) => {
-            if (state.user) {
-                const { name, last_name: lastName } = state.user;
-                return `${name.charAt(0)}${lastName.charAt(0)}`;
-            }
+            return state.store.local.user.initials;
+        },
 
-            const storedInitials = localStorage.getItem('userInitials');
-            if (storedInitials) {
-                return storedInitials;
+        role: (state) => {
+            if (state.store.local.user.role) {
+                return state.store.local.user.role[0].name;
             }
         },
+
         fullName: (state) => {
-            if (state.user) {
-                const { name, last_name: lastName } = state.user;
-                return `${name} ${lastName}`;
-            }
+            return state.store.local.user.fullName;
+        },
 
-            const storedFullName = localStorage.getItem('userFullName');
-            if (storedFullName) {
-                return storedFullName;
-            }
-        },
-        isUserAdmin: (state) => {
-            if (state.isAdmin) {
-                return state.isAdmin;
-            } else {
-                return JSON.parse(sessionStorage.getItem('user-isAdmin'));
-            }
-        },
         discount: (state) => {
-            if (state.user && state.user.discount) {
-                return state.user.discount;
-            } else {
-                const discount = JSON.parse(
-                    localStorage.getItem('userData'),
-                ).discount;
-                return discount;
-            }
+            return state.store.local.user.discount;
         },
     },
     actions: {
-        addUser(data) {
-            this.user = data;
+        add(user) {
+            const { name, last_name: lastName } = user;
 
-            localStorage.setItem('userData', JSON.stringify(data));
+            this.store.local.user = user;
+            this.store.local.user.initials = `${name.charAt(0)}${lastName.charAt(0)}`;
+            this.store.local.user.fullName = `${name} ${lastName}`;
 
-            this.setIsAdmin(false);
-
-            if (
-                data.role &&
-                data.role.length &&
-                data.role[0].name === 'admin'
-            ) {
-                this.setIsAdmin(true);
-            }
-
-            // add initials to the local storage
-            const { name, last_name: lastName } = data;
-
-            localStorage.setItem(
-                'userInitials',
-                `${name.charAt(0)}${lastName.charAt(0)}`,
-            );
-
-            localStorage.setItem('userFullName', `${name} ${lastName}`);
-        },
-        login() {
-            this.isLoggedIn = true;
-            localStorage.setItem('isLoggedIn', true);
-        },
-        logout() {
-            this.isLoggedIn = false;
-            this.setIsAdmin(false);
-
-            localStorage.setItem('isLoggedIn', false);
-        },
-        robohash(name) {
-            this.robohashName = name;
-        },
-        setIsAdmin(val) {
-            this.isAdmin = val;
-
-            sessionStorage.setItem('user-isAdmin', val);
+            local.save('user-store', this.store.local);
         },
     },
 });

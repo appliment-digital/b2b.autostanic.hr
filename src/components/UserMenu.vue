@@ -26,7 +26,6 @@ export default {
 
         logout() {
             userService.logout().then(() => this.$router.push('/auth/login'));
-            this.userStore.logout();
         },
     },
 };
@@ -70,7 +69,7 @@ export default {
                     </span>
                 </li>
                 <li
-                    v-if="userStore.isUserAdmin"
+                    v-if="userStore.role === 'admin'"
                     role="menuitem"
                     class="m-0 mb-3"
                 >
