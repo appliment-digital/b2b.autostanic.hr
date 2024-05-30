@@ -85,7 +85,6 @@ export default {
             ];
         },
     },
-
     mounted() {
         UserService.getCurrentUserData()
             .then((response) => {
@@ -104,7 +103,6 @@ export default {
             })
             .catch((err) => console.error(err));
     },
-
     methods: {
         calcPrice(price, quantity) {
             return `${Number(quantity * price).toFixed(2)}`;
@@ -115,7 +113,7 @@ export default {
                 this.$toast.add({
                     severity: 'warn',
                     summary: 'Količina proizvoda',
-                    detail: 'Nema dovoljno na stanju',
+                    detail: 'Nema dovoljno na stanju.',
                     life: 3000,
                 });
 
@@ -149,20 +147,6 @@ export default {
 </script>
 
 <template>
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs
-            page="shoppingCart"
-            :crumbs="this.breadcrumbsStore.current"
-        />
-        <div
-            v-if="this.UIStore.isDataLoading"
-            class="flex align-items-center column-gap-2"
-        >
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
     <div
         class="grid grid-nogutter justify-content-between bg-white border-round p-5 border-1 border-100"
     >

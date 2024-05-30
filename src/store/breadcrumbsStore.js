@@ -1,8 +1,8 @@
 // lib
 import { defineStore } from 'pinia';
 
-// utils
-import { session, local } from '@/utils';
+// storage
+import { session, local } from '@/utils/browser-storage';
 
 export const useBreadcrumbsStore = defineStore('breadcrumbs', {
     state: () => {

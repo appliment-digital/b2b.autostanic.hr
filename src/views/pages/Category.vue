@@ -61,11 +61,6 @@ export default {
     mounted() {
         this.handleNavigation();
     },
-
-    updated() {
-
-    },
-
     methods: {
         /**
          * Handle navigating categories.
@@ -180,17 +175,6 @@ export default {
 </script>
 
 <template>
-    <div class="mt-3 flex justify-content-between align-items-center">
-        <Breadcrumbs />
-        <div
-            v-if="this.UIStore.isDataLoading"
-            class="flex align-items-center column-gap-2"
-        >
-            <ProgressSpinner class="w-2rem h-3rem text-400" strokeWidth="3" />
-            učitavanje podataka...
-        </div>
-    </div>
-
     <div v-if="subcategories && !products" class="grid">
         <div
             v-for="subcategory in subcategories"
