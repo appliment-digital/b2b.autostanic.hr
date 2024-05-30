@@ -81,8 +81,6 @@ export default {
                 .then((response) => {
                     if (response.data) {
                         this.product = camelcaseKeys(response.data);
-
-                        this.UIStore.setIsDataLoading(false);
                     }
                 })
                 .catch((err) => console.error(err));
