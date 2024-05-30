@@ -12,94 +12,66 @@ import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 setSlugCharMap(slug);
 
 export default {
-    props: ['page', 'product', 'crumbs'],
     data() {
         return {
             home: {
-                icon: 'pi pi-home',
+                label: 'Naslovna',
                 route: '/',
             },
 
             items: [],
         };
     },
-    watch: {
-        '$route.path': function (newPath) {
-            if (this.page === 'product') return;
-
-            this.makeBreadcrumbFromUrl(newPath);
-        },
-
-        items: function () {
-            this.breadcrumbsStore.set(this.items);
-        },
-    },
     computed: {
         ...mapStores(useBreadcrumbsStore),
     },
-
+    watch: {
+        '$route.path': function (newPath) {
+            this.setCrumbs(newPath);
+        }
+    },
     mounted() {
-        switch (this.page) {
-            case 'product':
-                this.setProductCrumbs();
-                break;
-
-            case 'shoppingCart':
-                this.setShoppingCartCrumbs();
-                break;
-            default:
-                this.makeBreadcrumbFromUrl(this.$route.fullPath);
-                break;
-        }
+        this.setCrumbs(this.$route.path);
     },
-    unmounted() {
-        if (this.$route.path === '/') {
-            return this.breadcrumbsStore.set([]);
-        }
-
-        if (this.page === 'shoppingCart') {
-            this.items.pop();
-        }
-    },
-
     methods: {
-        setProductCrumbs() {
-            const history = this.breadcrumbsStore.products[this.product.id];
-
-            if (history) {
-                this.items = history
+        setCrumbs(path) {
+            if (this.$route.params['product']) {
+                this.makeProductCrumbs();
             } else {
-                this.items = this.crumbs;
+                this.makeCrumbs(path);
             }
 
-            const hasProductCrumb = this.items.find((entry) => {
+            this.breadcrumbsStore.set(this.items);
+        },
+
+        makeProductCrumbs() {
+            const { id } = this.$route.query;
+
+            const product = {
+                id,
+                name: this.$route.params.product,
+                breadcrumbs: this.breadcrumbsStore.products[id],
+            };
+
+            if (product.breadcrumbs) {
+                this.items = product.breadcrumbs;
+            } else {
+                this.items = this.breadcrumbsStore.current;
+            }
+
+            const isProductIconInBreadcrumbs = this.items.find((entry) => {
                 return entry.icon === 'pi pi-car';
             });
 
-            if (!hasProductCrumb) {
+            if (!isProductIconInBreadcrumbs) {
                 this.items.push({
                     icon: 'pi pi-car',
-                    route: `/${slug(this.product.name)}?id=${this.product.id}`,
+                    route: `/${slug(product.name)}?id=${product.id}`,
                 });
             }
         },
 
-        setShoppingCartCrumbs() {
-            this.items = this.crumbs;
-
-            const hasShoppingCartCrumb = this.items.find((entry) => {
-                return entry.icon === 'pi pi-shopping-cart';
-            });
-
-            if (!hasShoppingCartCrumb) {
-                this.items.push({
-                    icon: 'pi pi-shopping-cart',
-                    route: '/košarica',
-                });
-            }
-        },
-
-        makeBreadcrumbFromUrl(path) {
+        makeCrumbs(path) {
             const fullPath = decodeURIComponent(path);
 
             const parts = fullPath.slice(1).split('/');
@@ -111,6 +83,7 @@ export default {
                 return {
                     label: makeBreadcrumb(part),
                     route: `${url}`,
+                    icon: part === 'košarica' && 'pi pi-shopping-cart'
                 };
             });
         },
@@ -118,9 +91,9 @@ export default {
         handleBreadcrumbsNavigate(e, item, navigate) {
             e.preventDefault();
 
-            if (item.route === '/košarica') return
-            else navigate()
-        }
+            if (item.route === '/košarica') return;
+            else navigate();
+        },
     },
 };
 </script>
@@ -134,10 +107,18 @@ export default {
                 :to="item.route"
                 custom
             >
-                <a :href="href" v-bind="props.action" @click="(e) => handleBreadcrumbsNavigate(e, item, navigate)">
+                <a
+                    :href="href"
+                    v-bind="props.action"
+                    @click="(e) => handleBreadcrumbsNavigate(e, item, navigate)"
+                >
                     <span :class="[item.icon, 'text-800']" />
                     <span
-                        :class="item.label === 'Košarica' && 'ml-2'"
+                        :class="
+                            item.label === 'Košarica'
+                                ? 'ml-2'
+                                : ''
+                        "
                         class="text-800"
                         >{{ item.label }}</span
                     >

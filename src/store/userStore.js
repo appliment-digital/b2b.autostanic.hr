@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
-// utils
-import { local } from '@/utils';
+// storage
+import { session, local } from '@/utils/browser-storage';
 
 export const useUserStore = defineStore('user', {
     state: () => {

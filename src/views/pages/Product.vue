@@ -69,57 +69,38 @@ export default {
             }
         },
     },
-
     beforeMount() {
         this.loadProduct(this.$route.query.id);
         this.loadProductDetails(this.$route.query.id);
     },
-
     methods: {
         loadProduct(id) {
+            this.UIStore.setIsDataLoading(true);
+
             ProductService.getProductById(id)
                 .then((response) => {
                     if (response.data) {
                         this.product = camelcaseKeys(response.data);
+
+                        this.UIStore.setIsDataLoading(false);
                     }
                 })
                 .catch((err) => console.error(err));
         },
 
         loadProductDetails(id) {
-            // get pictures
-            ProductService.getPictures(id)
-                .then((response) => {
-                    if (response.data && response.data.url550) {
-                        this.details.pictures = response.data.url550;
-                    }
-                })
-                .catch((err) => console.error(err));
+            this.UIStore.setIsDataLoading(true);
 
-            // get specifications
-            ProductService.getSpecifications(id)
-                .then((response) => {
-                    if (response.data) {
-                        this.details.specifications = response.data;
-                    }
-                })
-                .catch((err) => console.error(err));
+            ProductService.getDetails(id)
+                .then((res) => {
+                    this.details = {
+                        pictures: res.data.pictures,
+                        specifications: res.data.specifications,
+                        oemCodes: res.data.oemCodes,
+                        carTypes: res.data.carTypes,
+                    };
 
-            // get oem codes
-            ProductService.getOEMCodes(id)
-                .then((response) => {
-                    if (response.data) {
-                        this.details.oemCodes = response.data;
-                    }
-                })
-                .catch((err) => console.error(err));
-
-            // get car types
-            ProductService.getCarTypes(id)
-                .then((response) => {
-                    if (response) {
-                        this.details.carTypes = response.data;
-                    }
+                    this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
         },
@@ -170,24 +151,6 @@ export default {
 
 <template>
     <section v-if="product && details">
-        <div class="mt-3 flex justify-content-between align-items-center">
-            <Breadcrumbs
-                page="product"
-                :product="product"
-                :crumbs="this.breadcrumbsStore.current"
-            />
-            <div
-                v-if="this.UIStore.isDataLoading"
-                class="flex align-items-center column-gap-2"
-            >
-                <ProgressSpinner
-                    class="w-2rem h-3rem text-400"
-                    strokeWidth="3"
-                />
-                učitavanje podataka...
-            </div>
-        </div>
-
         <!-- Product: Image & Description -->
         <div class="grid column-gap-6 justify-content-between pb-8">
             <div class="col-12 md:col-5 md:h-auto">

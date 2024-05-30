@@ -1,19 +1,21 @@
 // lib
 import { defineStore } from 'pinia';
 
-// utils
-import { session } from '@/utils';
+// storage
+import { session, local } from '@/utils/browser-storage';
 
 export const useUIStore = defineStore('UI', {
     state: () => ({
         store: {
-            isDataLoading: session.load('ui-store')?.isDataLoading,
+            session: {
+                isDataLoading: session.load('ui-store')?.isDataLoading,
+            }
         },
     }),
     getters: {
         isDataLoading: (state) => {
-            if (state.store.isDataLoading !== undefined) {
-                return state.store.isDataLoading;
+            if (state.store.session.isDataLoading !== undefined) {
+                return state.store.session.isDataLoading;
             } else {
                 return session.load('ui-store')?.isDataLoading;
             }
@@ -21,9 +23,8 @@ export const useUIStore = defineStore('UI', {
     },
     actions: {
         setIsDataLoading(val) {
-            this.store.isDataLoading = val;
-
-            session.save('ui-store', this.store);
+            this.store.session.isDataLoading = val;
+            session.save('ui-store', this.store.session);
         },
     },
 });

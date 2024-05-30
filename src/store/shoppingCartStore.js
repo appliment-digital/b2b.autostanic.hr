@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
-// utils
-import { session, local } from '@/utils';
+// storage
+import { session, local } from '@/utils/browser-storage';
 
 export const useShoppingCartStore = defineStore('shoppingCart', {
     state: () => {
@@ -63,7 +63,6 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
         },
 
         clear() {
-            console.log('clearing cart...');
             this.store.local.cart = [];
             local.save('shopping-cart-store', this.store.local);
         },

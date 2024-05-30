@@ -12,6 +12,11 @@ export default {
         Header,
         Breadcrumbs,
     },
+    data() {
+        return {
+            isHomePageMounted: null,
+        };
+    },
     watch: {
         '$route.path': function (newPath) {
             this.isHomePageMounted = newPath === '/' ? true : false;
@@ -19,11 +24,6 @@ export default {
     },
     computed: {
         ...mapStores(useUIStore),
-    },
-    data() {
-        return {
-            isHomePageMounted: null,
-        };
     },
     mounted() {
         this.isHomePageMounted = this.$route.path === '/' ? true : false;
@@ -35,6 +35,23 @@ export default {
     <div class="layout mx-auto mb-8 mt-4 sm:p-2 md:p-0">
         <Toast></Toast>
         <Header />
+
+        <div
+            v-if="!this.isHomePageMounted"
+            class="mt-3 flex justify-content-between align-items-center"
+        >
+            <Breadcrumbs />
+            <div
+                v-if="this.UIStore.isDataLoading"
+                class="flex align-items-center column-gap-2"
+            >
+                <ProgressSpinner
+                    class="w-2rem h-3rem text-400"
+                    strokeWidth="3"
+                />
+                učitavanje podataka...
+            </div>
+        </div>
 
         <router-view></router-view>
     </div>
