@@ -57,9 +57,14 @@ class User extends Authenticatable
         $user->city = $data['city'] ?? null;
         $user->state_province = $data['state_province'] ?? null;
         $user->country = $data['country'] ? $data['country']['NAME'] : null;
+        $user->country_bitrix_id = $data['country']
+            ? $data['country']['ID']
+            : null;
 
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];
+            $user->payment_method_e_racuni =
+                $data['payment_method']['eRacuniId'];
         }
 
         if (!empty($data['discount_type'])) {
@@ -91,9 +96,14 @@ class User extends Authenticatable
 
         if ($data['country']['NAME']) {
             $user->country = $data['country']['NAME'];
+            $user->country_bitrix_id = $data['country']
+                ? $data['country']['ID']
+                : null;
         }
         if (!empty($data['payment_method'])) {
             $user->payment_method = $data['payment_method']['name'];
+            $user->payment_method_e_racuni =
+                $data['payment_method']['eRacuniId'];
         }
         if (!empty($data['discount_type'])) {
             $user->discount_type_id = $data['discount_type']['id'];

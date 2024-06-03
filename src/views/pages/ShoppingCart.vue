@@ -23,7 +23,9 @@ import { useUserStore } from '@/store/userStore.js';
 
 // services
 import UserService from '../../service/UserService.js';
+import OrderService from '@/service/OrderService.js';
 
+const orderService = new OrderService();
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
 
@@ -45,6 +47,8 @@ export default {
             tableData: {
                 delivery: null,
             },
+
+            orderTotal: 0,
         };
     },
     computed: {
@@ -64,6 +68,8 @@ export default {
 
             const tax = discountedAmount * 0.25;
             const totalAmount = discountedAmount + tax;
+
+            this.orderTotal = totalAmount;
 
             return [
                 {
@@ -130,8 +136,17 @@ export default {
         },
 
         handleFinishOrderClick() {
-            this.$router.push('/hvala');
-            this.shoppingCartStore.clear();
+            orderService
+                .createOrder({
+                    orderTotal: this.orderTotal,
+                    items: this.shoppingCartStore.cart,
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    // this.$router.push('/hvala');
+                    // //prazni local storage
+                    // this.shoppingCartStore.clear();
+                });
         },
 
         handleProductTableItemClick(product) {
