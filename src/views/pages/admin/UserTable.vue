@@ -9,12 +9,10 @@ import Sidebar from '@/components/admin/Sidebar.vue';
 import UserService from '@/service/UserService.js';
 import DiscountTypeService from '@/service/DiscountTypeService.js';
 import BitrixService from '@/service/BitrixService.js';
-import OrderService from '@/service/OrderService.js';
 
 const userService = new UserService();
 const discountTypeService = new DiscountTypeService();
 const bitrixService = new BitrixService();
-const orderService = new OrderService();
 
 export default {
     components: {
@@ -31,7 +29,6 @@ export default {
         this.getRoles();
         this.getDiscountTypes();
         this.getCountriesList();
-        this.test();
     },
     data() {
         return {
@@ -45,57 +42,64 @@ export default {
             paymentMethods: [
                 {
                     id: 1,
+                    eRacuniId: 'Unknown',
                     name: 'Nepoznato',
                 },
                 {
                     id: 2,
+                    eRacuniId: 'BankTransfer',
                     name: 'Transakcijski račun',
                 },
                 {
                     id: 3,
+                    eRacuniId: 'Cash',
                     name: 'Gotovina (novčanice)',
                 },
                 {
                     id: 4,
+                    eRacuniId: 'EurocardMastercard',
                     name: 'Kartica - MasterCard',
                 },
                 {
                     id: 5,
+                    eRacuniId: 'Visa',
                     name: 'Kartica - Visa',
                 },
                 {
                     id: 6,
+                    eRacuniId: 'Amex',
                     name: 'Kartica - Amex',
                 },
                 {
                     id: 7,
+                    eRacuniId: 'Diners',
                     name: 'Kartica - Diners',
                 },
                 {
                     id: 8,
+                    eRacuniId: 'Maestro',
                     name: 'Kartica - Maestro',
                 },
                 {
                     id: 9,
+                    eRacuniId: 'CreditCard',
                     name: 'Kartica',
                 },
                 {
                     id: 10,
+                    eRacuniId: 'CashOnDeliveryCourierService',
                     name: 'Plaćanje pouzećem (kurirska služba)',
                 },
                 {
                     id: 11,
+                    eRacuniId: 'Compensation',
                     name: 'Kompenzacija',
                 },
             ],
             countries: [],
         };
     },
-    watch: {
-        user() {
-            console.log(this.user);
-        },
-    },
+    watch: {},
     computed: {
         showSaveButton() {
             if (
@@ -112,11 +116,6 @@ export default {
         },
     },
     methods: {
-        test() {
-            orderService.createOrder().then((response) => {
-                console.log(response.data);
-            });
-        },
         getCountriesList() {
             bitrixService.getCountriesList().then((response) => {
                 this.countries = response.data;
@@ -136,6 +135,10 @@ export default {
                     user.roles.forEach((v) => delete v.pivot);
                     user.roles = user.roles[0];
                 }
+                user.country = {
+                    ID: String(user.country_bitrix_id),
+                    NAME: user.country,
+                };
 
                 this.user = user;
             }
