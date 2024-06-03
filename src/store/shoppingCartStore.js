@@ -53,10 +53,32 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
             local.save('shopping-cart-store', this.store.local);
         },
 
-        delete(product) {
-            const filteredCart = this.store.local.cart.filter(
-                (entry) => entry.id !== product.id,
+        update(product, quantity) {
+            const entryId = this.store.local.cart.findIndex(
+                (entry) => entry.id == product.id,
             );
+
+            if (entryId != -1) {
+                // item exists in the cart
+                let newQuantity = Number(quantity)
+
+                if (newQuantity > product.stockQuantity) {
+                    newQuantity = Number(product.stockQuantity);
+                }
+
+                this.store.local.cart[entryId].quantity = newQuantity;
+            } 
+
+            local.save('shopping-cart-store', this.store.local);
+        },
+
+        delete(product) {
+            console.log('cart: deleting product');
+            const filteredCart = this.store.local.cart.filter(
+                (entry) => entry.id != product.id,
+            );
+
+            console.log('filtered cart..', { filteredCart });
 
             this.store.local.cart = filteredCart;
             local.save('shopping-cart-store', this.store.local);
