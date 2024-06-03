@@ -83,7 +83,6 @@ export default {
                 return {
                     label: makeBreadcrumb(part),
                     route: `${url}`,
-                    icon: part === 'košarica' && 'pi pi-shopping-cart'
                 };
             });
         },
@@ -114,11 +113,6 @@ export default {
                 >
                     <span :class="[item.icon, 'text-800']" />
                     <span
-                        :class="
-                            item.label === 'Košarica'
-                                ? 'ml-2'
-                                : ''
-                        "
                         class="text-800"
                         >{{ item.label }}</span
                     >

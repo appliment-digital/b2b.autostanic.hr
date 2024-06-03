@@ -39,14 +39,18 @@ export default {
                 carTypes: null,
             },
 
-            itemQuantity: '1',
+            itemQuantity: 1,
         };
     },
     watch: {
-        itemQuantity(newVal, oldVal) {
-            if (newVal < 1) {
-                this.itemQuantity = '1';
+        itemQuantity(newVal) {
+            const min = 1 
+
+            if (newVal <= min) {
+                this.itemQuantity = min;
             }
+
+            console.log('item quantity', this.itemQuantity);
         },
     },
     computed: {
@@ -81,6 +85,7 @@ export default {
                 .then((response) => {
                     if (response.data) {
                         this.product = camelcaseKeys(response.data);
+                        console.log('this.product', this.product);
                     }
                 })
                 .catch((err) => console.error(err));
@@ -107,7 +112,25 @@ export default {
             this.openCRMForm();
         },
 
+        handleModifyProductQuantity(modifier) {
+            if (modifier === 'increment') {
+                this.itemQuantity++;
+            }
+
+            if (modifier === 'decrement') {
+                this.itemQuantity--;
+            }
+        },
+
         handleAddProdcutToShoppingCart(product) {
+
+            if (this.isProductInShoppingCart) {
+                this.shoppingCartStore.update(product, this.itemQuantity)
+                return;
+            }
+
+            product.quantity = this.itemQuantity;
+
             const productDetails = {
                 ...product,
                 quantity: this.itemQuantity,
@@ -124,13 +147,29 @@ export default {
             this.$toast.add({
                 severity: 'success',
                 summary: 'Status',
-                detail: 'Proizvod dodan u košaricu!',
+                detail: `${this.isProductInShoppingCart ? 'Količina ažurirana!' : 'Proizvod dodan u košaricu!'} `,
                 life: 1000,
             });
         },
 
+        handleRemoveProductFromShoppingCart() {
+            this.shoppingCartStore.delete(this.product);
+        },
+
         handlePrice(price, discount) {
             return stringifyProductPrice(calcProductPrice(price, discount));
+        },
+
+        getProductQuantity() {
+            const product = this.shoppingCartStore.cart.find(
+                (entry) => entry.id === this.product.id,
+            );
+
+            if (product) {
+                return product.quantity;
+            }
+
+            return 0;
         },
 
         openCRMForm() {
@@ -192,21 +231,37 @@ export default {
                 <p class="mt-3" v-html="product.fullDescription" />
 
                 <!-- Stock -->
-                <span class="block mt-5"
-                    ><span
-                        class="font-bold"
-                        :class="
-                            product.stockQuantity == 0
-                                ? 'text-red-500'
-                                : 'text-green-500'
-                        "
-                        >{{ product.stockQuantity }}</span
+                <div class="mt-4" style="height: 66px">
+                    <span class="block"
+                        ><span
+                            class="font-bold"
+                            :class="
+                                product.stockQuantity == 0
+                                    ? 'text-red-500'
+                                    : 'text-green-500'
+                            "
+                            >{{ product.stockQuantity }}</span
+                        >
+                        na stanju.</span
                     >
-                    na stanju.</span
-                >
+                    <span class="mt-2 flex align-items-center"
+                        ><i class="pi pi-truck text-blue-500"></i>
+                        <span class="ml-2">Besplatna dostava.</span></span
+                    >
+                    <div class="mt-2" v-if="isProductInShoppingCart">
+                        <i class="pi pi-shopping-cart text-blue-500"></i>
+                        <span class="ml-2"
+                            >Proizvod 
+                            (<span class="text-blue-500 font-bold">{{
+                                getProductQuantity()
+                            }}</span
+                            >)<span class="font-bold"> u košarici.</span></span
+                        >
+                    </div>
+                </div>
 
                 <div
-                    class="mt-5 flex flex-column row-gap-1 justify-content-between"
+                    class="mt-4 flex flex-column row-gap-1 justify-content-between"
                 >
                     <div>
                         <span class="mb-0 mr-2 mb-2 text-lg"
@@ -227,6 +282,7 @@ export default {
                 </div>
 
                 <div
+                    v-if="!UIStore.isDataLoading"
                     class="mt-5 bg-white-alpha-10 border-1 border-100 py-2 border-noround border-left-none border-right-none"
                     :class="
                         product.stockQuantity > 0 &&
@@ -236,23 +292,29 @@ export default {
                     <div
                         class="w-full flex justify-content-between align-items-center"
                     >
-                        <div
-                            v-if="
-                                product.stockQuantity > 0 &&
-                                !isProductInShoppingCart
-                            "
-                        >
+                        <div v-if="product.stockQuantity >= 0">
                             <Button
                                 class="button--no-shadow mr-1"
                                 icon="pi pi-minus"
-                                severity="secondary"
-                                outlined
-                                @click="itemQuantity--"
-                            />
-                            <Button
-                                class="button--no-shadow mr-1"
                                 severity="primary"
-                                :label="itemQuantity"
+                                outlined
+                                @click="
+                                    handleModifyProductQuantity('decrement')
+                                "
+                            />
+                            <InputNumber
+                                class="mr-1"
+                                style="box-shadow: none"
+                                inputId="locale-german"
+                                locale="de-DE"
+                                v-model="itemQuantity"
+                                inputClass="font-bold"
+                                inputStyle="width: 60px; text-align: center; border: 1px solid #5297ff; box-shadow: none; background: transparent; color: #5297ff"
+                                :max="product.stockQuantity"
+                                :min="1"
+                                @update:modelValue="
+                                    handleModifyProductQuantity('input')
+                                "
                             />
                             <Button
                                 icon="pi pi-plus"
@@ -261,22 +323,33 @@ export default {
                                     itemQuantity >= product.stockQuantity
                                 "
                                 outlined
-                                severity="secondary"
-                                @click="itemQuantity++"
+                                severity="primary"
+                                @click="
+                                    handleModifyProductQuantity('increment')
+                                "
                             />
                             <Button
                                 class="button--no-shadow ml-1 text-sm"
-                                label="Dodaj u košaricu"
+                                :label="
+                                    isProductInShoppingCart
+                                        ? 'Ažuriraj košaricu'
+                                        : 'Dodaj u košaricu'
+                                "
                                 severity="primary"
                                 @click="handleAddProdcutToShoppingCart(product)"
                             />
-                        </div>
-                        <div v-if="isProductInShoppingCart">
-                            <i class="pi pi-shopping-cart text-blue-500"></i>
-                            <span class="ml-2"
-                                >Proizvod
-                                <span class="font-bold">u košarici</span></span
-                            >
+                            <Button
+                                v-if="
+                                    shoppingCartStore.cart.find(
+                                        (entry) => entry.id == product.id,
+                                    )
+                                "
+                                icon="pi pi-trash"
+                                class="button--no-shadow ml-1 text-sm"
+                                severity="primary"
+                                outlined
+                                @click="handleRemoveProductFromShoppingCart"
+                            />
                         </div>
                         <Button
                             class="button--no-shadow text-sm"
