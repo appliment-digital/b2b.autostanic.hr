@@ -110,6 +110,10 @@ export default {
             .catch((err) => console.error(err));
     },
     methods: {
+        calcPrice(price, quantity) {
+            return `${Number(quantity * price).toFixed(2)}`;
+        },
+
         handleNewProductQuantity(product) {
             if (product.quantity > product.stockQuantity) {
                 this.$toast.add({
@@ -121,6 +125,8 @@ export default {
 
                 product.quantity = product.stockQuantity;
             }
+
+            this.shoppingCartStore.updateQuantity(product);
         },
 
         handlePrice(price) {
@@ -153,6 +159,16 @@ export default {
                 query: { id: product.id },
             });
         },
+
+        handleProductName(name) {
+            const max = 60;
+
+            if (name.length > max) {
+                return name.substring(0, max) + ', ...';
+            }
+
+            return name;
+        },
     },
 };
 </script>
@@ -181,41 +197,38 @@ export default {
                     <template #body="{ data }">
                         <img
                             :src="data.picture"
+                            style="user-select: none;"
                             class="table-image border-round cursor-pointer"
                             @click="handleProductTableItemClick(data)"
                         />
                     </template>
                 </Column>
 
-                <Column field="name" header="Proizvod">
+                <Column field="name" header="Proizvod" style="max-width: 200px">
                     <template #body="{ data }">
                         <span
-                            class="cursor-pointer"
+                            class="cursor-pointer text-sm"
                             @click="handleProductTableItemClick(data)"
-                            >{{ data.name }}</span
+                            >{{ handleProductName(data.name) }}</span
                         >
                     </template>
                 </Column>
 
                 <Column field="price" header="Cijena" style="min-width: 100px">
                     <template #body="{ data }">
-                        <span
-                            >{{
-                                handlePrice(data.price)
-                            }}
-                            €</span
-                        >
+                        <span>{{ handlePrice(data.price) }} €</span>
                     </template>
                 </Column>
 
-
-                <Column header="Količina">
+                <Column header="Količina" id="xyz">
                     <template #body="{ data }">
                         <InputNumber
+                            showButtons
+                            :step="1"
                             inputId="locale-german"
                             locale="de-DE"
                             v-model="data.quantity"
-                            inputStyle="width: 60px; text-align: center;"
+                            inputStyle="width: 60px; text-align: center; box-shadow: none;"
                             @update:modelValue="handleNewProductQuantity(data)"
                             @keyup.enter="handleNewProductQuantity(data)"
                             min="1"
@@ -225,7 +238,7 @@ export default {
 
                 <Column header="Ukupno" style="min-width: 100px">
                     <template #body="{ data }">
-                        <span
+                        <span style="user-select: none;"
                             >{{
                                 handlePrice(data.price * data.quantity)
                             }}
@@ -233,7 +246,6 @@ export default {
                         >
                     </template>
                 </Column>
-
 
                 <Column header="Obriši">
                     <template #body="{ data }">
@@ -268,7 +280,7 @@ export default {
                 >
                     <Column>
                         <template #header>
-                            <i class="pi pi-wallet mr-2"></i>Ukupna narudžba 
+                            <i class="pi pi-wallet mr-2"></i>Ukupna narudžba
                         </template>
                         <template #body="{ data }">
                             <div
@@ -304,7 +316,8 @@ export default {
                 >
                     <Column>
                         <template #header>
-                            <i class="pi pi-truck mr-2"></i>Dostava <span class="ml-1 text-blue-500">(besplatna)</span>
+                            <i class="pi pi-truck mr-2"></i>Dostava
+                            <span class="ml-1 text-blue-500">(besplatna)</span>
                         </template>
                         <template #body="{ data }">
                             <div

@@ -70,10 +70,26 @@ export default {
                 if (product) return true;
             }
         },
+
+        availableItemQuantity() {
+            if (!this.isProductInShoppingCart) return;
+
+            const product = this.shoppingCartStore.cart.find(
+                (entry) => entry.id == this.product.id,
+            );
+
+            return Math.abs(
+                product.quantity - Number(this.product.stockQuantity),
+            );
+        },
     },
     beforeMount() {
         this.loadProduct(this.$route.query.id);
         this.loadProductDetails(this.$route.query.id);
+    },
+    updated() {
+        // console.log('this.availableQuantity', this.availableItemQuantity);
+        // console.log('this.itemQuantity', this.itemQuantity);
     },
     methods: {
         loadProduct(id) {
@@ -113,7 +129,7 @@ export default {
         handleAddProductToShoppingCart() {
             // update product cart quantity if product is already in the cart
             if (this.isProductInShoppingCart) {
-                this.shoppingCartStore.update(this.product, this.itemQuantity);
+                this.shoppingCartStore.addQuantity(this.product, this.itemQuantity);
 
                 this.$toast.add({
                     severity: 'success',
@@ -150,16 +166,16 @@ export default {
             });
         },
 
-        handleRemoveProductFromShoppingCart() {
-            this.$toast.add({
-                severity: 'info',
-                summary: 'Košarica',
-                detail: 'Proizvod uklonjen!',
-                life: 2000,
-            });
+        // handleRemoveProductFromShoppingCart() {
+        //     this.$toast.add({
+        //         severity: 'info',
+        //         summary: 'Košarica',
+        //         detail: 'Proizvod uklonjen!',
+        //         life: 2000,
+        //     });
 
-            this.shoppingCartStore.delete(this.product);
-        },
+        //     this.shoppingCartStore.delete(this.product);
+        // },
 
         handlePrice(price, discount) {
             return stringifyProductPrice(calcProductPrice(price, discount));
@@ -320,7 +336,7 @@ export default {
                                 icon="pi pi-plus"
                                 class="button--no-shadow"
                                 :disabled="
-                                    itemQuantity >= product.stockQuantity
+                                    itemQuantity >= availableItemQuantity
                                 "
                                 outlined
                                 severity="primary"
@@ -328,15 +344,11 @@ export default {
                             />
                             <Button
                                 class="button--no-shadow ml-1 text-sm"
-                                :label="
-                                    isProductInShoppingCart
-                                        ? 'Ažuriraj košaricu'
-                                        : 'Dodaj u košaricu'
-                                "
+                                label="Dodaj u košaricu"
                                 severity="primary"
                                 @click="handleAddProductToShoppingCart"
                             />
-                            <Button
+                            <!-- <Button
                                 v-if="
                                     shoppingCartStore.cart.find(
                                         (entry) => entry.id == product.id,
@@ -347,7 +359,7 @@ export default {
                                 severity="primary"
                                 outlined
                                 @click="handleRemoveProductFromShoppingCart"
-                            />
+                            /> -->
                         </div>
                         <Button
                             class="button--no-shadow text-sm"
