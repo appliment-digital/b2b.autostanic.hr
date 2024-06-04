@@ -21,7 +21,7 @@
         }
 
         #order tr{
-            border-bottom: 0.5px solid rgb(201, 194, 194);
+            border-bottom: 0.5px solid rgb(96 90 90);
         }
     </style>
 
@@ -108,9 +108,6 @@
                                                                             <tr>
                                                                                 <td><span style="font-weight:bold;">Adresa dostave: </span>{{ $address }}, {{ $postal_code }} {{ $city }}, {{ $country_name }}</td>
                                                                             </tr>
-                                                                            @if($note !='')         
-                                                                                <td><span style="font-weight:bold;">Napomena: </span>{{ $note }}</td>      
-                                                                            @endif
                                                                             <tr>
                                                                                 <td><span style="font-weight:bold; font-size:16px;">Dostava je besplatna.</span></td>
                                                                             </tr>

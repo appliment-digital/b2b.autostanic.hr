@@ -49,6 +49,8 @@ export default {
             },
 
             orderTotal: 0,
+
+            sendingOrder: false,
         };
     },
     computed: {
@@ -145,16 +147,35 @@ export default {
         },
 
         handleFinishOrderClick() {
+            this.sendingOrder = true;
             orderService
                 .createOrder({
                     orderTotal: this.orderTotal,
                     items: this.shoppingCartStore.cart,
+                    note: this.shoppingNote,
                 })
                 .then((response) => {
-                    console.log(response.data);
-                    // this.$router.push('/hvala');
-                    // //prazni local storage
-                    // this.shoppingCartStore.clear();
+                    if (response.data.ID) {
+                        this.sendingOrder = true;
+                        this.$router.push('/hvala');
+                        //prazni local storage
+                        this.shoppingCartStore.clear();
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: 'je poslana narudžba.',
+                            life: 3000,
+                        });
+                        setTimeout(this.$router.push('/'), 30000);
+                    } else {
+                        this.$router.push('/');
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: 'Došlo je do greške pri izradi narudžbe.',
+                            life: 3000,
+                        });
+                    }
                 });
         },
 
@@ -181,7 +202,20 @@ export default {
 </script>
 
 <template>
+    <div v-if="sendingOrder" class="card flex justify-content-center">
+        <div>
+            <div class="flex justify-center">
+                <ProgressSpinner
+                    style="width: 80px; height: 100px"
+                    strokeWidth="3"
+                    fill="var(--surface-ground)"
+                />
+            </div>
+            <div class="flex justify-center">Slanje narudžbe u tijeku...</div>
+        </div>
+    </div>
     <div
+        v-else
         class="grid grid-nogutter justify-content-between bg-white border-round p-5 border-1 border-100"
     >
         <div class="col border-right-1 border-100 pr-5 mr-5">
