@@ -44,13 +44,11 @@ export default {
     },
     watch: {
         itemQuantity(newVal) {
-            const min = 1 
+            const min = 1;
 
             if (newVal <= min) {
                 this.itemQuantity = min;
             }
-
-            console.log('item quantity', this.itemQuantity);
         },
     },
     computed: {
@@ -85,7 +83,6 @@ export default {
                 .then((response) => {
                     if (response.data) {
                         this.product = camelcaseKeys(response.data);
-                        console.log('this.product', this.product);
                     }
                 })
                 .catch((err) => console.error(err));
@@ -103,6 +100,7 @@ export default {
                         carTypes: res.data.carTypes,
                     };
 
+                    console.log('this.details', this.details);
                     this.UIStore.setIsDataLoading(false);
                 })
                 .catch((err) => console.error(err));
@@ -112,33 +110,33 @@ export default {
             this.openCRMForm();
         },
 
-        handleModifyProductQuantity(modifier) {
-            if (modifier === 'increment') {
-                this.itemQuantity++;
-            }
-
-            if (modifier === 'decrement') {
-                this.itemQuantity--;
-            }
-        },
-
-        handleAddProdcutToShoppingCart(product) {
-
+        handleAddProductToShoppingCart() {
+            // update product cart quantity if product is already in the cart
             if (this.isProductInShoppingCart) {
-                this.shoppingCartStore.update(product, this.itemQuantity)
+                this.shoppingCartStore.update(this.product, this.itemQuantity);
+
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Košarica',
+                    detail: `Nova količina ažurirana!`,
+                    life: 2000,
+                });
+
                 return;
             }
 
-            product.quantity = this.itemQuantity;
+            // update quantity on the product
+            this.product.quantity = this.itemQuantity;
 
+            // add product in the car
             const productDetails = {
-                ...product,
+                ...this.product,
                 quantity: this.itemQuantity,
                 picture: this.details.pictures[0],
             };
 
             this.breadcrumbsStore.addProductCrumbs(
-                product.id,
+                this.product.id,
                 this.breadcrumbsStore.current,
             );
 
@@ -146,13 +144,20 @@ export default {
 
             this.$toast.add({
                 severity: 'success',
-                summary: 'Status',
-                detail: `${this.isProductInShoppingCart ? 'Količina ažurirana!' : 'Proizvod dodan u košaricu!'} `,
-                life: 1000,
+                summary: 'Košarica',
+                detail: 'Proizvod dodan!',
+                life: 2000,
             });
         },
 
         handleRemoveProductFromShoppingCart() {
+            this.$toast.add({
+                severity: 'info',
+                summary: 'Košarica',
+                detail: 'Proizvod uklonjen!',
+                life: 2000,
+            });
+
             this.shoppingCartStore.delete(this.product);
         },
 
@@ -251,8 +256,7 @@ export default {
                     <div class="mt-2" v-if="isProductInShoppingCart">
                         <i class="pi pi-shopping-cart text-blue-500"></i>
                         <span class="ml-2"
-                            >Proizvod 
-                            (<span class="text-blue-500 font-bold">{{
+                            >Proizvod (<span class="text-blue-500 font-bold">{{
                                 getProductQuantity()
                             }}</span
                             >)<span class="font-bold"> u košarici.</span></span
@@ -298,9 +302,7 @@ export default {
                                 icon="pi pi-minus"
                                 severity="primary"
                                 outlined
-                                @click="
-                                    handleModifyProductQuantity('decrement')
-                                "
+                                @click="itemQuantity--"
                             />
                             <InputNumber
                                 class="mr-1"
@@ -312,9 +314,7 @@ export default {
                                 inputStyle="width: 60px; text-align: center; border: 1px solid #5297ff; box-shadow: none; background: transparent; color: #5297ff"
                                 :max="product.stockQuantity"
                                 :min="1"
-                                @update:modelValue="
-                                    handleModifyProductQuantity('input')
-                                "
+                                @keyup.enter="handleAddProductToShoppingCart"
                             />
                             <Button
                                 icon="pi pi-plus"
@@ -324,9 +324,7 @@ export default {
                                 "
                                 outlined
                                 severity="primary"
-                                @click="
-                                    handleModifyProductQuantity('increment')
-                                "
+                                @click="itemQuantity++"
                             />
                             <Button
                                 class="button--no-shadow ml-1 text-sm"
@@ -336,7 +334,7 @@ export default {
                                         : 'Dodaj u košaricu'
                                 "
                                 severity="primary"
-                                @click="handleAddProdcutToShoppingCart(product)"
+                                @click="handleAddProductToShoppingCart"
                             />
                             <Button
                                 v-if="
@@ -501,7 +499,7 @@ export default {
                             }"
                         >
                             <div
-                                v-if="details.carTypes"
+                                v-if="details.carTypes?.length"
                                 v-for="(
                                     details, carType, index
                                 ) in details.carTypes"

@@ -74,7 +74,7 @@ export default {
             return [
                 {
                     name: 'Ukupno',
-                    value: `${stringifyProductPrice(this.shoppingCartStore.total)} €`,
+                    value: `${stringifyProductPrice(cartTotal)} €`,
                 },
                 {
                     name: `Rabat (${userDiscount}%)`,
@@ -110,10 +110,6 @@ export default {
             .catch((err) => console.error(err));
     },
     methods: {
-        calcPrice(price, quantity) {
-            return `${Number(quantity * price).toFixed(2)}`;
-        },
-
         handleNewProductQuantity(product) {
             if (product.quantity > product.stockQuantity) {
                 this.$toast.add({

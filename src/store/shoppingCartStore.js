@@ -73,12 +73,9 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
         },
 
         delete(product) {
-            console.log('cart: deleting product');
             const filteredCart = this.store.local.cart.filter(
                 (entry) => entry.id != product.id,
             );
-
-            console.log('filtered cart..', { filteredCart });
 
             this.store.local.cart = filteredCart;
             local.save('shopping-cart-store', this.store.local);
