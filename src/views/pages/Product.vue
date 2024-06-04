@@ -15,6 +15,7 @@ import { useUserStore } from '@/store/userStore.js';
 import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 import { useUIStore } from '@/store/UIStore.js';
+import { useProductStore } from '@/store/productStore.js';
 
 // components
 import Header from '@/components/Header.vue';
@@ -56,6 +57,7 @@ export default {
             useUserStore,
             useShoppingCartStore,
             useBreadcrumbsStore,
+            useProductStore,
             useUIStore,
         ),
 
@@ -84,8 +86,15 @@ export default {
         },
     },
     beforeMount() {
-        this.loadProduct(this.$route.query.id);
-        this.loadProductDetails(this.$route.query.id);
+        const storedProduct = this.productStore.products[this.$route.query.id];
+
+        if (storedProduct) {
+            this.product = storedProduct;
+            this.details = storedProduct.details;
+        } else {
+            this.loadProduct(this.$route.query.id);
+            this.loadProductDetails(this.$route.query.id);
+        }
     },
     updated() {
         // console.log('this.availableQuantity', this.availableItemQuantity);
@@ -116,8 +125,14 @@ export default {
                         carTypes: res.data.carTypes,
                     };
 
-                    console.log('this.details', this.details);
                     this.UIStore.setIsDataLoading(false);
+
+                    if (this.product) {
+                        this.productStore.add({
+                            product: this.product,
+                            details: this.details,
+                        });
+                    }
                 })
                 .catch((err) => console.error(err));
         },
@@ -129,12 +144,15 @@ export default {
         handleAddProductToShoppingCart() {
             // update product cart quantity if product is already in the cart
             if (this.isProductInShoppingCart) {
-                this.shoppingCartStore.addQuantity(this.product, this.itemQuantity);
+                this.shoppingCartStore.addQuantity(
+                    this.product,
+                    this.itemQuantity,
+                );
 
                 this.$toast.add({
                     severity: 'success',
                     summary: 'Košarica',
-                    detail: `Nova količina ažurirana!`,
+                    detail: 'Nova količina ažurirana!',
                     life: 2000,
                 });
 
