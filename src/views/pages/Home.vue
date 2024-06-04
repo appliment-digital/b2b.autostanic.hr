@@ -14,6 +14,7 @@ import { useUIStore } from '@/store/UIStore.js';
 
 // components
 import Header from '@/components/Header.vue';
+import Query from '@/components/Query.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
@@ -46,11 +47,13 @@ const news = [
 export default {
     components: {
         Header,
+        Query,
     },
     data() {
         return {
             categories: null,
             news,
+            showQueryModal: false,
         };
     },
     computed: {
@@ -102,11 +105,8 @@ export default {
             }
         },
 
-        openCRMForm() {
-            window.open(
-                'https://b24-t1zfqc.bitrix24.site/crm_form_vks6q',
-                '_blank',
-            );
+        handleQueryModalClick() {
+            this.showQueryModal = !this.showQueryModal;
         },
     },
 };
@@ -405,7 +405,7 @@ export default {
                             icon="pi pi-envelope"
                             label="Pošalji upit"
                             class="button--submit block w-full"
-                            @click="openCRMForm()"
+                            @click="handleQueryModalClick()"
                         />
                     </div>
                 </div>
@@ -420,6 +420,10 @@ export default {
             </p>
         </div>
     </footer>
+    <Query
+        :showQueryModal="showQueryModal"
+        @on-query-modal-click="handleQueryModalClick"
+    ></Query>
 </template>
 
 <style scoped>

@@ -31,6 +31,10 @@ export const useUserStore = defineStore('user', {
         discount: (state) => {
             return state.store.local.user.discount;
         },
+
+        user: (state) => {
+            return state.store.local.user;
+        },
     },
     actions: {
         add(user) {

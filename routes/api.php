@@ -133,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
         'getCountriesList',
     ]);
 
+    Route::post('/bitrix/sendQuery', [BitrixController::class, 'sendQuery']);
+
     //****************   Supplier CONTOLLER ******************
 
     Route::post('/supplier/getAll', [SupplierController::class, 'getAll']);

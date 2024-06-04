@@ -28,4 +28,32 @@ class BitrixController extends Controller
             ];
         }
     }
+
+    public function sendQuery(Request $request)
+    {
+        $currentUserData = auth()->user();
+
+        $queryData = [
+            'token' => env('CREATE_LEAD_PROTECTION'),
+            'name' => $request->name,
+            'last_name' => $request->last_name,
+            'full_name' => $request->name . ' ' . $request->last_name,
+            'email' => $request->email,
+            'company_id' => $currentUserData->bitrix_company_id,
+            'address' => $currentUserData->address,
+            'postal_code' => $currentUserData->postal_code,
+            'city' => $currentUserData->city,
+            'state_province' => $currentUserData->state_province,
+            'country_name' => $currentUserData->country,
+            'country' => $currentUserData->country_bitrix_id,
+            'message' => $request->message,
+        ];
+
+        $response = Http::asForm()->post(
+            'https://sustav.autostanic.hr//bitrix/services/main/ajax.php?mode=class&c=app%3Aapp.b2b.webshop&action=createQuery',
+            ['queryData' => $queryData]
+        );
+
+        return $response['data'];
+    }
 }
