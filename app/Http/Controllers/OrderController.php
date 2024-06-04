@@ -27,18 +27,9 @@ class OrderController extends BaseController
     {
         $currentUserData = auth()->user();
 
-        $bitrixCountryId = $this->getBitrixCountryId($currentUserData->country);
-
         $authUser = Auth::user();
         $discountPercentage =
             DiscountType::getDiscountForUser($authUser->id) ?? 0;
-
-        $orderItems[] = [
-            'sku' => '16.10.210', //$request['sku'],
-            'price' => '2.59', //$request['priceWithDiscount'],
-            'priceWithVat' => '2.59',
-            'quantity' => 1,
-        ];
 
         $orderData = [
             'token' => env('CREATE_DEAL_PROTECTION'),
@@ -50,11 +41,12 @@ class OrderController extends BaseController
             'postal_code' => $currentUserData->postal_code,
             'city' => $currentUserData->city,
             'state_province' => $currentUserData->state_province,
-            'country' => $bitrixCountryId,
+            'country' => $currentUserData->country_bitrix_id,
             'state_province' => $currentUserData->state_province,
+            'method_of_payment' => $currentUserData->payment_method_e_racuni,
             'customer_discount' => $discountPercentage,
-            'order_total' => '10000',
-            'order_items' => $orderItems,
+            'order_total' => $request->orderTotal,
+            'order_items' => $request->items,
         ];
 
         return Http::asForm()->post(

@@ -23,7 +23,9 @@ import { useUserStore } from '@/store/userStore.js';
 
 // services
 import UserService from '../../service/UserService.js';
+import OrderService from '@/service/OrderService.js';
 
+const orderService = new OrderService();
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
 
@@ -45,6 +47,8 @@ export default {
             tableData: {
                 delivery: null,
             },
+
+            orderTotal: 0,
         };
     },
     computed: {
@@ -65,10 +69,12 @@ export default {
             const tax = discountedAmount * 0.25;
             const totalAmount = discountedAmount + tax;
 
+            this.orderTotal = totalAmount;
+
             return [
                 {
                     name: 'Ukupno',
-                    value: `${stringifyProductPrice(this.shoppingCartStore.total)} €`,
+                    value: `${stringifyProductPrice(cartTotal)} €`,
                 },
                 {
                     name: `Rabat (${userDiscount}%)`,
@@ -104,10 +110,6 @@ export default {
             .catch((err) => console.error(err));
     },
     methods: {
-        calcPrice(price, quantity) {
-            return `${Number(quantity * price).toFixed(2)}`;
-        },
-
         handleNewProductQuantity(product) {
             if (product.quantity > product.stockQuantity) {
                 this.$toast.add({
@@ -130,8 +132,17 @@ export default {
         },
 
         handleFinishOrderClick() {
-            this.$router.push('/hvala');
-            this.shoppingCartStore.clear();
+            orderService
+                .createOrder({
+                    orderTotal: this.orderTotal,
+                    items: this.shoppingCartStore.cart,
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    // this.$router.push('/hvala');
+                    // //prazni local storage
+                    // this.shoppingCartStore.clear();
+                });
         },
 
         handleProductTableItemClick(product) {
@@ -186,16 +197,17 @@ export default {
                     </template>
                 </Column>
 
-                <Column field="price" header="Cijena" style="min-width: 110px">
+                <Column field="price" header="Cijena" style="min-width: 100px">
                     <template #body="{ data }">
                         <span
                             >{{
-                                handlePrice(data.price * data.quantity)
+                                handlePrice(data.price)
                             }}
                             €</span
                         >
                     </template>
                 </Column>
+
 
                 <Column header="Količina">
                     <template #body="{ data }">
@@ -211,13 +223,25 @@ export default {
                     </template>
                 </Column>
 
+                <Column header="Ukupno" style="min-width: 100px">
+                    <template #body="{ data }">
+                        <span
+                            >{{
+                                handlePrice(data.price * data.quantity)
+                            }}
+                            €</span
+                        >
+                    </template>
+                </Column>
+
+
                 <Column header="Obriši">
                     <template #body="{ data }">
                         <Button
                             class="button--no-shadow"
                             icon="pi pi-trash"
                             outlined
-                            severity="info"
+                            severity="primary"
                             @click="handleDeleteProduct(data)"
                         />
                     </template>
@@ -242,7 +266,10 @@ export default {
                         },
                     }"
                 >
-                    <Column header="Ukupna narudžba">
+                    <Column>
+                        <template #header>
+                            <i class="pi pi-wallet mr-2"></i>Ukupna narudžba 
+                        </template>
                         <template #body="{ data }">
                             <div
                                 class="flex justify-content-between"
@@ -265,7 +292,7 @@ export default {
                         shoppingCartStore.cart.length &&
                         tableData.delivery
                     "
-                    class="mt-4"
+                    class="mt-3"
                     :value="tableData.delivery"
                     :pt="{
                         column: {
@@ -275,7 +302,10 @@ export default {
                         },
                     }"
                 >
-                    <Column header="Dostava">
+                    <Column>
+                        <template #header>
+                            <i class="pi pi-truck mr-2"></i>Dostava <span class="ml-1 text-blue-500">(besplatna)</span>
+                        </template>
                         <template #body="{ data }">
                             <div
                                 class="flex justify-content-between"
@@ -304,7 +334,7 @@ export default {
                     class="button--no-shadow w-full mt-3"
                     label="Završi narudžbu"
                     outlined
-                    severity="info"
+                    severity="primary"
                     @click="handleFinishOrderClick"
                 />
             </div>
