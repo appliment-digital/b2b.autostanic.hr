@@ -327,6 +327,7 @@ export default {
                             v-else
                             v-model="selectedCategory"
                             :options="categories"
+                            filter
                             display="chip"
                             optionLabel="name"
                             placeholder="Odaberite kategoriju"
