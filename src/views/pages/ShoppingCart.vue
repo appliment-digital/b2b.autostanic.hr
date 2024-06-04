@@ -117,7 +117,9 @@ export default {
         },
 
         handleNewProductQuantity(product) {
-            if (product.quantity > product.stockQuantity) {
+            console.log('handling new product quantity', {product});
+
+            if (product.quantity > Number(product.stockQuantity)) {
                 this.$toast.add({
                     severity: 'warn',
                     summary: 'Košarica',
@@ -125,7 +127,8 @@ export default {
                     life: 2000,
                 });
 
-                product.quantity = product.stockQuantity;
+                product.quantity = Number(product.stockQuantity);
+
             } else {
                 this.$toast.add({
                     severity: 'success',
@@ -270,7 +273,7 @@ export default {
                             locale="de-DE"
                             v-model="data.quantity"
                             inputStyle="width: 60px; text-align: center; box-shadow: none;"
-                            @blur="handleNewProductQuantity(data)"
+                            @update:modelValue="handleNewProductQuantity(data)"
                             min="1"
                         />
                     </template>
