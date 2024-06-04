@@ -120,12 +120,19 @@ export default {
             if (product.quantity > product.stockQuantity) {
                 this.$toast.add({
                     severity: 'warn',
-                    summary: 'Količina proizvoda',
-                    detail: 'Nema dovoljno na stanju.',
-                    life: 3000,
+                    summary: 'Košarica',
+                    detail: 'Maksimalna količina dodana!',
+                    life: 2000,
                 });
 
                 product.quantity = product.stockQuantity;
+            } else {
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Košarica',
+                    detail: 'Nova količina ažurirana!',
+                    life: 2000,
+                });
             }
 
             this.shoppingCartStore.updateQuantity(product);
@@ -263,8 +270,7 @@ export default {
                             locale="de-DE"
                             v-model="data.quantity"
                             inputStyle="width: 60px; text-align: center; box-shadow: none;"
-                            @update:modelValue="handleNewProductQuantity(data)"
-                            @keyup.enter="handleNewProductQuantity(data)"
+                            @blur="handleNewProductQuantity(data)"
                             min="1"
                         />
                     </template>
