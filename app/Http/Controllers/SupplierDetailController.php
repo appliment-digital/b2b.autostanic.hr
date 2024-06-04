@@ -52,6 +52,18 @@ class SupplierDetailController extends BaseController
             )->get();
 
             foreach ($suppliersDetails as &$detail) {
+                $detail->min_product_cost = number_format(
+                    $detail->min_product_cost,
+                    2,
+                    ',',
+                    '.'
+                );
+                $detail->max_product_cost = number_format(
+                    $detail->max_product_cost,
+                    2,
+                    ',',
+                    '.'
+                );
                 $detail->supplier_name = $this->getSuppliersName(
                     $detail->web_db_supplier_id
                 );
@@ -202,6 +214,7 @@ class SupplierDetailController extends BaseController
                         ->where('min_product_cost', '<=', $price)
                         ->where('max_product_cost', '>=', $price);
                 })
+
                 ->first();
 
             return $details;
