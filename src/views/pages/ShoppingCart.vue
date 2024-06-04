@@ -49,6 +49,8 @@ export default {
             },
 
             orderTotal: 0,
+
+            sendingOrder: false,
         };
     },
     computed: {
@@ -136,6 +138,7 @@ export default {
         },
 
         handleFinishOrderClick() {
+            this.sendingOrder = true;
             orderService
                 .createOrder({
                     orderTotal: this.orderTotal,
@@ -143,9 +146,26 @@ export default {
                 })
                 .then((response) => {
                     console.log(response.data);
-                    // this.$router.push('/hvala');
-                    // //prazni local storage
-                    // this.shoppingCartStore.clear();
+                    if (response.data.ID) {
+                        this.sendingOrder = true;
+                        this.$router.push('/hvala');
+                        //prazni local storage
+                        this.shoppingCartStore.clear();
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Uspješno',
+                            detail: 'je poslana narudžba.',
+                            life: 3000,
+                        });
+                    } else {
+                        this.$router.push('/');
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Greška',
+                            detail: 'Došlo je do greške pri izradi narudžbe.',
+                            life: 3000,
+                        });
+                    }
                 });
         },
 
@@ -162,7 +182,20 @@ export default {
 </script>
 
 <template>
+    <div v-if="sendingOrder" class="card flex justify-content-center">
+        <div>
+            <div class="flex justify-center">
+                <ProgressSpinner
+                    style="width: 80px; height: 100px"
+                    strokeWidth="3"
+                    fill="var(--surface-ground)"
+                />
+            </div>
+            <div class="flex justify-center">Slanje narudžbe u tijeku...</div>
+        </div>
+    </div>
     <div
+        v-else
         class="grid grid-nogutter justify-content-between bg-white border-round p-5 border-1 border-100"
     >
         <div class="col border-right-1 border-100 pr-5 mr-5">
@@ -203,15 +236,9 @@ export default {
 
                 <Column field="price" header="Cijena" style="min-width: 100px">
                     <template #body="{ data }">
-                        <span
-                            >{{
-                                handlePrice(data.price)
-                            }}
-                            €</span
-                        >
+                        <span>{{ handlePrice(data.price) }} €</span>
                     </template>
                 </Column>
-
 
                 <Column header="Količina">
                     <template #body="{ data }">
@@ -237,7 +264,6 @@ export default {
                         >
                     </template>
                 </Column>
-
 
                 <Column header="Obriši">
                     <template #body="{ data }">
@@ -272,7 +298,7 @@ export default {
                 >
                     <Column>
                         <template #header>
-                            <i class="pi pi-wallet mr-2"></i>Ukupna narudžba 
+                            <i class="pi pi-wallet mr-2"></i>Ukupna narudžba
                         </template>
                         <template #body="{ data }">
                             <div
@@ -308,7 +334,8 @@ export default {
                 >
                     <Column>
                         <template #header>
-                            <i class="pi pi-truck mr-2"></i>Dostava <span class="ml-1 text-blue-500">(besplatna)</span>
+                            <i class="pi pi-truck mr-2"></i>Dostava
+                            <span class="ml-1 text-blue-500">(besplatna)</span>
                         </template>
                         <template #body="{ data }">
                             <div
