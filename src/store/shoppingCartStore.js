@@ -29,6 +29,31 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
         },
     },
     actions: {
+        add(product) {
+            console.log('adding product...');
+            const entryId = this.store.local.cart.findIndex(
+                (entry) => entry.id == product.id,
+            );
+
+            if (entryId != -1) {
+                // item exists in the cart
+                let newQuantity =
+                    Number(this.store.local.cart[entryId].quantity) +
+                    Number(product.quantity);
+
+                if (newQuantity > product.stockQuantity) {
+                    newQuantity = Number(product.stockQuantity);
+                }
+
+                this.store.local.cart[entryId].quantity = newQuantity;
+            } else {
+                // item doesn't exists in the cart
+                this.store.local.cart.push(product);
+            }
+
+            local.save('shopping-cart-store', this.store.local);
+        },
+
         addQuantity(product, quantity) {
             this.store.local.cart.forEach((entry) => {
                 if (entry.id == product.id) {
