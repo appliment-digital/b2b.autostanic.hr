@@ -76,7 +76,7 @@ export default {
             return [
                 {
                     name: 'Ukupno',
-                    value: `${stringifyProductPrice(this.shoppingCartStore.total)} €`,
+                    value: `${stringifyProductPrice(cartTotal)} €`,
                 },
                 {
                     name: `Rabat (${userDiscount}%)`,
@@ -127,6 +127,8 @@ export default {
 
                 product.quantity = product.stockQuantity;
             }
+
+            this.shoppingCartStore.updateQuantity(product);
         },
 
         handlePrice(price) {
@@ -177,6 +179,16 @@ export default {
                 query: { id: product.id },
             });
         },
+
+        handleProductName(name) {
+            const max = 60;
+
+            if (name.length > max) {
+                return name.substring(0, max) + ', ...';
+            }
+
+            return name;
+        },
     },
 };
 </script>
@@ -218,18 +230,19 @@ export default {
                     <template #body="{ data }">
                         <img
                             :src="data.picture"
+                            style="user-select: none"
                             class="table-image border-round cursor-pointer"
                             @click="handleProductTableItemClick(data)"
                         />
                     </template>
                 </Column>
 
-                <Column field="name" header="Proizvod">
+                <Column field="name" header="Proizvod" style="max-width: 200px">
                     <template #body="{ data }">
                         <span
-                            class="cursor-pointer"
+                            class="cursor-pointer text-sm"
                             @click="handleProductTableItemClick(data)"
-                            >{{ data.name }}</span
+                            >{{ handleProductName(data.name) }}</span
                         >
                     </template>
                 </Column>
@@ -240,13 +253,15 @@ export default {
                     </template>
                 </Column>
 
-                <Column header="Količina">
+                <Column header="Količina" id="xyz">
                     <template #body="{ data }">
                         <InputNumber
+                            showButtons
+                            :step="1"
                             inputId="locale-german"
                             locale="de-DE"
                             v-model="data.quantity"
-                            inputStyle="width: 60px; text-align: center;"
+                            inputStyle="width: 60px; text-align: center; box-shadow: none;"
                             @update:modelValue="handleNewProductQuantity(data)"
                             @keyup.enter="handleNewProductQuantity(data)"
                             min="1"
@@ -256,7 +271,7 @@ export default {
 
                 <Column header="Ukupno" style="min-width: 100px">
                     <template #body="{ data }">
-                        <span
+                        <span style="user-select: none"
                             >{{
                                 handlePrice(data.price * data.quantity)
                             }}

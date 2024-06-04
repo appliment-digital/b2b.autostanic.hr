@@ -29,56 +29,36 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
         },
     },
     actions: {
-        add(product) {
-            const entryId = this.store.local.cart.findIndex(
-                (entry) => entry.id == product.id,
-            );
+        addQuantity(product, quantity) {
+            this.store.local.cart.forEach((entry) => {
+                if (entry.id == product.id) {
+                    let newQuantity = entry.quantity + Number(quantity);
 
-            if (entryId != -1) {
-                // item exists in the cart
-                let newQuantity =
-                    Number(this.store.local.cart[entryId].quantity) +
-                    Number(product.quantity);
+                    if (newQuantity > entry.stockQuantity) {
+                        newQuantity = entry.stockQuantity;
+                    }
 
-                if (newQuantity > product.stockQuantity) {
-                    newQuantity = Number(product.stockQuantity);
+                    entry.quantity = newQuantity;
                 }
-
-                this.store.local.cart[entryId].quantity = newQuantity;
-            } else {
-                // item doesn't exists in the cart
-                this.store.local.cart.push(product);
-            }
+            });
 
             local.save('shopping-cart-store', this.store.local);
         },
 
-        update(product, quantity) {
-            const entryId = this.store.local.cart.findIndex(
-                (entry) => entry.id == product.id,
-            );
-
-            if (entryId != -1) {
-                // item exists in the cart
-                let newQuantity = Number(quantity)
-
-                if (newQuantity > product.stockQuantity) {
-                    newQuantity = Number(product.stockQuantity);
+        updateQuantity(product) {
+            this.store.local.cart.forEach((entry) => {
+                if (entry.id == product.id) {
+                    entry.quantity = product.quantity;
                 }
-
-                this.store.local.cart[entryId].quantity = newQuantity;
-            } 
+            });
 
             local.save('shopping-cart-store', this.store.local);
         },
 
         delete(product) {
-            console.log('cart: deleting product');
             const filteredCart = this.store.local.cart.filter(
                 (entry) => entry.id != product.id,
             );
-
-            console.log('filtered cart..', { filteredCart });
 
             this.store.local.cart = filteredCart;
             local.save('shopping-cart-store', this.store.local);

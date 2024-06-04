@@ -85,4 +85,26 @@ body {
     table tr:last-child td {
         border: none;
     }
+    button[data-pc-name="incrementbutton"], 
+    button[data-pc-name="decrementbutton"] {
+        background-color: transparent;
+        color: #5297ff;
+        border-top: 1px solid #d4d6d9;
+        border-right: 1px solid #d4d6d9;
+        border-bottom: 1px solid #d4d6d9;
+        border-left: none;
+    }
+
+    button[data-pc-name="incrementbutton"] {
+        border-left: none;
+    }
+
+    button[data-pc-name="decrementbutton"] {
+        border-top: none; 
+    }
+
+    button[data-pc-name="incrementbutton"]:hover,
+    button[data-pc-name="decrementbutton"]:hover {
+        background-color: #e7f1ff;
+    }
 }
