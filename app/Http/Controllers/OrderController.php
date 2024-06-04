@@ -38,6 +38,7 @@ class OrderController extends BaseController
             'customer_discount' => $discountPercentage,
             'order_total' => number_format($request->orderTotal, 2, ',', '.'),
             'order_items' => $request->items,
+            'note' => $request->note,
         ];
 
         $response = Http::asForm()->post(

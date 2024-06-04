@@ -108,6 +108,9 @@
                                                                             <tr>
                                                                                 <td><span style="font-weight:bold;">Adresa dostave: </span>{{ $address }}, {{ $postal_code }} {{ $city }}, {{ $country_name }}</td>
                                                                             </tr>
+                                                                            @if($note !='')         
+                                                                                <td><span style="font-weight:bold;">Napomena: </span>{{ $note }}</td>      
+                                                                            @endif
                                                                             <tr>
                                                                                 <td><span style="font-weight:bold; font-size:16px;">Dostava je besplatna.</span></td>
                                                                             </tr>

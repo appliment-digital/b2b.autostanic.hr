@@ -145,9 +145,9 @@ export default {
                 .createOrder({
                     orderTotal: this.orderTotal,
                     items: this.shoppingCartStore.cart,
+                    note: this.shoppingNote,
                 })
                 .then((response) => {
-                    console.log(response.data);
                     if (response.data.ID) {
                         this.sendingOrder = true;
                         this.$router.push('/hvala');
@@ -159,6 +159,7 @@ export default {
                             detail: 'je poslana narudžba.',
                             life: 3000,
                         });
+                        setTimeout(this.$router.push('/'), 30000);
                     } else {
                         this.$router.push('/');
                         this.$toast.add({
