@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>{{ $title }}</title>
+    <title>Zaprimljen upit</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
@@ -14,14 +14,6 @@
             -webkit-text-size-adjust: none;
             -ms-text-size-adjust: none;
             background: #edf2ff;
-        }
-
-        #order {
-            border-collapse: collapse;
-        }
-
-        #order tr{
-            border-bottom: 0.5px solid rgb(96 90 90);
         }
     </style>
 
@@ -82,86 +74,33 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:20px; color:#203c4d; font-weight:bold; line-height:50px; text-transform:none;" mc:edit="fm-40" valign="top" align="center">
-                                                                    <multiline>{{ $title }}</multiline>
+                                                                <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:20px; color:#3b3a3a; font-weight:bold; line-height:50px; text-transform:none;" mc:edit="fm-40" valign="top" align="center">
+                                                                    <multiline>Vaša poruka je uspješno poslana</multiline>
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td style="font-size:5px; line-height:5px;" valign="top" height="10" align="center">&nbsp;
+                                                                <td style="font-size:5px; line-height:5px;" valign="top" height="5" align="center">&nbsp;
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;" mc:edit="fm-41" valign="top" align="left">
-                                                                    <multiline>Poštovani {{ $full_name }}, narudžba je uspješno poslana.</multiline>
+                                                                    <strong>Na Vašu poruku odgovorit ćemo u najkraćem mogućem ruku. </strong>
                                                                 </td>
                                                             </tr>
-                                                            
                                                             <tr>
-                                                                <td style="font-size:5px; line-height:20px;" valign="top" height="15" align="center">&nbsp;
+                                                                <td style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;" mc:edit="fm-41" valign="top" align="left">
+                                                                    <multiline>Hvala što ste nam se javili!</multiline>
                                                                 </td>
                                                             </tr>
-
-                                                            <tr>
-                                                                <td>
-                                                                    <table id="buyerData" width="100%" cellspacing="1" cellpadding="0" style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#203c4d; font-weight:normal; line-height:24px;">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td><span style="font-weight:bold;">Adresa dostave: </span>{{ $address }}, {{ $postal_code }} {{ $city }}, {{ $country_name }}</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td><span style="font-weight:bold; font-size:16px;">Dostava je besplatna.</span></td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </td>
-                                                            </tr>
-
-                                                            <tr>
-                                                                <td style="font-size:5px; line-height:20px;" valign="top" height="15" align="center">&nbsp;
-                                                                </td>
-                                                            </tr>
-
-                                                            <!-- Table for items -->
-                                                            <tr>
-                                                                <td>
-                                                                    <table id="order" width="100%" cellspacing="1" cellpadding="1" style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th colspan="2" style="color: #203c4db3;">Artikl</th>
-                                                                                <th style="width: 10%; text-align: center; color: #203c4db3;">Kol</th>
-                                                                                <th style="color: #203c4db3;">Cijena</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            @foreach ($order_items as $item)
-                                                                            <tr>
-                                                                                <td><img src="{{ $item['picture'] }}" style="width: 50px; height: auto;"></td>
-                                                                                <td>{{ $item['name'] }}</td>
-                                                                                <td style="width: 10%; text-align: center;">{{ $item['quantity'] }}</td>
-                                                                                <td style="text-align: center;">{{ $item['priceString'] }} €</td>
-                                                                            </tr>
-                                                                            @endforeach
-                                                                        </tbody>
-                                                                        <tfoot>
-                                                                            <tr style="font-weight: 600;">
-                                                                                <td colspan="3" align="right">Ukupno: </td>
-                                                                                <td style="width: 20%; text-align: center;">{{ $order_total }} €</td>
-                                                                            </tr>
-                                                                        </tfoot>
-                                                                    </table>
-                                                                </td>
-                                                            </tr>
-
                                                             <tr>
                                                                 <td style="font-size:5px; line-height:5px;" valign="top" height="15" align="center">&nbsp;
                                                                 </td>
                                                             </tr>
-                                                            
                                                             <tr>
                                                                 <td>
                                                                     <table style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;">
                                                                         <tr>
-                                                                            <td>Srdačan pozdrav, <br> Auto Stanić</td>
+                                                                            <td>Srdačan pozdrav, Auto Stanić</td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
