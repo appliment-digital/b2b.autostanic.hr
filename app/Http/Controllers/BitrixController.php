@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+
 class BitrixController extends Controller
 {
     public function getCountriesList()
@@ -53,6 +55,14 @@ class BitrixController extends Controller
             'https://sustav.autostanic.hr//bitrix/services/main/ajax.php?mode=class&c=app%3Aapp.b2b.webshop&action=createQuery',
             ['queryData' => $queryData]
         );
+
+        Mail::send('emails.query', $queryData, function ($message) use (
+            $queryData
+        ) {
+            $message->from('sales@autostanic.hr', 'Hvala na upitu');
+            $message->to($queryData['email'], $queryData['full_name']);
+            $message->subject('Hvala na upitu');
+        });
 
         return $response['data'];
     }
