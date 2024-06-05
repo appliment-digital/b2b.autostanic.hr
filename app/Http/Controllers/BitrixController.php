@@ -33,37 +33,48 @@ class BitrixController extends Controller
 
     public function sendQuery(Request $request)
     {
-        $currentUserData = auth()->user();
+        try {
+            $currentUserData = auth()->user();
 
-        $queryData = [
-            'token' => env('CREATE_LEAD_PROTECTION'),
-            'name' => $request->name,
-            'last_name' => $request->last_name,
-            'full_name' => $request->name . ' ' . $request->last_name,
-            'email' => $request->email,
-            'company_id' => $currentUserData->bitrix_company_id,
-            'address' => $currentUserData->address,
-            'postal_code' => $currentUserData->postal_code,
-            'city' => $currentUserData->city,
-            'state_province' => $currentUserData->state_province,
-            'country_name' => $currentUserData->country,
-            'country' => $currentUserData->country_bitrix_id,
-            'message' => $request->message,
-        ];
+            $queryData = [
+                'token' => env('CREATE_LEAD_PROTECTION'),
+                'name' => $request->name,
+                'last_name' => $request->last_name,
+                'full_name' => $request->name . ' ' . $request->last_name,
+                'email' => $request->email,
+                'company_id' => $currentUserData->bitrix_company_id,
+                'address' => $currentUserData->address,
+                'postal_code' => $currentUserData->postal_code,
+                'city' => $currentUserData->city,
+                'state_province' => $currentUserData->state_province,
+                'country_name' => $currentUserData->country,
+                'country' => $currentUserData->country_bitrix_id,
+                'message' => $request->message,
+            ];
 
-        $response = Http::asForm()->post(
-            'https://sustav.autostanic.hr//bitrix/services/main/ajax.php?mode=class&c=app%3Aapp.b2b.webshop&action=createQuery',
-            ['queryData' => $queryData]
-        );
+            $response = Http::asForm()->post(
+                'https://sustav.autostanic.hr//bitrix/services/main/ajax.php?mode=class&c=app%3Aapp.b2b.webshop&action=createQuery',
+                ['queryData' => $queryData]
+            );
 
-        Mail::send('emails.query', $queryData, function ($message) use (
-            $queryData
-        ) {
-            $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
-            $message->to($queryData['email'], $queryData['full_name']);
-            $message->subject('Hvala na upitu');
-        });
+            Mail::send('emails.query', $queryData, function ($message) use (
+                $queryData
+            ) {
+                $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
+                $message->to($queryData['email'], $queryData['full_name']);
+                $message->subject('Hvala na upitu');
+            });
 
-        return $response['data'];
+            return $response['data'];
+        } catch (\Exception $e) {
+            return [
+                'exception' =>
+                    $e->getMessage() .
+                    ' on line ' .
+                    $e->getLine() .
+                    ' in file ' .
+                    $e->getFile(),
+            ];
+        }
     }
 }
