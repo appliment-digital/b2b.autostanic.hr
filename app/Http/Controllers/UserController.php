@@ -103,7 +103,7 @@ class UserController extends BaseController
             Mail::send('emails.access_data', $userData, function (
                 $message
             ) use ($userData) {
-                $message->from('sales@autostanic.hr', 'Pristupni podaci');
+                $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
                 $message->to($userData['email'], $userData['full_name']);
                 $message->subject('Pristupni podaci');
             });

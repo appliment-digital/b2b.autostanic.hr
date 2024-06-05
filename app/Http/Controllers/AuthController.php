@@ -124,7 +124,7 @@ class AuthController extends BaseController
                     ) use ($userData) {
                         $message->from(
                             'sales@autostanic.hr',
-                            'Resetiranje lozinke'
+                            'B2B Auto Stanić'
                         );
 
                         $message->to(

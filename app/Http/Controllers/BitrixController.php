@@ -59,7 +59,7 @@ class BitrixController extends Controller
         Mail::send('emails.query', $queryData, function ($message) use (
             $queryData
         ) {
-            $message->from('sales@autostanic.hr', 'Hvala na upitu');
+            $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
             $message->to($queryData['email'], $queryData['full_name']);
             $message->subject('Hvala na upitu');
         });
