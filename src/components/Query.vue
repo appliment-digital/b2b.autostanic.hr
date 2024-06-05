@@ -36,6 +36,7 @@ export default {
         sendQuery() {
             this.sendingQuery = true;
             bitrixService.sendQuery(this.user).then((response) => {
+                console.log(response.data);
                 if (response.data > 0) {
                     this.sendingQuery = false;
                     this.$toast.add({
