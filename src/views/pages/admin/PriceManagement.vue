@@ -545,6 +545,8 @@ export default {
         :style="{ width: '450px' }"
         header="Detalji dobavljača"
         :modal="true"
+        dismissableMask
+        closeOnEscape
         class="p-fluid"
     >
         <p class="text-red-500">Polja označena s zvijezdicom(*) su obavezna!</p>

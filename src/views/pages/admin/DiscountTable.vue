@@ -381,6 +381,8 @@ export default {
         v-model:visible="discountTypeDialog"
         :style="{ width: '450px' }"
         header="Detalji tipa rabata"
+        dismissableMask
+        closeOnEscape
         :modal="true"
         class="p-fluid"
     >

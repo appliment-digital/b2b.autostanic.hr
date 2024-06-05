@@ -273,13 +273,12 @@ export default {
     <h3 class="block mb-5">Upravljanje korisnicima</h3>
 
     <Dialog
-        modal
+        header="Detalji korisnika"
+        v-model:visible="isDialogVisible"
+        :style="{ width: '30rem' }"
         dismissableMask
         closeOnEscape
-        header="Detalji korisnika"
-        :visible="isDialogVisible"
-        :style="{ width: '30rem' }"
-        :filters="filters"
+        :modal="true"
     >
         <p class="text-red-500">Polja označena s zvijezdicom(*) su obavezna!</p>
         <!-- Dialog Input: First Name -->

@@ -34,7 +34,6 @@ export default {
             this.$emit('on-query-modal-click');
         },
         sendQuery() {
-            console.log('test');
             this.sendingQuery = true;
             bitrixService.sendQuery(this.user).then((response) => {
                 if (response.data > 0) {
