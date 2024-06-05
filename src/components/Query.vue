@@ -32,6 +32,7 @@ export default {
         closeDialog() {
             this.isDialogVisible = false;
             this.$emit('on-query-modal-click');
+            this.user.message = '';
         },
         sendQuery() {
             this.sendingQuery = true;

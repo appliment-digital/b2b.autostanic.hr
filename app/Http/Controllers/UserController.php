@@ -58,7 +58,8 @@ class UserController extends BaseController
 
     private function generateRandomPassword($length = 12)
     {
-        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $alphabet =
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $symbols = '!@#$%^&*()-_';
 
         $password = '';
