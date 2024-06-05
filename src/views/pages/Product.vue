@@ -20,6 +20,7 @@ import { useProductStore } from '@/store/productStore.js';
 // components
 import Header from '@/components/Header.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import Query from '@/components/Query.vue';
 
 // services
 import ProductService from '@/service/ProductService';
@@ -28,6 +29,7 @@ export default {
     components: {
         Header,
         Breadcrumbs,
+        Query,
     },
     data() {
         return {
@@ -41,6 +43,8 @@ export default {
             },
 
             itemQuantity: 1,
+
+            showQueryModal: false,
         };
     },
     watch: {
@@ -221,6 +225,10 @@ export default {
         capitalize(text) {
             return capitalizeFirstLetter(text);
         },
+
+        handleQueryModalClick() {
+            this.showQueryModal = !this.showQueryModal;
+        },
     },
 };
 </script>
@@ -384,7 +392,7 @@ export default {
                             label="Pošalji upit"
                             outlined
                             severity="primary"
-                            @click="handleSendInquiry"
+                            @click="handleQueryModalClick"
                         />
                     </div>
                 </div>
@@ -589,6 +597,10 @@ export default {
             </div>
         </div>
     </section>
+    <Query
+        :showQueryModal="showQueryModal"
+        @on-query-modal-click="handleQueryModalClick"
+    ></Query>
 </template>
 
 <style scoped>
