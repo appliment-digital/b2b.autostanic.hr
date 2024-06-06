@@ -32,6 +32,7 @@ class ProductController extends BaseController
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->where('Product_Category_Mapping.Deleted', 0)
+                ->where('Product.Price', '>', 0)
                 // filters
                 ->when(
                     $filters->has('manufacturerName') &&
@@ -69,6 +70,7 @@ class ProductController extends BaseController
                     'Product.ManufacturerName',
                     'Product.SupplierId',
                     'Product_Category_Mapping.CategoryId',
+                    'Category.Name as CategoryName',
                     'Picture.SeoFilename',
                     'Picture.MimeType',
                     'Product_Picture_Mapping.PictureId as PictureId'
@@ -78,6 +80,12 @@ class ProductController extends BaseController
                     'Product.Id',
                     '=',
                     'Product_Category_Mapping.ProductId'
+                )
+                ->join(
+                    'Category',
+                    'Product_Category_Mapping.CategoryId',
+                    '=',
+                    'Category.Id'
                 )
                 ->leftJoin('Product_Picture_Mapping', function ($join) {
                     $join
@@ -104,6 +112,7 @@ class ProductController extends BaseController
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->where('Product_Category_Mapping.Deleted', 0)
+                ->where('Product.Price', '>', 0)
                 // filters
                 ->when(
                     $filters->has('manufacturerName') &&
@@ -194,24 +203,24 @@ class ProductController extends BaseController
                         $product->Price * ($discountPercentage / 100);
 
                     $product->PriceWithDiscount = round(
-                        abs($product->PriceWithDiscount),
+                        $product->PriceWithDiscount,
                         2
                     );
 
                     $product->PriceString = number_format(
-                        abs($product->Price),
+                        $product->Price,
                         2,
                         ',',
                         '.'
                     );
                     $product->PriceWithDiscountString = number_format(
-                        abs($product->PriceWithDiscount),
+                        $product->PriceWithDiscount,
                         2,
                         ',',
                         '.'
                     );
 
-                    $product->Price = abs($product->Price);
+                    $product->Price = $product->Price;
 
                     return $product;
                 })
@@ -263,6 +272,10 @@ class ProductController extends BaseController
                     ];
                 });
 
+            $categoryName = isset($productsQuery[0])
+                ? $productsQuery[0]->CategoryName
+                : '';
+
             $response = [
                 'products' => $this->convertKeysToCamelCase($productsQuery),
                 'status' => $this->convertKeysToCamelCase($statusesQuery),
@@ -270,6 +283,7 @@ class ProductController extends BaseController
                     'ManufacturerName'
                 ),
                 'productCount' => $productCount,
+                'categoryName' => $categoryName,
             ];
 
             return $this->convertKeysToCamelCase($response);
@@ -354,41 +368,89 @@ class ProductController extends BaseController
                         $productData->Price * ($discountPercentage / 100);
 
                     $productData->PriceWithDiscount = round(
-                        abs($productData->PriceWithDiscount),
+                        $productData->PriceWithDiscount,
                         2
                     );
 
                     $productData->PriceString = number_format(
-                        abs($productData->Price),
+                        $productData->Price,
                         2,
                         ',',
                         '.'
                     );
                     $productData->PriceWithDiscountString = number_format(
-                        abs($productData->PriceWithDiscount),
+                        $productData->PriceWithDiscount,
                         2,
                         ',',
                         '.'
                     );
 
-                    $productData->Price = abs($productData->Price);
+                    $productData->Price = $productData->Price;
                 }
             }
 
             $productData->Price = round($productData->Price, 2);
-            $productData->PriceString = number_format($productData->Price, 2, ',', '.');
+            $productData->PriceString = number_format(
+                $productData->Price,
+                2,
+                ',',
+                '.'
+            );
+
+            // Fetch categories details
+            $categories = collect();
+            $categoryIdsToFetch = [$productData->CategoryId];
+
+            while (!empty($categoryIdsToFetch)) {
+                $fetchedCategories = DB::connection('webshopdb')
+                    ->table('dbo.Category')
+                    ->select(
+                        'Category.Id',
+                        'Category.Name',
+                        'Category.ParentCategoryId'
+                    )
+                    ->whereIn('Category.Id', $categoryIdsToFetch)
+                    ->get();
+
+                $categories = $categories->merge($fetchedCategories);
+
+                $categoryIdsToFetch = $fetchedCategories
+                    ->pluck('ParentCategoryId')
+                    ->filter(function ($value) {
+                        return !is_null($value);
+                    })
+                    ->unique()
+                    ->diff($categories->pluck('Id'))
+                    ->all();
+            }
+
+            $productData->Categories = $categories;
 
             return $productData;
-            // $productData->pictures = $this->getProductPictures($id);
-            // $productData->oem_codes = $this->getOEMCodeForProduct($id);
-            // $productData->specification_attributes = $this->getSpecificationAttributeForProduct(
-            //     $id
-            // );
-            // $productData->car_types = $this->getCarTypesForProduct($id);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->with('error', 'Error fetching records: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper function to recursively add subcategories.
+     */
+    public function addSubcategories(
+        &$organizedCategories,
+        $categoriesById,
+        $parentCategoryId
+    ) {
+        foreach ($categoriesById as $category) {
+            if ($category->ParentCategoryId == $parentCategoryId) {
+                $organizedCategories[] = $category;
+                $this->addSubcategories(
+                    $organizedCategories,
+                    $categoriesById,
+                    $category->Id
+                );
+            }
         }
     }
 
@@ -552,7 +614,10 @@ class ProductController extends BaseController
             unset($item->CarMakeId, $item->CarMakeName); // Remove redundant fields
 
             if ($item->CarModelYearFrom && $item->CarModelYearTO) {
-                $item->CarModelYearFromTo = explode("/", $item->CarModelYearFrom)[1] . "-" . explode("/", $item->CarModelYearTO)[1];
+                $item->CarModelYearFromTo =
+                    explode('/', $item->CarModelYearFrom)[1] .
+                    '-' .
+                    explode('/', $item->CarModelYearTO)[1];
             } else {
                 $item->CarModelYearFromTo = '-';
             }
@@ -606,7 +671,7 @@ class ProductController extends BaseController
         } catch (Exception $e) {
             return [
                 'exception' =>
-                $e->getMessage() .
+                    $e->getMessage() .
                     ' on line ' .
                     $e->getLine() .
                     ' in file ' .
