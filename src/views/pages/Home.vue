@@ -11,6 +11,7 @@ import {
 import { mapStores } from 'pinia';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
+import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 
 // components
 import Header from '@/components/Header.vue';
@@ -57,7 +58,7 @@ export default {
         };
     },
     computed: {
-        ...mapStores(useCategoryStore, useUIStore),
+        ...mapStores(useCategoryStore, useUIStore, useBreadcrumbsStore),
     },
     mounted() {
         this.loadMainCategories();
@@ -84,10 +85,19 @@ export default {
         },
 
         handleCategoryClick(category) {
-            this.categoryStore.addHistory(category);
+            // console.log({ category });
+
+            // const breadcrumbs = category.breadcrumb
+            //     .split()
+            //     .map((b) => ({ id: category.id, breadcrumb: b }));
+
+            // console.log({ breadcrumbs });
+
+            // // this.useBreadcrumbsStore.set();
 
             this.$router.push({
-                path: `/${slug(category.name)}`,
+                path: '/category',
+                query: { id: String(category.id) },
             });
         },
 

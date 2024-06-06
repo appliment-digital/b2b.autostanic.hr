@@ -106,6 +106,9 @@ export default {
 
             ProductService.getProductById(id)
                 .then((response) => {
+                    console.log('loading product', {response});
+
+
                     if (response.data) {
                         this.product = camelcaseKeys(response.data);
                     }
@@ -182,21 +185,6 @@ export default {
                 detail: 'Proizvod dodan!',
                 life: 2000,
             });
-        },
-
-        // handleRemoveProductFromShoppingCart() {
-        //     this.$toast.add({
-        //         severity: 'info',
-        //         summary: 'Košarica',
-        //         detail: 'Proizvod uklonjen!',
-        //         life: 2000,
-        //     });
-
-        //     this.shoppingCartStore.delete(this.product);
-        // },
-
-        handlePrice(price, discount) {
-            return stringifyProductPrice(calcProductPrice(price, discount));
         },
 
         getProductQuantity() {
@@ -302,18 +290,18 @@ export default {
                     class="mt-4 flex flex-column row-gap-1 justify-content-between"
                 >
                     <div>
-                        <span class="mb-0 mr-2 mb-2 text-lg"
-                            >Veleprodajna cijena (VPC):</span
+                        <span class="mb-0 mr-2 mb-2 text-lg font-bold"
+                            >Veleprodajna cijena <span class="font-bold">(VPC <span class="">s rabatom</span>):</span></span
                         >
-                        <span v-if="details" class="font-bold">
+                        <span v-if="details" class="font-bold text-green-500">
                             {{ product.priceWithDiscountString }} €</span
                         >
                     </div>
-                    <div>
-                        <span class="m-0 mr-2 mb-2 text-lg"
+                    <div class="text-sm">
+                        <span class="m-0 mr-2 mb-2 "
                             >Maloprodajna cijena (MPC):
                         </span>
-                        <span v-if="details" class="font-bold"
+                        <span v-if="details" 
                             >{{ product.priceString }} €</span
                         >
                     </div>
@@ -361,6 +349,7 @@ export default {
                                 @click="itemQuantity++"
                             />
                             <Button
+                                :disabled="product.stockQuantity == 0"
                                 class="button--no-shadow ml-1 text-sm"
                                 label="Dodaj u košaricu"
                                 severity="primary"
