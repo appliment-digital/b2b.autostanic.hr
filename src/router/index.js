@@ -60,12 +60,16 @@ const routes = [
                 component: Home,
             },
             {
-                path: '/hvala',
+                path: '/thank-you',
                 component: ThankYou,
             },
             {
-                path: '/' + encodeURI('košarica'),
+                path: '/shopping-cart',
                 component: ShoppingCart,
+            },
+            {
+                path: '/category',
+                component: Category,
             },
             {
                 path: '/:product',
@@ -73,18 +77,18 @@ const routes = [
             },
 
             // create routes for all top-level categories
-            ...categoryRoutes.map((category) => {
-                return {
-                    path: `/${slug(category.name)}`,
-                    component: Category,
-                    children: [
-                        {
-                            path: `/${slug(category.name)}/:subcategory(.*)`,
-                            component: Category,
-                        },
-                    ],
-                };
-            }),
+            // ...categoryRoutes.map((category) => {
+            //     return {
+            //         path: '/:categoryId',
+            //         component: Category,
+                    // children: [
+                    //     {
+                    //         path: `/${slug(category.name)}/:subcategory(.*)`,
+                    //         component: Category,
+                    //     },
+                    // ],
+                // };
+            // }),
         ],
     },
     {

@@ -66,25 +66,30 @@ export default {
             const cartTotal = this.shoppingCartStore.total;
 
             const discount = cartTotal * (userDiscount / 100);
-            const discountedAmount = cartTotal - discount;
 
-            const tax = discountedAmount * 0.25;
-            const totalAmount = discountedAmount + tax;
+            const cartTotalWithDiscount = cartTotal - discount;
+
+            const tax = cartTotalWithDiscount * 0.25;
+            const totalAmount = cartTotal - discount + tax;
 
             this.orderTotal = totalAmount;
 
             return [
                 {
-                    name: 'Ukupno',
+                    name: 'Ukupno bez rabata',
                     value: `${stringifyProductPrice(cartTotal)} €`,
                 },
                 {
                     name: `Rabat (${userDiscount}%)`,
-                    value: `${stringifyProductPrice(discountedAmount)} €`,
+                    value: `- ${stringifyProductPrice(discount)} €`,
+                },
+                {
+                    name: 'Ukupno s rabatom',
+                    value: `${stringifyProductPrice(cartTotalWithDiscount)} €`,
                 },
                 {
                     name: 'PDV (25%)',
-                    value: `${stringifyProductPrice(tax)} €`,
+                    value: `+ ${stringifyProductPrice(tax)} €`,
                 },
                 {
                     name: 'Sveukupno',
@@ -241,7 +246,7 @@ export default {
                     <template #body="{ data }">
                         <img
                             :src="data.picture"
-                            style="user-select: none"
+                            style="user-select: none; max-width: 44px; object-fit: contain;"
                             class="table-image border-round cursor-pointer"
                             @click="handleProductTableItemClick(data)"
                         />
@@ -258,9 +263,12 @@ export default {
                     </template>
                 </Column>
 
-                <Column field="price" header="Cijena" style="min-width: 100px">
+                <Column field="price">
+                    <template #header>
+                        <span>Cijena <span class="text-green-500">(VPC)</span></span>
+                    </template>
                     <template #body="{ data }">
-                        <span>{{ handlePrice(data.price) }} €</span>
+                        <span>{{ handlePrice(data.priceWithDiscount) }} €</span>
                     </template>
                 </Column>
 
@@ -279,11 +287,14 @@ export default {
                     </template>
                 </Column>
 
-                <Column header="Ukupno" style="min-width: 100px">
+                <Column>
+                    <template #header>
+                        <span>Ukupno <span class="text-green-500">(VPC)</span></span>
+                    </template>
                     <template #body="{ data }">
                         <span style="user-select: none"
                             >{{
-                                handlePrice(data.price * data.quantity)
+                                handlePrice(data.priceWithDiscount * data.quantity)
                             }}
                             €</span
                         >

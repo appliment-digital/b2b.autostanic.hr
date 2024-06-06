@@ -1,5 +1,6 @@
 <script>
 // lib
+import slug from 'slug';
 import camelcaseKeys from 'camelcase-keys';
 
 // utils
@@ -7,6 +8,7 @@ import {
     capitalizeFirstLetter,
     calcProductPrice,
     stringifyProductPrice,
+    setSlugCharMap,
 } from '@/utils';
 
 // pinia
@@ -24,6 +26,9 @@ import Query from '@/components/Query.vue';
 
 // services
 import ProductService from '@/service/ProductService';
+
+// modify slug library (add croatian chars)
+setSlugCharMap(slug);
 
 export default {
     components: {
@@ -110,11 +115,33 @@ export default {
 
             ProductService.getProductById(id)
                 .then((response) => {
-                    console.log('loading product', {response});
-
+                    console.log('loading product', { response });
 
                     if (response.data) {
-                        this.product = camelcaseKeys(response.data);
+                        this.product = camelcaseKeys(response.data, {
+                            deep: true,
+                        });
+
+                        // make breadcrumbs
+                        const ids = this.product.categories
+                            .reverse()
+                            .map((c) => c.id);
+                        const breadcrumbs = this.product.categories.map(
+                            (c, i) => ({
+                                label: c.name.trim(),
+                                route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
+                            }),
+                        );
+                        breadcrumbs.push({
+                            icon: 'pi pi-car',
+                            // label:
+                            //     this.product.name.charAt(0).toUpperCase() +
+                            //     this.product.name.slice(1),
+                            route: `/${slug(this.product.name)}?id=${this.product.id}`,
+                        });
+                        console.log({breadcrumbs});
+
+                        this.breadcrumbsStore.set(breadcrumbs);
                     }
                 })
                 .catch((err) => console.error(err));
@@ -299,19 +326,20 @@ export default {
                 >
                     <div>
                         <span class="mb-0 mr-2 mb-2 text-lg font-bold"
-                            >Veleprodajna cijena <span class="font-bold">(VPC <span class="">s rabatom</span>):</span></span
+                            >Veleprodajna cijena
+                            <span class="font-bold"
+                                >(VPC <span class="">s rabatom</span>):</span
+                            ></span
                         >
                         <span v-if="details" class="font-bold text-green-500">
                             {{ product.priceWithDiscountString }} €</span
                         >
                     </div>
                     <div class="text-sm">
-                        <span class="m-0 mr-2 mb-2 "
+                        <span class="m-0 mr-2 mb-2"
                             >Maloprodajna cijena (MPC):
                         </span>
-                        <span v-if="details" 
-                            >{{ product.priceString }} €</span
-                        >
+                        <span v-if="details">{{ product.priceString }} €</span>
                     </div>
                 </div>
 
