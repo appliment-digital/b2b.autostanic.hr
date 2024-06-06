@@ -226,6 +226,33 @@ class ProductController extends BaseController
                 })
                 ->toArray();
 
+            // Fetch categories details
+            $categories = collect();
+            $categoryIdsToFetch = [$productsQuery[0]->CategoryId];
+
+            while (!empty($categoryIdsToFetch)) {
+                $fetchedCategories = DB::connection('webshopdb')
+                    ->table('dbo.Category')
+                    ->select(
+                        'Category.Id',
+                        'Category.Name',
+                        'Category.ParentCategoryId'
+                    )
+                    ->whereIn('Category.Id', $categoryIdsToFetch)
+                    ->get();
+
+                $categories = $categories->merge($fetchedCategories);
+
+                $categoryIdsToFetch = $fetchedCategories
+                    ->pluck('ParentCategoryId')
+                    ->filter(function ($value) {
+                        return !is_null($value);
+                    })
+                    ->unique()
+                    ->diff($categories->pluck('Id'))
+                    ->all();
+            }
+
             $manufacturersQuery = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->select('ManufacturerName')
@@ -284,6 +311,7 @@ class ProductController extends BaseController
                 ),
                 'productCount' => $productCount,
                 'categoryName' => $categoryName,
+                'categories' => $categories,
             ];
 
             return $this->convertKeysToCamelCase($response);

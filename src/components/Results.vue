@@ -479,28 +479,26 @@ export default {
                                     >
                                         <div class="flex flex-column row-gap-1">
                                             <span
+                                                class="text-green-500 font-bold text-xl"
                                                 ><span
-                                                    class="inline-block"
+                                                    class="inline-block mr-1"
                                                     style="width: 40px"
                                                     >VPC:
                                                 </span>
-                                                <span
-                                                    class="text-green-500 mr-2 font-bold"
-                                                >
+                                                <span class="mr-2">
                                                     {{
                                                         product.priceWithDiscountString
                                                     }}
                                                     €
                                                 </span>
                                             </span>
-                                            <span class=""
+                                            <span class="text-blue-500"
                                                 ><span
                                                     class="inline-block"
                                                     style="width: 40px"
                                                     >MPC:
                                                 </span>
-                                                <span
-                                                    class="text-blue-500 font-bold"
+                                                <span class=""
                                                     >{{
                                                         product.priceString
                                                     }}
