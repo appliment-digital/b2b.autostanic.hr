@@ -88,4 +88,25 @@ export default class ProductService {
             object,
         );
     }
+
+    static async getProductsByCodeAndTerm(
+        page,
+        pageSize,
+        code,
+        term,
+        filter = {},
+    ) {
+        return axios.post(
+            this.apiResourceEndpoint +
+                '/getProductsByCodeAndTerm/' +
+                page +
+                '/' +
+                pageSize +
+                '/' +
+                code +
+                '/' +
+                term,
+            filter,
+        );
+    }
 }
