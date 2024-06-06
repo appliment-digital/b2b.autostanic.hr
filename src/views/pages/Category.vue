@@ -15,10 +15,12 @@ import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
+import { useBreadcrumbsStore } from '@/store/breadcrumbsStore';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
 import ProductService from '@/service/ProductService.js';
+import camelcaseKeys from 'camelcase-keys';
 
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
@@ -48,48 +50,56 @@ export default {
             useUserStore,
             useCategoryStore,
             useUIStore,
+            useBreadcrumbsStore,
         ),
     },
     watch: {
-        '$route.path': function () {
-            this.handleNavigation();
+        '$route.query.id': function () {
+            const ids = this.$route.query.id.split('&');
 
-            // hide product results and show category cards
+            this.handleNavigation(ids[ids.length - 1]);
+
             this.products = null;
         },
     },
     mounted() {
-        this.handleNavigation();
+        const ids = this.$route.query.id.split('&');
+        this.handleNavigation(ids[ids.length - 1]);
     },
     methods: {
         /**
          * Handle navigating categories.
          * Get category data from history (e.g. /karoserija/retrovizori --> retrovizori).
          */
-        handleNavigation() {
-            const category = this.getCategoryDataFromHistory();
-
+        handleNavigation(id) {
             this.UIStore.setIsDataLoading(true);
 
-            CategoryService.getSubcategories(category.id)
+            CategoryService.getSubcategories(id)
                 .then((response) => {
                     if (response.data.length) {
+                        console.log({ response });
+
+                        // make breadcrumbs
+                        const ids = this.$route.query.id.split('&');
+                        const breadcrumbs = response.data[0].breadcrumb
+                            .split('>')
+                            .slice(0, -1)
+                            .map((b, i) => ({
+                                label: b.trim(),
+                                route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
+                            }));
+
+                        this.breadcrumbsStore.set(breadcrumbs);
+
+                        console.log({ breadcrumbs });
+
                         this.UIStore.setIsDataLoading(false);
                         this.subcategories = response.data;
                     } else {
-                        this.getProducts(category.id);
+                        this.getProducts(id);
                     }
                 })
                 .catch((err) => console.error(err));
-        },
-
-        /**
-         * Get category data fronm history (e.g. /karoserija/retrovizori --> retrovizori).
-         */
-        getCategoryDataFromHistory() {
-            return this.categoryStore.history.find(
-                (entry) => entry.url === getLastUrlPart(this.$route.path),
-            );
         },
 
         /**
@@ -101,11 +111,24 @@ export default {
             ProductService.getProductsByCategoryId(
                 id,
                 this.page.current,
-                this.page.size, 
+                this.page.size,
                 filters,
             )
                 .then((response) => {
                     const { data } = response;
+                    console.log({ response });
+
+                    // make breadcrumbs
+                    const ids = this.$route.query.id.split('&');
+                    const breadcrumbs = camelcaseKeys(data.categories).reverse().map(
+                        (c, i) => ({
+                            label: c.name.trim(),
+                            route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
+                        }),
+                    )
+
+                    console.log({ breadcrumbs });
+                    this.breadcrumbsStore.set(breadcrumbs);
 
                     // store response data
                     this.products = data.products;
@@ -132,11 +155,10 @@ export default {
             // set product count to display on results page
             this.productCount = subcategory.productCount;
 
-            // store
-            this.categoryStore.setSelectedCategory(subcategory);
-            this.categoryStore.addHistory(subcategory);
-
-            this.$router.push(`${this.$route.path}/${slug(subcategory.name)}`);
+            this.$router.push({
+                path: '/category',
+                query: { id: `${this.$route.query.id}&${subcategory.id}` },
+            });
         },
 
         handleResultsPageChange(event, filters) {

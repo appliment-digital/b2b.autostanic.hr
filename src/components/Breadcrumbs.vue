@@ -26,66 +26,72 @@ export default {
         ...mapStores(useBreadcrumbsStore),
     },
     watch: {
-        '$route.path': function (newPath) {
-            this.setCrumbs(newPath);
-        }
+        '$route.path': function (x, y) {
+            console.log({x, y});
+
+        },
+
+        'breadcrumbsStore.current': function (newCrumbs) {
+            console.log({ newCrumbs });
+            this.items = newCrumbs;
+        },
     },
     mounted() {
-        this.setCrumbs(this.$route.path);
+        // this.setCrumbs(this.$route.path);
     },
     methods: {
-        setCrumbs(path) {
-            if (this.$route.params['product']) {
-                this.makeProductCrumbs();
-            } else {
-                this.makeCrumbs(path);
-            }
+        // setCrumbs(path) {
+        //     if (this.$route.params['product']) {
+        //         this.makeProductCrumbs();
+        //     } else {
+        //         this.makeCrumbs(path);
+        //     }
 
-            this.breadcrumbsStore.set(this.items);
-        },
+        //     this.breadcrumbsStore.set(this.items);
+        // },
 
-        makeProductCrumbs() {
-            const { id } = this.$route.query;
+        // makeProductCrumbs() {
+        //     const { id } = this.$route.query;
 
-            const product = {
-                id,
-                name: this.$route.params.product,
-                breadcrumbs: this.breadcrumbsStore.products[id],
-            };
+        //     const product = {
+        //         id,
+        //         name: this.$route.params.product,
+        //         breadcrumbs: this.breadcrumbsStore.products[id],
+        //     };
 
-            if (product.breadcrumbs) {
-                this.items = product.breadcrumbs;
-            } else {
-                this.items = this.breadcrumbsStore.current;
-            }
+        //     if (product.breadcrumbs) {
+        //         this.items = product.breadcrumbs;
+        //     } else {
+        //         this.items = this.breadcrumbsStore.current;
+        //     }
 
-            const isProductIconInBreadcrumbs = this.items.find((entry) => {
-                return entry.icon === 'pi pi-car';
-            });
+        //     const isProductIconInBreadcrumbs = this.items.find((entry) => {
+        //         return entry.icon === 'pi pi-car';
+        //     });
 
-            if (!isProductIconInBreadcrumbs) {
-                this.items.push({
-                    icon: 'pi pi-car',
-                    route: `/${slug(product.name)}?id=${product.id}`,
-                });
-            }
-        },
+        //     if (!isProductIconInBreadcrumbs) {
+        //         this.items.push({
+        //             icon: 'pi pi-car',
+        //             route: `/${slug(product.name)}?id=${product.id}`,
+        //         });
+        //     }
+        // },
 
-        makeCrumbs(path) {
-            const fullPath = decodeURIComponent(path);
+        // makeCrumbs(path) {
+        //     const fullPath = decodeURIComponent(path);
 
-            const parts = fullPath.slice(1).split('/');
+        //     const parts = fullPath.slice(1).split('/');
 
-            let url = '';
-            this.items = parts.map((part) => {
-                url += `/${part}`;
+        //     let url = '';
+        //     this.items = parts.map((part) => {
+        //         url += `/${part}`;
 
-                return {
-                    label: makeBreadcrumb(part),
-                    route: `${url}`,
-                };
-            });
-        },
+        //         return {
+        //             label: makeBreadcrumb(part),
+        //             route: `${url}`,
+        //         };
+        //     });
+        // },
 
         handleBreadcrumbsNavigate(e, item, navigate) {
             e.preventDefault();
@@ -112,10 +118,7 @@ export default {
                     @click="(e) => handleBreadcrumbsNavigate(e, item, navigate)"
                 >
                     <span :class="[item.icon, 'text-800']" />
-                    <span
-                        class="text-800"
-                        >{{ item.label }}</span
-                    >
+                    <span class="text-800">{{ item.label }}</span>
                 </a>
             </RouterLink>
             <a
