@@ -58,13 +58,24 @@ class UserController extends BaseController
 
     private function generateRandomPassword($length = 12)
     {
-        $characters =
-            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-_';
+        $alphabet =
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $symbols = '!@#$%^&*()-_';
+
         $password = '';
-        $charactersLength = strlen($characters);
+        $alphabetLength = strlen($alphabet);
+        $symbolsLength = strlen($symbols);
+
+        $symbolPosition = rand(0, $length - 1);
+
         for ($i = 0; $i < $length; $i++) {
-            $password .= $characters[rand(0, $charactersLength - 1)];
+            if ($i === $symbolPosition) {
+                $password .= $symbols[rand(0, $symbolsLength - 1)];
+            } else {
+                $password .= $alphabet[rand(0, $alphabetLength - 1)];
+            }
         }
+
         return $password;
     }
 
@@ -93,7 +104,7 @@ class UserController extends BaseController
             Mail::send('emails.access_data', $userData, function (
                 $message
             ) use ($userData) {
-                $message->from('sales@autostanic.hr', 'Pristupni podaci');
+                $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
                 $message->to($userData['email'], $userData['full_name']);
                 $message->subject('Pristupni podaci');
             });

@@ -55,6 +55,13 @@ export default {
             categories: null,
             news,
             showQueryModal: false,
+            searchCode: [
+                { name: 'Broj artikla' },
+                { name: 'Broj dijela' },
+                { name: 'Šifra motora' },
+                { name: 'Šifra mjenjača' },
+            ],
+            selectedCode: null,
         };
     },
     computed: {
@@ -62,6 +69,11 @@ export default {
     },
     mounted() {
         this.loadMainCategories();
+    },
+    watch: {
+        selectedCode() {
+            console.log(this.selectedCode);
+        },
     },
     methods: {
         loadMainCategories() {
@@ -118,6 +130,8 @@ export default {
         handleQueryModalClick() {
             this.showQueryModal = !this.showQueryModal;
         },
+
+        getSearchResults() {},
     },
 };
 </script>
@@ -148,47 +162,21 @@ export default {
                 <div
                     class="p-0 flex flex-column column-gap-3 sm:col sm:flex-row"
                 >
-                    <div class="flex mb-3 md:mb-3 align-items-center">
-                        <Checkbox
-                            v-model="pizza"
-                            inputId="ingredient1"
-                            name="pizza"
-                            value="Cheese"
-                        />
-                        <label for="ingredient1" class="ml-2"
-                            >Broj artikla</label
+                    <div class="flex flex-row gap-3">
+                        <div
+                            v-for="code in searchCode"
+                            class="flex align-items-center"
                         >
-                    </div>
-                    <div class="flex mb-3 md:mb-3 align-items-center">
-                        <Checkbox
-                            v-model="pizza"
-                            inputId="ingredient1"
-                            name="pizza"
-                            value="Cheese"
-                        />
-                        <label for="ingredient1" class="ml-2">Broj djela</label>
-                    </div>
-                    <div class="flex mb-3 md:mb-3 align-items-center">
-                        <Checkbox
-                            v-model="pizza"
-                            inputId="ingredient1"
-                            name="pizza"
-                            value="Cheese"
-                        />
-                        <label for="ingredient1" class="ml-2"
-                            >Šifra motora</label
-                        >
-                    </div>
-                    <div class="flex align-items-center md:mb-3">
-                        <Checkbox
-                            v-model="pizza"
-                            inputId="ingredient1"
-                            name="pizza"
-                            value="Cheese"
-                        />
-                        <label for="ingredient1" class="ml-2"
-                            >Šifra mjenjača</label
-                        >
+                            <RadioButton
+                                v-model="selectedCode"
+                                :inputId="code"
+                                name="dynamic"
+                                :value="code"
+                            />
+                            <label :for="code" class="ml-2">{{
+                                code.name
+                            }}</label>
+                        </div>
                     </div>
                 </div>
 
@@ -199,11 +187,12 @@ export default {
                     <InputText
                         type="text"
                         class="w-20rem sm:w-full md:w-23rem"
-                        placeholder="Upišite svoj kod ovdje"
+                        placeholder="Pretraživanje..."
                     />
                     <Button
-                        label="pretraži"
+                        label="Pretraži"
                         class="button--submit block w-full sm:w-4 md:w-full lg:w-4"
+                        @click="getSearchResults()"
                     />
                 </div>
             </div>

@@ -53,7 +53,7 @@ class OrderController extends BaseController
         Mail::send('emails.order', $orderData, function ($message) use (
             $orderData
         ) {
-            $message->from('sales@autostanic.hr', $orderData['title']);
+            $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
             $message->to($orderData['email'], $orderData['full_name']);
             $message->subject($orderData['title']);
         });

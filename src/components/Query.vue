@@ -32,10 +32,12 @@ export default {
         closeDialog() {
             this.isDialogVisible = false;
             this.$emit('on-query-modal-click');
+            this.user.message = '';
         },
         sendQuery() {
             this.sendingQuery = true;
             bitrixService.sendQuery(this.user).then((response) => {
+                console.log(response.data);
                 if (response.data > 0) {
                     this.sendingQuery = false;
                     this.$toast.add({
@@ -62,13 +64,11 @@ export default {
 
 <template>
     <Dialog
-        modal
-        dismissableMask
-        closeOnEscape
+        v-model:visible="isDialogVisible"
         header="POŠALJITE UPIT"
-        :visible="isDialogVisible"
         :style="{ width: '30rem' }"
-        :filters="filters"
+        :modal="true"
+        :closable="false"
     >
         <div v-if="sendingQuery" class="card flex justify-content-center">
             <div class="flex justify-center">
@@ -83,17 +83,18 @@ export default {
             </div>
         </div>
         <div v-else>
-            <p class="text-red-500">
-                Polja označena s zvijezdicom(*) su obavezna!
-            </p>
-            <label>Ime<span class="text-red-500">*</span></label>
-            <InputText v-model="user.name" class="w-full mt-2 mb-3" />
+            <label>Ime</label>
+            <InputText v-model="user.name" disabled class="w-full mt-2 mb-3" />
 
-            <label>Prezime<span class="text-red-500">*</span></label>
-            <InputText v-model="user.last_name" class="w-full mt-2 mb-3" />
+            <label>Prezime</label>
+            <InputText
+                v-model="user.last_name"
+                disabled
+                class="w-full mt-2 mb-3"
+            />
 
-            <label>E-mail<span class="text-red-500">*</span></label>
-            <InputText v-model="user.email" class="w-full mt-2 mb-3" />
+            <label>E-mail</label>
+            <InputText v-model="user.email" disabled class="w-full mt-2 mb-3" />
 
             <label>Upit<span class="text-red-500">*</span></label>
             <Textarea
@@ -104,7 +105,7 @@ export default {
                 placeholder="Vaš upit..."
             />
 
-            <div class="flex justify-content-end">
+            <div class="flex justify-content-between">
                 <Button
                     class="block mt-5 mr-2"
                     severity="secondary"
@@ -113,11 +114,20 @@ export default {
                     @click="closeDialog()"
                 />
                 <Button
+                    v-if="user.message"
                     class="block mt-5"
                     severity="success"
                     label="Spremi"
                     style="min-width: 100px"
                     @click="sendQuery()"
+                />
+                <Button
+                    v-else
+                    class="block mt-5"
+                    severity="success"
+                    label="Spremi"
+                    style="min-width: 100px"
+                    disabled
                 />
             </div>
         </div>
