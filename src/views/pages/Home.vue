@@ -19,6 +19,7 @@ import Query from '@/components/Query.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
+import ProductService from '@/service/ProductService.js';
 
 setSlugCharMap(slug);
 
@@ -55,13 +56,14 @@ export default {
             categories: null,
             news,
             showQueryModal: false,
-            searchCode: [
-                { name: 'Broj artikla' },
-                { name: 'Broj dijela' },
-                { name: 'Šifra motora' },
-                { name: 'Šifra mjenjača' },
+            searchCodeType: [
+                { name: 'Broj artikla', key: 'sku' },
+                { name: 'Broj dijela', key: 'oem' },
+                { name: 'Šifra motora', key: 'engine' },
+                { name: 'Šifra mjenjača', key: 'gearbox' },
             ],
-            selectedCode: null,
+            selectedCode: {},
+            searchTerm: null,
         };
     },
     computed: {
@@ -131,7 +133,19 @@ export default {
             this.showQueryModal = !this.showQueryModal;
         },
 
-        getSearchResults() {},
+        getSearchResults() {
+            ProductService.getProductsByCodeAndTerm(
+                1,
+                24,
+                this.selectedCode.key,
+                this.searchTerm,
+                {},
+            )
+                .then((response) => {
+                    console.log(response);
+                })
+                .catch((err) => console.error(err));
+        },
     },
 };
 </script>
@@ -164,7 +178,7 @@ export default {
                 >
                     <div class="flex flex-row gap-3">
                         <div
-                            v-for="code in searchCode"
+                            v-for="code in searchCodeType"
                             class="flex align-items-center"
                         >
                             <RadioButton
@@ -185,6 +199,7 @@ export default {
                     class="flex flex-column justify-content-between mt-2 gap-2 sm:flex-row md:flex-column lg:flex-row"
                 >
                     <InputText
+                        v-model="searchTerm"
                         type="text"
                         class="w-20rem sm:w-full md:w-23rem"
                         placeholder="Pretraživanje..."

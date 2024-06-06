@@ -707,4 +707,305 @@ class ProductController extends BaseController
             ];
         }
     }
+
+    public function getProductsByCodeAndTerm(
+        $page,
+        $pageSize,
+        $code,
+        $term,
+        Request $filters
+    ) {
+        try {
+            $offset = ($page - 1) * $pageSize;
+
+            $productCount = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->where('Product.Price', '>', 0)
+                ->where('Product_Category_Mapping.Deleted', 0)
+                // codes
+                // SKU
+                ->when($code == 'sku', function ($query) use ($term) {
+                    return $query->where('Product.sku', '=', $term);
+                })
+                // filters
+                ->when(
+                    $filters->has('manufacturerName') &&
+                        $filters->manufacturerName !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ManufacturerName',
+                            $filters->manufacturerName
+                        );
+                    }
+                )
+                ->when(
+                    $filters->has('statusId') && $filters->statusId !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ProductStatusId',
+                            $filters->statusId
+                        );
+                    }
+                )
+                ->distinct('Product.Id')
+                ->count('Product.Id');
+
+            $distinctProductIds = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->select('Product.Id')
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->where('Product.Price', '>', 0)
+                ->where('Product_Category_Mapping.Deleted', 0)
+                ->when($code == 'sku', function ($query) use ($term) {
+                    return $query->where('Product.sku', $term);
+                })
+                ->when(
+                    $filters->has('manufacturerName') &&
+                        $filters->manufacturerName !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ManufacturerName',
+                            $filters->manufacturerName
+                        );
+                    }
+                )
+                ->when(
+                    $filters->has('statusId') && $filters->statusId !== [],
+                    function ($query) use ($filters) {
+                        return $query->whereIn(
+                            'Product.ProductStatusId',
+                            $filters->statusId
+                        );
+                    }
+                )
+                ->groupBy('Product.Id')
+                ->pluck('Product.Id');
+
+            $productsQuery = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->select(
+                    'Product.Id',
+                    'Product.Name',
+                    'Product.Sku',
+                    'Product.StockQuantity',
+                    'Product.ShortDescription',
+                    'Product.FullDescription',
+                    'Product.Price',
+                    'Product.IsNewPart',
+                    'Product.IsUsedPart',
+                    'Product.ManufacturerName',
+                    'Product.SupplierId',
+                    'Product_Category_Mapping.CategoryId',
+                    'Picture.SeoFilename',
+                    'Picture.MimeType',
+                    'Product_Picture_Mapping.PictureId as PictureId'
+                )
+                ->join(
+                    'Product_Category_Mapping',
+                    'Product.Id',
+                    '=',
+                    'Product_Category_Mapping.ProductId'
+                )
+                ->leftJoin('Product_Picture_Mapping', function ($join) {
+                    $join
+                        ->on(
+                            'Product.Id',
+                            '=',
+                            'Product_Picture_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_Picture_Mapping.Id',
+                            '=',
+                            DB::raw(
+                                '(SELECT MIN(Id) FROM Product_Picture_Mapping WHERE ProductId = Product.Id)'
+                            )
+                        );
+                })
+                ->leftJoin(
+                    'Picture',
+                    'Product_Picture_Mapping.PictureId',
+                    '=',
+                    'Picture.Id'
+                )
+                ->whereIn('Product.Id', $distinctProductIds)
+                ->groupBy(
+                    'Product.Id',
+                    'Product.Name',
+                    'Product.Sku',
+                    'Product.StockQuantity',
+                    'Product.ShortDescription',
+                    'Product.FullDescription',
+                    'Product.Price',
+                    'Product.IsNewPart',
+                    'Product.IsUsedPart',
+                    'Product.ManufacturerName',
+                    'Product.SupplierId',
+                    'Product_Category_Mapping.CategoryId',
+                    'Picture.SeoFilename',
+                    'Picture.MimeType',
+                    'Product_Picture_Mapping.PictureId'
+                )
+                ->orderBy('Product.IsNewPart', 'desc')
+                ->orderBy('Product.Price', 'asc')
+                ->offset($offset)
+                ->limit($pageSize)
+                ->first()
+                ->map(function ($product) {
+                    // Fetch supplier details
+                    $supplierDetails = SuppliersDetail::where(
+                        'web_db_supplier_id',
+                        $product->SupplierId
+                    )
+                        ->where('web_db_category_id', $product->CategoryId)
+                        ->select('id', 'mark_up', 'expenses')
+                        ->when(!is_null($product->Price), function (
+                            $query
+                        ) use ($product) {
+                            return $query
+                                ->where(
+                                    'min_product_cost',
+                                    '<=',
+                                    $product->Price
+                                )
+                                ->where(
+                                    'max_product_cost',
+                                    '>=',
+                                    $product->Price
+                                );
+                        })
+                        ->first();
+
+                    // Calculate new price with mark up and expenses
+                    if ($supplierDetails) {
+                        $markup = $supplierDetails->mark_up ?? 0;
+                        $expenses = $supplierDetails->expenses ?? 0;
+                        $product->Price =
+                            $product->Price +
+                            $product->Price * ($markup / 100) +
+                            $expenses;
+                    }
+
+                    // Generate picture URL
+                    $pictureUrl = '';
+                    if (!is_null($product->PictureId)) {
+                        $paddedPictureId = str_pad(
+                            $product->PictureId,
+                            7,
+                            '0',
+                            STR_PAD_LEFT
+                        );
+                        $extension = explode('/', $product->MimeType);
+                        $fileExtension = end($extension);
+                        $pictureUrl = "https://www.autostanic.hr/content/images/thumbs/{$paddedPictureId}_{$product->SeoFilename}_280.{$fileExtension}";
+                    } else {
+                        $pictureUrl =
+                            'https://www.autostanic.hr/content/images/thumbs/default-image_280.png';
+                    }
+                    $product->pictureUrl = $pictureUrl;
+
+                    // Fetch discount for the current user
+                    $authUser = Auth::user();
+                    $discountPercentage =
+                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+
+                    // Calculate price with discount
+                    $product->PriceWithDiscount =
+                        $product->Price -
+                        $product->Price * ($discountPercentage / 100);
+
+                    $product->PriceWithDiscount = round(
+                        $product->PriceWithDiscount,
+                        2
+                    );
+
+                    $product->PriceString = number_format(
+                        $product->Price,
+                        2,
+                        ',',
+                        '.'
+                    );
+                    $product->PriceWithDiscountString = number_format(
+                        $product->PriceWithDiscount,
+                        2,
+                        ',',
+                        '.'
+                    );
+
+                    $product->Price = $product->Price;
+
+                    return $product;
+                })
+                ->toArray();
+
+            $manufacturersQuery = DB::connection('webshopdb')
+                ->table('dbo.Product')
+                ->select('ManufacturerName')
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                // codes
+                // SKU
+                ->when($code == 'sku', function ($query) use ($term) {
+                    return $query->where('Product.sku', $term);
+                })
+                ->orderBy('Product.ManufacturerName', 'asc')
+                ->groupBy('ManufacturerName');
+
+            // Query to get all unique product statuses for the category
+            $statusesQuery = DB::connection('webshopdb')
+                ->table('ProductStatus')
+                ->select('ProductStatus.Id', 'ProductStatus.Name')
+                ->join(
+                    'Product',
+                    'Product.ProductStatusId',
+                    '=',
+                    'ProductStatus.Id'
+                )
+                // codes
+                // SKU
+                ->when($code == 'sku', function ($query) use ($term) {
+                    return $query->where('Product.sku', $term);
+                })
+                ->where('Product.Deleted', 0)
+                ->where('Product.Published', 1)
+                ->orderBy('ProductStatus.Name', 'asc')
+                ->distinct()
+                ->get()
+                ->map(function ($status) {
+                    return [
+                        'id' => $status->Id,
+                        'name' => $status->Name,
+                    ];
+                });
+
+            $response = [
+                'products' => $this->convertKeysToCamelCase($productsQuery),
+                'status' => $this->convertKeysToCamelCase($statusesQuery),
+                'manufacturers' => $manufacturersQuery->pluck(
+                    'ManufacturerName'
+                ),
+                'productCount' => $productCount,
+            ];
+
+            return $this->convertKeysToCamelCase($response);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
 }

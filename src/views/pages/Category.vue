@@ -44,11 +44,7 @@ export default {
         };
     },
     computed: {
-        ...mapStores(
-            useUserStore,
-            useCategoryStore,
-            useUIStore,
-        ),
+        ...mapStores(useUserStore, useCategoryStore, useUIStore),
     },
     watch: {
         '$route.path': function () {
@@ -101,7 +97,7 @@ export default {
             ProductService.getProductsByCategoryId(
                 id,
                 this.page.current,
-                this.page.size, 
+                this.page.size,
                 filters,
             )
                 .then((response) => {
