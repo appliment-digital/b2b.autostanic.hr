@@ -109,6 +109,9 @@ export default {
             this.loadProductDetails(this.$route.query.id);
         }
     },
+    mounted() {
+        console.log('product mounted, current user: ', this.userStore.user);
+    },
     methods: {
         loadProduct(id) {
             this.UIStore.setIsDataLoading(true);
@@ -154,6 +157,8 @@ export default {
                         oemCodes: res.data.oemCodes,
                         carTypes: res.data.carTypes,
                     };
+
+                    console.log('product car types', this.details.carTypes);
 
                     this.UIStore.setIsDataLoading(false);
 
@@ -205,6 +210,7 @@ export default {
                 this.breadcrumbsStore.current,
             );
 
+            // this.shoppingCartStore.setUser(this.user)
             this.shoppingCartStore.add(productDetails);
 
             this.$toast.add({
@@ -287,7 +293,7 @@ export default {
                 >
 
                 <!-- Stock -->
-                <div class="mt-4 text-lg">
+                <div class="mt-4 text-normal">
                     <span class="block"
                         ><span
                             class="font-bold"
@@ -298,11 +304,11 @@ export default {
                             "
                             >{{ product.stockQuantity }}</span
                         >
-                        na stanju.</span
+                        na stanju kod dobavljača</span
                     >
                     <span class="mt-2 flex align-items-center"
                         ><i class="pi pi-truck text-blue-500"></i>
-                        <span class="ml-2">Besplatna dostava.</span></span
+                        <span class="ml-2">Besplatna dostava</span></span
                     >
                     <div class="mt-2" v-if="isProductInShoppingCart">
                         <i class="pi pi-shopping-cart text-blue-500"></i>
@@ -310,14 +316,14 @@ export default {
                             >Proizvod (<span class="text-blue-500 font-bold">{{
                                 getProductQuantity()
                             }}</span
-                            >)<span class="font-bold"> u košarici.</span></span
+                            >)<span class="font-bold"> u košarici</span></span
                         >
                     </div>
                     <div class="mt-2" v-else>
                         <i class="pi pi-shopping-cart text-red-500"></i>
                         <span class="ml-2"
                             >Proizvod <span class="font-normal">nije </span>u
-                            košarici.</span
+                            košarici</span
                         >
                     </div>
                 </div>
@@ -440,11 +446,11 @@ export default {
                             <div class="grid column-gap-6">
                                 <p
                                     class="mt-3 col"
-                                    v-html="product.shortDescription"
+                                    v-html="product.fullDescription"
                                 />
                                 <p
                                     class="mt-3 col"
-                                    v-html="product.fullDescription"
+                                    v-html="product.shortDescription"
                                 />
                             </div>
                         </TabPanel>
@@ -574,7 +580,7 @@ export default {
                             }"
                         >
                             <div
-                                v-if="details.carTypes?.length"
+                                v-if="details.carTypes && Object.keys(details.carTypes)?.length"
                                 v-for="(
                                     details, carType, index
                                 ) in details.carTypes"
