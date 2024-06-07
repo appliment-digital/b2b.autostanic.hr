@@ -18,9 +18,30 @@ export default {
         ...mapStores(useBreadcrumbsStore),
     },
     watch: {
+        '$route.path': function (newPath) {
+            if (newPath === '/shopping-cart') {
+                this.items = [
+                    {
+                        label: 'Košarica',
+                        route: '/shopping-cart',
+                    },
+                ];
+            }
+        },
+
         'breadcrumbsStore.current': function (newCrumbs) {
             this.items = newCrumbs;
         },
+    },
+    mounted() {
+        if (this.$route.path === '/shopping-cart') {
+            this.items = [
+                {
+                    label: 'Košarica',
+                    route: '/shopping-cart',
+                },
+            ];
+        }
     },
     methods: {
         handleBreadcrumbsNavigate(e, item, navigate) {

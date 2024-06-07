@@ -112,17 +112,6 @@ export default {
                 ];
             })
             .catch((err) => console.error(err));
-
-        // set breadcrumbs
-
-        const breadcrumbs = [
-            {
-                label: 'Košarica',
-                route: '/shopping-cart',
-            },
-        ];
-
-        this.breadcrumbsStore.set(breadcrumbs);
     },
     methods: {
         calcPrice(price, quantity) {
