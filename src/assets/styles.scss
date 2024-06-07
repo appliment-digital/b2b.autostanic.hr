@@ -83,8 +83,9 @@ body {
 
 #shopping-cart {
     table tr:last-child td {
-        border: none;
+        // border: none;
     }
+
     button[data-pc-name="incrementbutton"], 
     button[data-pc-name="decrementbutton"] {
         background-color: transparent;

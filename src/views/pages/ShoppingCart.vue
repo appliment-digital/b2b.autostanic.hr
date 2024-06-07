@@ -52,6 +52,8 @@ export default {
             orderTotal: 0,
 
             sendingOrder: false,
+
+            shoppingBill: null,
         };
     },
     computed: {
@@ -71,21 +73,13 @@ export default {
             const cartTotalWithDiscount = cartTotal - discount;
 
             const tax = cartTotalWithDiscount * 0.25;
-            const totalAmount = cartTotal - discount + tax;
+            const totalAmount = cartTotalWithDiscount + tax;
 
             this.orderTotal = totalAmount;
 
             return [
                 {
-                    name: 'Ukupno bez rabata',
-                    value: `${stringifyProductPrice(cartTotal)} €`,
-                },
-                {
-                    name: `Rabat (${userDiscount}%)`,
-                    value: `- ${stringifyProductPrice(discount)} €`,
-                },
-                {
-                    name: 'Ukupno s rabatom',
+                    name: 'Ukupno',
                     value: `${stringifyProductPrice(cartTotalWithDiscount)} €`,
                 },
                 {
@@ -93,13 +87,15 @@ export default {
                     value: `+ ${stringifyProductPrice(tax)} €`,
                 },
                 {
-                    name: 'Sveukupno',
+                    name: 'Ukupno s PDV-om',
                     value: `${stringifyProductPrice(totalAmount)} €`,
                 },
             ];
         },
     },
     mounted() {
+        // create delivery data
+
         UserService.getCurrentUserData()
             .then((response) => {
                 const data = camelcaseKeys(response.data);
@@ -117,6 +113,8 @@ export default {
             })
             .catch((err) => console.error(err));
 
+        // set breadcrumbs
+
         const breadcrumbs = [
             {
                 label: 'Košarica',
@@ -131,6 +129,17 @@ export default {
             return `${Number(quantity * price).toFixed(2)}`;
         },
 
+        updateNewProductQuantity(product) {
+            this.$toast.add({
+                severity: 'success',
+                summary: 'Košarica',
+                detail: 'Nova količina ažurirana!',
+                life: 2000,
+            });
+
+            this.shoppingCartStore.updateQuantity(product);
+        },
+
         handleNewProductQuantity(product) {
             if (product.quantity > Number(product.stockQuantity)) {
                 this.$toast.add({
@@ -141,16 +150,9 @@ export default {
                 });
 
                 product.quantity = Number(product.stockQuantity);
-            } else {
-                this.$toast.add({
-                    severity: 'success',
-                    summary: 'Košarica',
-                    detail: 'Nova količina ažurirana!',
-                    life: 2000,
-                });
             }
 
-            this.shoppingCartStore.updateQuantity(product);
+            // this.shoppingCartStore.updateQuantity(product);
         },
 
         handlePrice(price) {
@@ -233,7 +235,7 @@ export default {
         v-else
         class="grid grid-nogutter justify-content-between bg-white border-round p-5 border-1 border-100"
     >
-        <div class="col border-right-1 border-100 pr-5 mr-5">
+        <div class="col-12 border-100">
             <DataTable
                 id="shopping-cart"
                 :pt="{
@@ -274,18 +276,6 @@ export default {
                     </template>
                 </Column>
 
-                <Column field="price">
-                    <template #header>
-                        <span
-                            >Cijena
-                            <span class="text-green-500">(VPC)</span></span
-                        >
-                    </template>
-                    <template #body="{ data }">
-                        <span>{{ handlePrice(data.priceWithDiscount) }} €</span>
-                    </template>
-                </Column>
-
                 <Column header="Količina" id="xyz">
                     <template #body="{ data }">
                         <InputNumber
@@ -296,23 +286,59 @@ export default {
                             v-model="data.quantity"
                             inputStyle="width: 60px; text-align: center; box-shadow: none;"
                             @update:modelValue="handleNewProductQuantity(data)"
+                            @blur="updateNewProductQuantity(data)"
                             min="1"
                         />
                     </template>
                 </Column>
 
+                <Column field="price">
+                    <template #header>
+                        <span>VPC</span>
+                    </template>
+                    <template #body="{ data }">
+                        <span>{{ handlePrice(data.priceWithDiscount) }} €</span>
+                    </template>
+                </Column>
+
                 <Column>
                     <template #header>
-                        <span
-                            >Ukupno
-                            <span class="text-green-500">(VPC)</span></span
-                        >
+                        <span>Ukupno VPC</span>
                     </template>
                     <template #body="{ data }">
                         <span style="user-select: none"
                             >{{
                                 handlePrice(
                                     data.priceWithDiscount * data.quantity,
+                                )
+                            }}
+                            €</span
+                        >
+                    </template>
+                </Column>
+
+                <Column>
+                    <template #header>
+                        <span class="text-sm">Rabat</span>
+                    </template>
+                    <template #body>
+                        <span>{{ this.userStore.discount }}%</span>
+                    </template>
+                </Column>
+
+                <Column>
+                    <template #header>
+                        <span>Ukupno VPC s rabatom</span>
+                    </template>
+                    <template #body="{ data }">
+                        <span style="user-select: none"
+                            >{{
+                                handlePrice(
+                                    data.priceWithDiscount * data.quantity -
+                                        (data.priceWithDiscount *
+                                            data.quantity *
+                                            this.userStore.discount) /
+                                            100,
                                 )
                             }}
                             €</span
@@ -338,9 +364,9 @@ export default {
 
         <div
             v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
-            class="col-12 lg:col-3"
+            class="w-full mt-3 grid column-gap-6"
         >
-            <div class="max-w-24rem mx-auto">
+            <div class="col border-right-1 border-0">
                 <DataTable
                     :value="order"
                     :pt="{
@@ -370,14 +396,28 @@ export default {
                         </template>
                     </Column>
                 </DataTable>
+                <Textarea
+                    class="block w-full mt-3"
+                    v-model="shoppingNote"
+                    rows="5"
+                    placeholder="Napomena.."
+                />
+                <Button
+                    class="button--no-shadow w-full mt-3"
+                    label="Završi narudžbu"
+                    outlined
+                    severity="primary"
+                    @click="handleFinishOrderClick"
+                />
+            </div>
 
+            <div class="col">
                 <DataTable
                     v-if="
                         shoppingCartStore.cart &&
                         shoppingCartStore.cart.length &&
                         tableData.delivery
                     "
-                    class="mt-3"
                     :value="tableData.delivery"
                     :pt="{
                         column: {
@@ -407,23 +447,11 @@ export default {
                         </template>
                     </Column>
                 </DataTable>
-
-                <Textarea
-                    class="w-full mt-3"
-                    v-model="shoppingNote"
-                    rows="5"
-                    cols="30"
-                    placeholder="Napomena.."
-                />
-
-                <Button
-                    class="button--no-shadow w-full mt-3"
-                    label="Završi narudžbu"
-                    outlined
-                    severity="primary"
-                    @click="handleFinishOrderClick"
-                />
             </div>
+        </div>
+        <div class="w-full mt-2 grid column-gap-8">
+            <div class="col"></div>
+            <div class="col"></div>
         </div>
     </div>
 </template>

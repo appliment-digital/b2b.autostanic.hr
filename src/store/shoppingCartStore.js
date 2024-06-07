@@ -20,7 +20,7 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
 
         total: (state) => {
             return state.store.local.cart.reduce((total, product) => {
-                const amount = Number(product.price * product.quantity);
+                const amount = Number(product.priceWithDiscount * product.quantity);
 
                 total += amount;
 
