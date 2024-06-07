@@ -77,8 +77,6 @@ export default {
             CategoryService.getSubcategories(id)
                 .then((response) => {
                     if (response.data.length) {
-                        console.log({ response });
-
                         // make breadcrumbs
                         const ids = this.$route.query.id.split('&');
                         const breadcrumbs = response.data[0].breadcrumb
@@ -86,12 +84,10 @@ export default {
                             .slice(0, -1)
                             .map((b, i) => ({
                                 label: b.trim(),
-                                route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
+                                route: `/category?id=${ids.slice(0, i + 1).join(encodeURIComponent('&'))}`,
                             }));
 
                         this.breadcrumbsStore.set(breadcrumbs);
-
-                        console.log({ breadcrumbs });
 
                         this.UIStore.setIsDataLoading(false);
                         this.subcategories = response.data;
@@ -116,18 +112,16 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
-                    console.log({ response });
 
                     // make breadcrumbs
                     const ids = this.$route.query.id.split('&');
-                    const breadcrumbs = camelcaseKeys(data.categories).reverse().map(
-                        (c, i) => ({
+                    const breadcrumbs = camelcaseKeys(data.categories)
+                        .reverse()
+                        .map((c, i) => ({
                             label: c.name.trim(),
-                            route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
-                        }),
-                    )
+                            route: `/category?id=${ids.slice(0, i + 1).join(encodeURIComponent('&'))}`,
+                        }));
 
-                    console.log({ breadcrumbs });
                     this.breadcrumbsStore.set(breadcrumbs);
 
                     // store response data

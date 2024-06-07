@@ -50,6 +50,8 @@ export default {
             itemQuantity: 1,
 
             showQueryModal: false,
+
+            breadcrumbs: null,
         };
     },
     watch: {
@@ -100,14 +102,12 @@ export default {
         if (storedProduct) {
             this.product = storedProduct;
             this.details = storedProduct.details;
+
+            this.breadcrumbsStore.set(storedProduct.breadcrumbs);
         } else {
             this.loadProduct(this.$route.query.id);
             this.loadProductDetails(this.$route.query.id);
         }
-    },
-    updated() {
-        // console.log('this.availableQuantity', this.availableItemQuantity);
-        // console.log('this.itemQuantity', this.itemQuantity);
     },
     methods: {
         loadProduct(id) {
@@ -115,8 +115,6 @@ export default {
 
             ProductService.getProductById(id)
                 .then((response) => {
-                    console.log('loading product', { response });
-
                     if (response.data) {
                         this.product = camelcaseKeys(response.data, {
                             deep: true,
@@ -129,19 +127,17 @@ export default {
                         const breadcrumbs = this.product.categories.map(
                             (c, i) => ({
                                 label: c.name.trim(),
-                                route: `/category?id=${ids.slice(0, i + 1).join('&')}`,
+                                route: `/category?id=${ids.slice(0, i + 1).join(encodeURIComponent('&'))}`,
                             }),
                         );
                         breadcrumbs.push({
                             icon: 'pi pi-car',
-                            // label:
-                            //     this.product.name.charAt(0).toUpperCase() +
-                            //     this.product.name.slice(1),
                             route: `/${slug(this.product.name)}?id=${this.product.id}`,
                         });
-                        console.log({breadcrumbs});
 
-                        this.breadcrumbsStore.set(breadcrumbs);
+                        this.breadcrumbs = breadcrumbs;
+
+                        this.breadcrumbsStore.set(this.breadcrumbs);
                     }
                 })
                 .catch((err) => console.error(err));
@@ -165,6 +161,7 @@ export default {
                         this.productStore.add({
                             product: this.product,
                             details: this.details,
+                            breadcrumbs: this.breadcrumbs,
                         });
                     }
                 })
@@ -289,11 +286,8 @@ export default {
                     <span class="font-normal">{{ product.sku }}</span></span
                 >
 
-                <p class="mt-3" v-html="product.shortDescription" />
-                <p class="mt-3" v-html="product.fullDescription" />
-
                 <!-- Stock -->
-                <div class="mt-4" style="height: 66px">
+                <div class="mt-4 text-lg">
                     <span class="block"
                         ><span
                             class="font-bold"
@@ -319,24 +313,31 @@ export default {
                             >)<span class="font-bold"> u košarici.</span></span
                         >
                     </div>
+                    <div class="mt-2" v-else>
+                        <i class="pi pi-shopping-cart text-red-500"></i>
+                        <span class="ml-2"
+                            >Proizvod <span class="font-normal">nije </span>u
+                            košarici.</span
+                        >
+                    </div>
                 </div>
 
                 <div
-                    class="mt-4 flex flex-column row-gap-1 justify-content-between"
+                    class="mt-4 flex flex-column justify-content-between"
                 >
                     <div>
-                        <span class="mb-0 mr-2 mb-2 text-lg font-bold"
+                        <span class="mb-0 mr-2 text-lg font-bold"
                             >Veleprodajna cijena
                             <span class="font-bold"
                                 >(VPC <span class="">s rabatom</span>):</span
                             ></span
                         >
-                        <span v-if="details" class="font-bold text-green-500">
+                        <span v-if="details" class="text-lg font-bold text-green-500">
                             {{ product.priceWithDiscountString }} €</span
                         >
                     </div>
-                    <div class="text-sm">
-                        <span class="m-0 mr-2 mb-2"
+                    <div class="text-normal mt-2">
+                        <span class="mr-2 mb-2"
                             >Maloprodajna cijena (MPC):
                         </span>
                         <span v-if="details">{{ product.priceString }} €</span>
@@ -428,6 +429,25 @@ export default {
                             },
                         }"
                     >
+                        <TabPanel
+                            header="Opis"
+                            :pt="{
+                                headerAction: {
+                                    style: 'background-color: transparent',
+                                },
+                            }"
+                        >
+                            <div class="grid column-gap-6">
+                                <p
+                                    class="mt-3 col"
+                                    v-html="product.shortDescription"
+                                />
+                                <p
+                                    class="mt-3 col"
+                                    v-html="product.fullDescription"
+                                />
+                            </div>
+                        </TabPanel>
                         <TabPanel
                             header="Dodatne informacije"
                             :pt="{

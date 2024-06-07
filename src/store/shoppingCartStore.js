@@ -30,7 +30,6 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
     },
     actions: {
         add(product) {
-            console.log('adding product...');
             const entryId = this.store.local.cart.findIndex(
                 (entry) => entry.id == product.id,
             );
