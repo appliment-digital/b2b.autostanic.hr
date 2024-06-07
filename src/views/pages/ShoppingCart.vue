@@ -79,7 +79,7 @@ export default {
 
             return [
                 {
-                    name: 'Ukupno',
+                    name: 'Ukupno VPC s rabatom',
                     value: `${stringifyProductPrice(cartTotalWithDiscount)} €`,
                 },
                 {
@@ -87,7 +87,7 @@ export default {
                     value: `+ ${stringifyProductPrice(tax)} €`,
                 },
                 {
-                    name: 'Ukupno s PDV-om',
+                    name: 'Ukupno s rabatom i PDV-om',
                     value: `${stringifyProductPrice(totalAmount)} €`,
                 },
             ];
