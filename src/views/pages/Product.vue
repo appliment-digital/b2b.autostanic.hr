@@ -110,7 +110,7 @@ export default {
         }
     },
     mounted() {
-        console.log('product mounted, current user: ', this.userStore.user);
+        // console.log('product mounted, current user: ', this.userStore.user);
     },
     methods: {
         loadProduct(id) {

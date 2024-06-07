@@ -26,15 +26,15 @@ export default {
                         route: '/shopping-cart',
                     },
                 ];
-            }
-
-            if (newPath === '/searchcodes') {
+            } else if (newPath === '/searchcodes') {
                 this.items = [
                     {
                         label: 'Rezultati pretraživanja',
                         route: '',
                     },
                 ];
+            } else {
+                this.items = this.breadcrumbsStore.current;
             }
         },
 
