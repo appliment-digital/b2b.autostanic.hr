@@ -46,18 +46,18 @@ class OrderController extends BaseController
             ['orderData' => $orderData]
         );
 
-        if ($response['status'] === 'success' && $response['data'] > 0) {
+        if ($response['status'] === 'success' && $response['data']['ID'] > 0) {
             $orderData['title'] = 'Narudžba broj ' . $response['data']['ID'];
+
+            Mail::send('emails.order', $orderData, function ($message) use (
+                $orderData
+            ) {
+                $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
+                $message->to($orderData['email'], $orderData['full_name']);
+                $message->subject($orderData['title']);
+            });
+
+            return $response['data'];
         }
-
-        Mail::send('emails.order', $orderData, function ($message) use (
-            $orderData
-        ) {
-            $message->from('sales@autostanic.hr', 'B2B Auto Stanić');
-            $message->to($orderData['email'], $orderData['full_name']);
-            $message->subject($orderData['title']);
-        });
-
-        return $response['data'];
     }
 }

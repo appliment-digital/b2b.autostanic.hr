@@ -735,6 +735,36 @@ class ProductController extends BaseController
                 ->when($code == 'sku', function ($query) use ($term) {
                     return $query->where('Product.sku', '=', $term);
                 })
+                // OEM
+                ->when($code == 'oem', function ($query) use ($term) {
+                    // Assuming $term contains the OEM code you want to filter by
+                    return $query
+                        ->join(
+                            'Product_OEMCode_Mapping',
+                            'Product.Id',
+                            '=',
+                            'Product_OEMCode_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_OEMCode_Mapping.OEMCodeDenormalized',
+                            $term
+                        );
+                })
+                //engineCode or gearboxCode
+                ->when(
+                    $code == 'EngineCode' || $code == 'GearboxCode',
+                    function ($query) use ($code, $term) {
+                        return $query
+                            ->join(
+                                'B2B.ProductSearch',
+                                'Product.Id',
+                                '=',
+                                'ProductSearch.ProductId'
+                            )
+                            ->where('ProductSearch.EntityName', $code)
+                            ->where('ProductSearch.EntityValue', $term);
+                    }
+                )
                 // filters
                 ->when(
                     $filters->has('manufacturerName') &&
@@ -771,9 +801,40 @@ class ProductController extends BaseController
                 ->where('Product.Published', 1)
                 ->where('Product.Price', '>', 0)
                 ->where('Product_Category_Mapping.Deleted', 0)
+                //SKU
                 ->when($code == 'sku', function ($query) use ($term) {
                     return $query->where('Product.sku', $term);
                 })
+                //OEM
+                ->when($code == 'oem', function ($query) use ($term) {
+                    // Assuming $term contains the OEM code you want to filter by
+                    return $query
+                        ->join(
+                            'Product_OEMCode_Mapping',
+                            'Product.Id',
+                            '=',
+                            'Product_OEMCode_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_OEMCode_Mapping.OEMCodeDenormalized',
+                            $term
+                        );
+                })
+                //engineCode or gearboxCode
+                ->when(
+                    $code == 'EngineCode' || $code == 'GearboxCode',
+                    function ($query) use ($code, $term) {
+                        return $query
+                            ->join(
+                                'B2B.ProductSearch',
+                                'Product.Id',
+                                '=',
+                                'ProductSearch.ProductId'
+                            )
+                            ->where('ProductSearch.EntityName', $code)
+                            ->where('ProductSearch.EntityValue', $term);
+                    }
+                )
                 ->when(
                     $filters->has('manufacturerName') &&
                         $filters->manufacturerName !== [],
@@ -793,12 +854,12 @@ class ProductController extends BaseController
                         );
                     }
                 )
-                ->groupBy('Product.Id')
+                ->distinct()
                 ->pluck('Product.Id');
 
-            $productsQuery = DB::connection('webshopdb')
-                ->table('dbo.Product')
-                ->select(
+            $rankedProducts = DB::connection('webshopdb')
+                ->table('Product')
+                ->select([
                     'Product.Id',
                     'Product.Name',
                     'Product.Sku',
@@ -813,8 +874,11 @@ class ProductController extends BaseController
                     'Product_Category_Mapping.CategoryId',
                     'Picture.SeoFilename',
                     'Picture.MimeType',
-                    'Product_Picture_Mapping.PictureId as PictureId'
-                )
+                    'Product_Picture_Mapping.PictureId',
+                    DB::raw(
+                        'ROW_NUMBER() OVER (PARTITION BY Product.Id ORDER BY Product_Category_Mapping.CategoryId) AS RowNum'
+                    ),
+                ])
                 ->join(
                     'Product_Category_Mapping',
                     'Product.Id',
@@ -828,12 +892,8 @@ class ProductController extends BaseController
                             '=',
                             'Product_Picture_Mapping.ProductId'
                         )
-                        ->where(
-                            'Product_Picture_Mapping.Id',
-                            '=',
-                            DB::raw(
-                                '(SELECT MIN(Id) FROM Product_Picture_Mapping WHERE ProductId = Product.Id)'
-                            )
+                        ->whereRaw(
+                            'Product_Picture_Mapping.Id = (SELECT MIN(Id) FROM Product_Picture_Mapping WHERE ProductId = Product.Id)'
                         );
                 })
                 ->leftJoin(
@@ -842,29 +902,39 @@ class ProductController extends BaseController
                     '=',
                     'Picture.Id'
                 )
-                ->whereIn('Product.Id', $distinctProductIds)
-                ->groupBy(
-                    'Product.Id',
-                    'Product.Name',
-                    'Product.Sku',
-                    'Product.StockQuantity',
-                    'Product.ShortDescription',
-                    'Product.FullDescription',
-                    'Product.Price',
-                    'Product.IsNewPart',
-                    'Product.IsUsedPart',
-                    'Product.ManufacturerName',
-                    'Product.SupplierId',
-                    'Product_Category_Mapping.CategoryId',
-                    'Picture.SeoFilename',
-                    'Picture.MimeType',
-                    'Product_Picture_Mapping.PictureId'
+                ->whereIn('Product.Id', $distinctProductIds);
+
+            // Bind the 'RowNum' parameter to the subquery
+            $rankedProducts->addBinding([], 'select');
+
+            $productsQuery = DB::connection('webshopdb')
+                ->table(
+                    DB::raw("({$rankedProducts->toSql()}) as RankedProducts")
                 )
-                ->orderBy('Product.IsNewPart', 'desc')
-                ->orderBy('Product.Price', 'asc')
+                ->mergeBindings($rankedProducts)
+                ->select([
+                    'Id',
+                    'Name',
+                    'Sku',
+                    'StockQuantity',
+                    'ShortDescription',
+                    'FullDescription',
+                    'Price',
+                    'IsNewPart',
+                    'IsUsedPart',
+                    'ManufacturerName',
+                    'SupplierId',
+                    'CategoryId',
+                    'SeoFilename',
+                    'MimeType',
+                    'PictureId',
+                ])
+                ->where('RowNum', 1)
+                ->orderBy('IsNewPart', 'DESC')
+                ->orderBy('Price', 'ASC')
                 ->offset($offset)
                 ->limit($pageSize)
-                ->first()
+                ->get()
                 ->map(function ($product) {
                     // Fetch supplier details
                     $supplierDetails = SuppliersDetail::where(
@@ -927,7 +997,6 @@ class ProductController extends BaseController
                     $product->PriceWithDiscount =
                         $product->Price -
                         $product->Price * ($discountPercentage / 100);
-
                     $product->PriceWithDiscount = round(
                         $product->PriceWithDiscount,
                         2
@@ -958,10 +1027,40 @@ class ProductController extends BaseController
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 // codes
-                // SKU
+                //SKU
                 ->when($code == 'sku', function ($query) use ($term) {
                     return $query->where('Product.sku', $term);
                 })
+                //OEM
+                ->when($code == 'oem', function ($query) use ($term) {
+                    // Assuming $term contains the OEM code you want to filter by
+                    return $query
+                        ->join(
+                            'Product_OEMCode_Mapping',
+                            'Product.Id',
+                            '=',
+                            'Product_OEMCode_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_OEMCode_Mapping.OEMCodeDenormalized',
+                            $term
+                        );
+                })
+                //engineCode or gearboxCode
+                ->when(
+                    $code == 'EngineCode' || $code == 'GearboxCode',
+                    function ($query) use ($code, $term) {
+                        return $query
+                            ->join(
+                                'B2B.ProductSearch',
+                                'Product.Id',
+                                '=',
+                                'ProductSearch.ProductId'
+                            )
+                            ->where('ProductSearch.EntityName', $code)
+                            ->where('ProductSearch.EntityValue', $term);
+                    }
+                )
                 ->orderBy('Product.ManufacturerName', 'asc')
                 ->groupBy('ManufacturerName');
 
@@ -976,10 +1075,40 @@ class ProductController extends BaseController
                     'ProductStatus.Id'
                 )
                 // codes
-                // SKU
+                //SKU
                 ->when($code == 'sku', function ($query) use ($term) {
                     return $query->where('Product.sku', $term);
                 })
+                //OEM
+                ->when($code == 'oem', function ($query) use ($term) {
+                    // Assuming $term contains the OEM code you want to filter by
+                    return $query
+                        ->join(
+                            'Product_OEMCode_Mapping',
+                            'Product.Id',
+                            '=',
+                            'Product_OEMCode_Mapping.ProductId'
+                        )
+                        ->where(
+                            'Product_OEMCode_Mapping.OEMCodeDenormalized',
+                            $term
+                        );
+                })
+                //engineCode or gearboxCode
+                ->when(
+                    $code == 'EngineCode' || $code == 'GearboxCode',
+                    function ($query) use ($code, $term) {
+                        return $query
+                            ->join(
+                                'B2B.ProductSearch',
+                                'Product.Id',
+                                '=',
+                                'ProductSearch.ProductId'
+                            )
+                            ->where('ProductSearch.EntityName', $code)
+                            ->where('ProductSearch.EntityValue', $term);
+                    }
+                )
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->orderBy('ProductStatus.Name', 'asc')
