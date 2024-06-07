@@ -27,6 +27,15 @@ export default {
                     },
                 ];
             }
+
+            if (newPath === '/searchcodes') {
+                this.items = [
+                    {
+                        label: 'Rezultati pretraživanja',
+                        route: '',
+                    },
+                ];
+            }
         },
 
         'breadcrumbsStore.current': function (newCrumbs) {
@@ -39,6 +48,14 @@ export default {
                 {
                     label: 'Košarica',
                     route: '/shopping-cart',
+                },
+            ];
+        }
+        if (this.$route.path === '/searchcodes') {
+            this.items = [
+                {
+                    label: 'Rezultati pretraživanja',
+                    route: '',
                 },
             ];
         }

@@ -12,6 +12,7 @@ import { mapStores } from 'pinia';
 import { useCategoryStore } from '@/store/categoryStore.js';
 import { useUIStore } from '@/store/UIStore.js';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
+import { useResultsStore } from '@/store/resultsStore';
 
 // components
 import Header from '@/components/Header.vue';
@@ -77,7 +78,12 @@ export default {
         };
     },
     computed: {
-        ...mapStores(useCategoryStore, useUIStore, useBreadcrumbsStore),
+        ...mapStores(
+            useCategoryStore,
+            useUIStore,
+            useBreadcrumbsStore,
+            useResultsStore,
+        ),
     },
     mounted() {
         this.loadMainCategories();
@@ -143,13 +149,16 @@ export default {
             )
                 .then((response) => {
                     const { data } = response;
+
+                    this.resultsStore.setSearchCodesResult(data);
+                    console.log({ data });
                     // store response data
-                    this.products = data.products;
-                    this.status = data.status;
-                    this.manufacturers = data.manufacturers;
-                    this.productCount = data.productCount[0];
+                    // this.products = data.products;
+                    // this.status = data.status;
+                    // this.manufacturers = data.manufacturers;
+                    // this.productCount = data.productCount[0];
                     this.$router.push({
-                        path: '/query',
+                        path: '/searchcodes',
                         query: {
                             code: `${this.selectedCode.key}`,
                             value: `${this.searchTerm}`,
@@ -163,7 +172,7 @@ export default {
 </script>
 
 <template>
-    <div v-if="!products">
+    <div>
         <!-- Home Page: Banner -->
         <div
             class="banner mt-3 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
@@ -449,7 +458,7 @@ export default {
             </div>
         </footer>
     </div>
-    <div v-if="products" class="mt-3">
+    <!-- <div v-if="products" class="mt-3">
         <Results
             :productCount="productCount"
             :products="products"
@@ -457,7 +466,7 @@ export default {
             :manufacturers="manufacturers"
             :pageOptions="page"
         />
-    </div>
+    </div> -->
     <Query
         :showQueryModal="showQueryModal"
         @on-query-modal-click="handleQueryModalClick"
