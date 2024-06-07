@@ -99,16 +99,6 @@ export default {
         },
 
         handleCategoryClick(category) {
-            // console.log({ category });
-
-            // const breadcrumbs = category.breadcrumb
-            //     .split()
-            //     .map((b) => ({ id: category.id, breadcrumb: b }));
-
-            // console.log({ breadcrumbs });
-
-            // // this.useBreadcrumbsStore.set();
-
             this.$router.push({
                 path: '/category',
                 query: { id: String(category.id) },

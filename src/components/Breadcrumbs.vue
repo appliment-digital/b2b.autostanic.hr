@@ -1,15 +1,7 @@
 <script>
-// lib
-import slug from 'slug';
-
-// utils
-import { makeBreadcrumb, setSlugCharMap } from '@/utils';
-
 // pinia
 import { mapStores } from 'pinia';
 import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
-
-setSlugCharMap(slug);
 
 export default {
     data() {
@@ -26,73 +18,11 @@ export default {
         ...mapStores(useBreadcrumbsStore),
     },
     watch: {
-        '$route.path': function (x, y) {
-            console.log({x, y});
-
-        },
-
         'breadcrumbsStore.current': function (newCrumbs) {
-            console.log({ newCrumbs });
             this.items = newCrumbs;
         },
     },
-    mounted() {
-        // this.setCrumbs(this.$route.path);
-    },
     methods: {
-        // setCrumbs(path) {
-        //     if (this.$route.params['product']) {
-        //         this.makeProductCrumbs();
-        //     } else {
-        //         this.makeCrumbs(path);
-        //     }
-
-        //     this.breadcrumbsStore.set(this.items);
-        // },
-
-        // makeProductCrumbs() {
-        //     const { id } = this.$route.query;
-
-        //     const product = {
-        //         id,
-        //         name: this.$route.params.product,
-        //         breadcrumbs: this.breadcrumbsStore.products[id],
-        //     };
-
-        //     if (product.breadcrumbs) {
-        //         this.items = product.breadcrumbs;
-        //     } else {
-        //         this.items = this.breadcrumbsStore.current;
-        //     }
-
-        //     const isProductIconInBreadcrumbs = this.items.find((entry) => {
-        //         return entry.icon === 'pi pi-car';
-        //     });
-
-        //     if (!isProductIconInBreadcrumbs) {
-        //         this.items.push({
-        //             icon: 'pi pi-car',
-        //             route: `/${slug(product.name)}?id=${product.id}`,
-        //         });
-        //     }
-        // },
-
-        // makeCrumbs(path) {
-        //     const fullPath = decodeURIComponent(path);
-
-        //     const parts = fullPath.slice(1).split('/');
-
-        //     let url = '';
-        //     this.items = parts.map((part) => {
-        //         url += `/${part}`;
-
-        //         return {
-        //             label: makeBreadcrumb(part),
-        //             route: `${url}`,
-        //         };
-        //     });
-        // },
-
         handleBreadcrumbsNavigate(e, item, navigate) {
             e.preventDefault();
 

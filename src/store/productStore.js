@@ -19,10 +19,11 @@ export const useProductStore = defineStore('product', {
         },
     },
     actions: {
-        add({ product, details }) {
+        add({ product, details, breadcrumbs }) {
             this.store.session.products[product.id] = {
                 ...product,
                 details,
+                breadcrumbs
             };
 
             session.save('product-store', this.store.session);

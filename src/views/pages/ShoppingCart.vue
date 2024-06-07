@@ -122,8 +122,6 @@ export default {
         },
 
         handleNewProductQuantity(product) {
-            console.log('handling new product quantity', {product});
-
             if (product.quantity > Number(product.stockQuantity)) {
                 this.$toast.add({
                     severity: 'warn',
