@@ -287,7 +287,7 @@ export default {
                 >
 
                 <!-- Stock -->
-                <div class="mt-4">
+                <div class="mt-4 text-lg">
                     <span class="block"
                         ><span
                             class="font-bold"
@@ -323,21 +323,21 @@ export default {
                 </div>
 
                 <div
-                    class="mt-4 flex flex-column row-gap-1 justify-content-between"
+                    class="mt-4 flex flex-column justify-content-between"
                 >
                     <div>
-                        <span class="mb-0 mr-2 mb-2 text-lg font-bold"
+                        <span class="mb-0 mr-2 text-lg font-bold"
                             >Veleprodajna cijena
                             <span class="font-bold"
                                 >(VPC <span class="">s rabatom</span>):</span
                             ></span
                         >
-                        <span v-if="details" class="font-bold text-green-500">
+                        <span v-if="details" class="text-lg font-bold text-green-500">
                             {{ product.priceWithDiscountString }} €</span
                         >
                     </div>
-                    <div class="text-sm">
-                        <span class="m-0 mr-2 mb-2"
+                    <div class="text-normal mt-2">
+                        <span class="mr-2 mb-2"
                             >Maloprodajna cijena (MPC):
                         </span>
                         <span v-if="details">{{ product.priceString }} €</span>
