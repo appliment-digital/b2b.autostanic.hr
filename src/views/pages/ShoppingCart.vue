@@ -26,6 +26,7 @@ import UserService from '../../service/UserService.js';
 import OrderService from '@/service/OrderService.js';
 
 const orderService = new OrderService();
+
 // modify slug library (add croatian chars)
 setSlugCharMap(slug);
 
@@ -115,6 +116,15 @@ export default {
                 ];
             })
             .catch((err) => console.error(err));
+
+        const breadcrumbs = [
+            {
+                label: 'Košarica',
+                route: '/shopping-cart',
+            },
+        ];
+
+        this.breadcrumbsStore.set(breadcrumbs);
     },
     methods: {
         calcPrice(price, quantity) {
@@ -131,7 +141,6 @@ export default {
                 });
 
                 product.quantity = Number(product.stockQuantity);
-
             } else {
                 this.$toast.add({
                     severity: 'success',
@@ -244,7 +253,11 @@ export default {
                     <template #body="{ data }">
                         <img
                             :src="data.picture"
-                            style="user-select: none; max-width: 44px; object-fit: contain;"
+                            style="
+                                user-select: none;
+                                max-width: 44px;
+                                object-fit: contain;
+                            "
                             class="table-image border-round cursor-pointer"
                             @click="handleProductTableItemClick(data)"
                         />
@@ -263,7 +276,10 @@ export default {
 
                 <Column field="price">
                     <template #header>
-                        <span>Cijena <span class="text-green-500">(VPC)</span></span>
+                        <span
+                            >Cijena
+                            <span class="text-green-500">(VPC)</span></span
+                        >
                     </template>
                     <template #body="{ data }">
                         <span>{{ handlePrice(data.priceWithDiscount) }} €</span>
@@ -287,12 +303,17 @@ export default {
 
                 <Column>
                     <template #header>
-                        <span>Ukupno <span class="text-green-500">(VPC)</span></span>
+                        <span
+                            >Ukupno
+                            <span class="text-green-500">(VPC)</span></span
+                        >
                     </template>
                     <template #body="{ data }">
                         <span style="user-select: none"
                             >{{
-                                handlePrice(data.priceWithDiscount * data.quantity)
+                                handlePrice(
+                                    data.priceWithDiscount * data.quantity,
+                                )
                             }}
                             €</span
                         >
