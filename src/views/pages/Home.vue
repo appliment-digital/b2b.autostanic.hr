@@ -151,12 +151,6 @@ export default {
                     const { data } = response;
 
                     this.resultsStore.setSearchCodesResult(data);
-                    console.log({ data });
-                    // store response data
-                    // this.products = data.products;
-                    // this.status = data.status;
-                    // this.manufacturers = data.manufacturers;
-                    // this.productCount = data.productCount[0];
                     this.$router.push({
                         path: '/searchcodes',
                         query: {
@@ -458,15 +452,6 @@ export default {
             </div>
         </footer>
     </div>
-    <!-- <div v-if="products" class="mt-3">
-        <Results
-            :productCount="productCount"
-            :products="products"
-            :status="status"
-            :manufacturers="manufacturers"
-            :pageOptions="page"
-        />
-    </div> -->
     <Query
         :showQueryModal="showQueryModal"
         @on-query-modal-click="handleQueryModalClick"

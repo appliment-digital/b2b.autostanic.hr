@@ -1075,40 +1075,10 @@ class ProductController extends BaseController
                     'ProductStatus.Id'
                 )
                 // codes
-                //SKU
+                // SKU
                 ->when($code == 'sku', function ($query) use ($term) {
                     return $query->where('Product.sku', $term);
                 })
-                //OEM
-                ->when($code == 'oem', function ($query) use ($term) {
-                    // Assuming $term contains the OEM code you want to filter by
-                    return $query
-                        ->join(
-                            'Product_OEMCode_Mapping',
-                            'Product.Id',
-                            '=',
-                            'Product_OEMCode_Mapping.ProductId'
-                        )
-                        ->where(
-                            'Product_OEMCode_Mapping.OEMCodeDenormalized',
-                            $term
-                        );
-                })
-                //engineCode or gearboxCode
-                ->when(
-                    $code == 'EngineCode' || $code == 'GearboxCode',
-                    function ($query) use ($code, $term) {
-                        return $query
-                            ->join(
-                                'B2B.ProductSearch',
-                                'Product.Id',
-                                '=',
-                                'ProductSearch.ProductId'
-                            )
-                            ->where('ProductSearch.EntityName', $code)
-                            ->where('ProductSearch.EntityValue', $term);
-                    }
-                )
                 ->where('Product.Deleted', 0)
                 ->where('Product.Published', 1)
                 ->orderBy('ProductStatus.Name', 'asc')
