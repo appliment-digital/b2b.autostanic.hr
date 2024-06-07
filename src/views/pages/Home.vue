@@ -16,6 +16,7 @@ import { useBreadcrumbsStore } from '@/store/breadcrumbsStore.js';
 // components
 import Header from '@/components/Header.vue';
 import Query from '@/components/Query.vue';
+import Results from '@/components/Results.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
@@ -50,6 +51,7 @@ export default {
     components: {
         Header,
         Query,
+        Results,
     },
     data() {
         return {
@@ -59,11 +61,19 @@ export default {
             searchCodeType: [
                 { name: 'Broj artikla', key: 'sku' },
                 { name: 'Broj dijela', key: 'oem' },
-                { name: 'Šifra motora', key: 'engine' },
-                { name: 'Šifra mjenjača', key: 'gearbox' },
+                { name: 'Šifra motora', key: 'EngineCode' },
+                { name: 'Šifra mjenjača', key: 'GearboxCode' },
             ],
             selectedCode: {},
             searchTerm: null,
+            products: null,
+            status: null,
+            productCount: null,
+            manufacturers: null,
+            page: {
+                current: 1,
+                size: 24,
+            },
         };
     },
     computed: {
@@ -125,14 +135,26 @@ export default {
 
         getSearchResults() {
             ProductService.getProductsByCodeAndTerm(
-                1,
-                24,
+                this.page.current,
+                this.page.size,
                 this.selectedCode.key,
                 this.searchTerm,
                 {},
             )
                 .then((response) => {
-                    console.log(response);
+                    const { data } = response;
+                    // store response data
+                    this.products = data.products;
+                    this.status = data.status;
+                    this.manufacturers = data.manufacturers;
+                    this.productCount = data.productCount[0];
+                    this.$router.push({
+                        path: '/query',
+                        query: {
+                            code: `${this.selectedCode.key}`,
+                            value: `${this.searchTerm}`,
+                        },
+                    });
                 })
                 .catch((err) => console.error(err));
         },
@@ -141,289 +163,301 @@ export default {
 </script>
 
 <template>
-    <!-- Home Page: Banner -->
-    <div
-        class="banner mt-3 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
-    >
-        <h3 class="text-white uppercase text-5xl m-0">B2B Auto Stanić</h3>
-        <span class="text-white text-xl mt-2">Sve na jednom mjestu</span>
-    </div>
-
-    <!-- Home Page: Search & Categories -->
-    <div class="w-full mx-auto mt-2 grid gap-2">
-        <!-- Search -->
+    <div v-if="!products">
+        <!-- Home Page: Banner -->
         <div
-            class="col-12 pt-7 flex justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"
+            class="banner mt-3 surface-300 flex flex-column align-items-center justify-content-center overflow-hidden border-round"
         >
-            <div>
-                <h3 class="text-700 mt-0 mb-2 pt-1">Pretraži prema kodu</h3>
-                <span class="block text-500 mb-6"
-                    >Pretraži auto dijelove koristeći tvoj kod proizvoda za brzu
-                    pretragu.</span
-                >
-
-                <!-- Checkboxes -->
-                <div
-                    class="p-0 flex flex-column column-gap-3 sm:col sm:flex-row"
-                >
-                    <div class="flex flex-row gap-3">
-                        <div
-                            v-for="code in searchCodeType"
-                            class="flex align-items-center"
-                        >
-                            <RadioButton
-                                v-model="selectedCode"
-                                :inputId="code"
-                                name="dynamic"
-                                :value="code"
-                            />
-                            <label :for="code" class="ml-2">{{
-                                code.name
-                            }}</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input -->
-                <div
-                    class="flex flex-column justify-content-between mt-2 gap-2 sm:flex-row md:flex-column lg:flex-row"
-                >
-                    <InputText
-                        v-model="searchTerm"
-                        type="text"
-                        class="w-20rem sm:w-full md:w-23rem"
-                        placeholder="Pretraživanje..."
-                    />
-                    <Button
-                        label="Pretraži"
-                        class="button--submit block w-full sm:w-4 md:w-full lg:w-4"
-                        @click="getSearchResults()"
-                    />
-                </div>
-            </div>
+            <h3 class="text-white uppercase text-5xl m-0">B2B Auto Stanić</h3>
+            <span class="text-white text-xl mt-2">Sve na jednom mjestu</span>
         </div>
 
-        <!-- Categories -->
-        <div
-            class="categories py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center justify-content-center"
-        >
+        <!-- Home Page: Search & Categories -->
+        <div class="w-full mx-auto mt-2 grid gap-2">
+            <!-- Search -->
             <div
-                class="grid justify-content-center row-gap-1 column-gap-1 align-items-start"
+                class="col-12 pt-7 flex justify-content-center surface-100 bg-white border-100 border-round border-1 md:col"
             >
-                <!-- prettier-ignore -->
-                <ProgressSpinner v-if="UIStore.isDataLoading" class="mx-auto" strokeWidth="2"/>
-                <div
-                    v-else
-                    v-for="category in categories"
-                    class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center align-items-center cursor-pointer"
-                    @click="handleCategoryClick(category)"
-                >
+                <div>
+                    <h3 class="text-700 mt-0 mb-2 pt-1">Pretraži prema kodu</h3>
+                    <span class="block text-500 mb-6"
+                        >Pretraži auto dijelove koristeći tvoj kod proizvoda za
+                        brzu pretragu.</span
+                    >
+
+                    <!-- Checkboxes -->
                     <div
-                        class="py-3 border-1 border-100 p-4 border-round hover:shadow-2"
+                        class="p-0 flex flex-column column-gap-3 sm:col sm:flex-row"
                     >
-                        <img
-                            :src="category.pictureUrl"
-                            style="width: 68px"
-                            class="block mx-auto"
-                        />
+                        <div class="flex flex-row gap-3">
+                            <div
+                                v-for="code in searchCodeType"
+                                class="flex align-items-center"
+                            >
+                                <RadioButton
+                                    v-model="selectedCode"
+                                    :inputId="code"
+                                    name="dynamic"
+                                    :value="code"
+                                />
+                                <label :for="code" class="ml-2">{{
+                                    code.name
+                                }}</label>
+                            </div>
+                        </div>
                     </div>
-                    <span class="text-sm text-center mt-2">{{
-                        category.name
-                    }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Home Page: News -->
-    <section class="mt-2 bg-white border-1 border-100 border-round p-8">
-        <h3 class="text-700 mt-0 mb-2 text-center">
-            Savjeti za Vas i Vaš automobil
-        </h3>
-        <span class="block text-500 mb-6 text-center"
-            >Pročitajte kratke zanimljivosti vezane uz vašeg limenog
-            ljubimca.</span
-        >
-
-        <div
-            class="grid grid-nogutter row-gap-6 md:column-gap-0 lg:column-gap-3"
-        >
-            <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card
-                    :pt="{
-                        title: {
-                            class: 'mb-0',
-                        },
-                    }"
-                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
-                    @click="
-                        handleNewsCardClick(
-                            'https://www.autostanic.hr/blog/sto-su-run-flat-gume',
-                        )
-                    "
-                >
-                    <template #header>
-                        <div class="p-4 pb-0">
-                            <img
-                                src="https://www.autostanic.hr/Content/Images/uploaded/test/run flat gume.jpeg"
-                                class="h-10rem w-full border-1 border-200 border-round"
-                                style="object-fit: cover"
-                            />
-                        </div>
-                    </template>
-                    <template #title
-                        ><span class="text-xl"
-                            >Prednosti i mane run flat guma</span
-                        ></template
+                    <!-- Input -->
+                    <div
+                        class="flex flex-column justify-content-between mt-2 gap-2 sm:flex-row md:flex-column lg:flex-row"
                     >
-                    <template #content>
-                        <p>
-                            {{ handleNewsCardTextSize(news[0].text) }}
-                            <span class="font-bold">saznaj više.</span>
-                        </p>
-                    </template>
-                </Card>
-            </div>
-            <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card
-                    :pt="{
-                        title: {
-                            class: 'mb-0',
-                        },
-                    }"
-                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
-                    @click="
-                        handleNewsCardClick(
-                            'https://www.autostanic.hr/blog/simptomi-kvara-kvacila',
-                        )
-                    "
-                >
-                    <template #header>
-                        <div class="p-4 pb-0">
-                            <img
-                                src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
-                                class="h-10rem w-full border-1 border-200 border-round"
-                                style="object-fit: cover"
-                            />
-                        </div>
-                    </template>
-                    <template #title
-                        ><span class="text-xl"
-                            >5 Simptoma Kvara Kvačila</span
-                        ></template
-                    >
-                    <template #content>
-                        <p>
-                            {{ handleNewsCardTextSize(news[1].text) }}
-                            <span class="font-bold">saznaj više.</span>
-                        </p>
-                    </template>
-                    hello
-                </Card>
-            </div>
-            <div class="mx-auto col-12 sm:col-8 md:col">
-                <Card
-                    class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
-                    :pt="{
-                        title: {
-                            class: 'mb-0',
-                        },
-                    }"
-                    @click="
-                        handleNewsCardClick(
-                            'https://www.autostanic.hr/blog/simptomi-kvara-dsg-mjenjaca',
-                        )
-                    "
-                >
-                    <template #header>
-                        <div class="p-4 pb-0">
-                            <img
-                                src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
-                                class="h-10rem w-full border-1 border-200 border-round"
-                                style="object-fit: cover"
-                            />
-                        </div>
-                    </template>
-                    <template #title
-                        ><span class="text-xl"
-                            >4 Simptoma kvara DSG Mjenjača</span
-                        ></template
-                    >
-                    <template #content>
-                        <p>
-                            {{ handleNewsCardTextSize(news[2].text) }}
-                            <span class="font-bold">saznaj više.</span>
-                        </p>
-                    </template>
-                </Card>
-            </div>
-        </div>
-    </section>
-
-    <!-- Home Page: Footer -->
-    <footer class="mt-3">
-        <div
-            class="w-full mx-auto p-8 bg-white border-round grid column-gap-2 row-gap-8 justify-content-center align-items-center border-100 border-round border-1 md:column-gap-4"
-        >
-            <!-- Footer: Company Information -->
-            <div class="col-12 md:col-5">
-                <span class="block"
-                    ><span class="font-bold">Naziv</span>: Auto Stanić
-                    d.o.o.</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">Sjedište</span>: Dravska 80c, 42202
-                    Trnovec Bartolovečki</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">OIB</span>: 75746481867</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">Direktor</span>: mag. inf. Alen
-                    Stanić</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">Nadležni sud</span>: Trgovački sud
-                    u Varaždinu</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">Temeljni kapital</span>: 2.654,46
-                    EUR uplaćen u cijelosti</span
-                >
-                <span class="block mt-2"
-                    ><span class="font-bold">Transakcijski računi</span>:<br />
-                    OTP banka d.d. <br />
-                    SWIFT:OTPVHR2X <br />
-                    Varaždin. IBAN: HR9824070001100504805
-                </span>
-            </div>
-
-            <!-- Footer: Contact Us  -->
-            <div class="flex-order-1 col-12 md:col-5">
-                <div
-                    class="flex flex-column justify-content-center align-items-center gap-3 cursor-pointer"
-                >
-                    <div>
-                        <h2>Kontaktiraj nas</h2>
+                        <InputText
+                            v-model="searchTerm"
+                            type="text"
+                            class="w-20rem sm:w-full md:w-23rem"
+                            placeholder="Pretraživanje..."
+                        />
                         <Button
-                            icon="pi pi-envelope"
-                            label="Pošalji upit"
-                            class="button--submit block w-full"
-                            @click="handleQueryModalClick()"
+                            label="Pretraži"
+                            class="button--submit block w-full sm:w-4 md:w-full lg:w-4"
+                            @click="getSearchResults()"
                         />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div
+                class="categories py-7 col-12 md:col bg-white border-100 border-round border-1 flex align-items-center justify-content-center"
+            >
+                <div
+                    class="grid justify-content-center row-gap-1 column-gap-1 align-items-start"
+                >
+                    <!-- prettier-ignore -->
+                    <ProgressSpinner v-if="UIStore.isDataLoading" class="mx-auto" strokeWidth="2"/>
+                    <div
+                        v-else
+                        v-for="category in categories"
+                        class="col-4 md:col-4 lg:col-3 flex flex-column justify-content-center align-items-center cursor-pointer"
+                        @click="handleCategoryClick(category)"
+                    >
+                        <div
+                            class="py-3 border-1 border-100 p-4 border-round hover:shadow-2"
+                        >
+                            <img
+                                :src="category.pictureUrl"
+                                style="width: 68px"
+                                class="block mx-auto"
+                            />
+                        </div>
+                        <span class="text-sm text-center mt-2">{{
+                            category.name
+                        }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer: Copy Rights -->
-        <div class="h-6rem">
-            <p class="mt-6 text-center">
-                Copyright & copy; 2024 Auto Stanić. Sva prava pridržana. Powered
-                by Appliment
-            </p>
-        </div>
-    </footer>
+        <!-- Home Page: News -->
+        <section class="mt-2 bg-white border-1 border-100 border-round p-8">
+            <h3 class="text-700 mt-0 mb-2 text-center">
+                Savjeti za Vas i Vaš automobil
+            </h3>
+            <span class="block text-500 mb-6 text-center"
+                >Pročitajte kratke zanimljivosti vezane uz vašeg limenog
+                ljubimca.</span
+            >
+
+            <div
+                class="grid grid-nogutter row-gap-6 md:column-gap-0 lg:column-gap-3"
+            >
+                <div class="mx-auto col-12 sm:col-8 md:col">
+                    <Card
+                        :pt="{
+                            title: {
+                                class: 'mb-0',
+                            },
+                        }"
+                        class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
+                        @click="
+                            handleNewsCardClick(
+                                'https://www.autostanic.hr/blog/sto-su-run-flat-gume',
+                            )
+                        "
+                    >
+                        <template #header>
+                            <div class="p-4 pb-0">
+                                <img
+                                    src="https://www.autostanic.hr/Content/Images/uploaded/test/run flat gume.jpeg"
+                                    class="h-10rem w-full border-1 border-200 border-round"
+                                    style="object-fit: cover"
+                                />
+                            </div>
+                        </template>
+                        <template #title
+                            ><span class="text-xl"
+                                >Prednosti i mane run flat guma</span
+                            ></template
+                        >
+                        <template #content>
+                            <p>
+                                {{ handleNewsCardTextSize(news[0].text) }}
+                                <span class="font-bold">saznaj više.</span>
+                            </p>
+                        </template>
+                    </Card>
+                </div>
+                <div class="mx-auto col-12 sm:col-8 md:col">
+                    <Card
+                        :pt="{
+                            title: {
+                                class: 'mb-0',
+                            },
+                        }"
+                        class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
+                        @click="
+                            handleNewsCardClick(
+                                'https://www.autostanic.hr/blog/simptomi-kvara-kvacila',
+                            )
+                        "
+                    >
+                        <template #header>
+                            <div class="p-4 pb-0">
+                                <img
+                                    src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-kvačila_web.jpg"
+                                    class="h-10rem w-full border-1 border-200 border-round"
+                                    style="object-fit: cover"
+                                />
+                            </div>
+                        </template>
+                        <template #title
+                            ><span class="text-xl"
+                                >5 Simptoma Kvara Kvačila</span
+                            ></template
+                        >
+                        <template #content>
+                            <p>
+                                {{ handleNewsCardTextSize(news[1].text) }}
+                                <span class="font-bold">saznaj više.</span>
+                            </p>
+                        </template>
+                        hello
+                    </Card>
+                </div>
+                <div class="mx-auto col-12 sm:col-8 md:col">
+                    <Card
+                        class="surface-50 cursor-pointer border-1 border-200 hover:shadow-3"
+                        :pt="{
+                            title: {
+                                class: 'mb-0',
+                            },
+                        }"
+                        @click="
+                            handleNewsCardClick(
+                                'https://www.autostanic.hr/blog/simptomi-kvara-dsg-mjenjaca',
+                            )
+                        "
+                    >
+                        <template #header>
+                            <div class="p-4 pb-0">
+                                <img
+                                    src="https://www.autostanic.hr/Content/Images/uploaded/test/simptomi-kvara-dsg-mjenjaca_web.jpg"
+                                    class="h-10rem w-full border-1 border-200 border-round"
+                                    style="object-fit: cover"
+                                />
+                            </div>
+                        </template>
+                        <template #title
+                            ><span class="text-xl"
+                                >4 Simptoma kvara DSG Mjenjača</span
+                            ></template
+                        >
+                        <template #content>
+                            <p>
+                                {{ handleNewsCardTextSize(news[2].text) }}
+                                <span class="font-bold">saznaj više.</span>
+                            </p>
+                        </template>
+                    </Card>
+                </div>
+            </div>
+        </section>
+
+        <!-- Home Page: Footer -->
+        <footer class="mt-3">
+            <div
+                class="w-full mx-auto p-8 bg-white border-round grid column-gap-2 row-gap-8 justify-content-center align-items-center border-100 border-round border-1 md:column-gap-4"
+            >
+                <!-- Footer: Company Information -->
+                <div class="col-12 md:col-5">
+                    <span class="block"
+                        ><span class="font-bold">Naziv</span>: Auto Stanić
+                        d.o.o.</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">Sjedište</span>: Dravska 80c,
+                        42202 Trnovec Bartolovečki</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">OIB</span>: 75746481867</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">Direktor</span>: mag. inf. Alen
+                        Stanić</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">Nadležni sud</span>: Trgovački
+                        sud u Varaždinu</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">Temeljni kapital</span>:
+                        2.654,46 EUR uplaćen u cijelosti</span
+                    >
+                    <span class="block mt-2"
+                        ><span class="font-bold">Transakcijski računi</span
+                        >:<br />
+                        OTP banka d.d. <br />
+                        SWIFT:OTPVHR2X <br />
+                        Varaždin. IBAN: HR9824070001100504805
+                    </span>
+                </div>
+
+                <!-- Footer: Contact Us  -->
+                <div class="flex-order-1 col-12 md:col-5">
+                    <div
+                        class="flex flex-column justify-content-center align-items-center gap-3 cursor-pointer"
+                    >
+                        <div>
+                            <h2>Kontaktiraj nas</h2>
+                            <Button
+                                icon="pi pi-envelope"
+                                label="Pošalji upit"
+                                class="button--submit block w-full"
+                                @click="handleQueryModalClick()"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer: Copy Rights -->
+            <div class="h-6rem">
+                <p class="mt-6 text-center">
+                    Copyright & copy; 2024 Auto Stanić. Sva prava pridržana.
+                    Powered by Appliment
+                </p>
+            </div>
+        </footer>
+    </div>
+    <div v-if="products" class="mt-3">
+        <Results
+            :productCount="productCount"
+            :products="products"
+            :status="status"
+            :manufacturers="manufacturers"
+            :pageOptions="page"
+        />
+    </div>
     <Query
         :showQueryModal="showQueryModal"
         @on-query-modal-click="handleQueryModalClick"
