@@ -129,6 +129,10 @@ Route::middleware('auth:sanctum')->group(function () {
         '/product/getProductsByCodeAndTerm/{page}/{pageSize}/{code}/{term}',
         [ProductController::class, 'getProductsByCodeAndTerm']
     );
+    Route::post('/product/searchProductsByTerm/{term}', [
+        ProductController::class,
+        'searchProductsByTerm',
+    ]);
 
     //****************   BITRIX CONTOLLER ******************
 

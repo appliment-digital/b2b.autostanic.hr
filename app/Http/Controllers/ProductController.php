@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\SuppliersDetail;
 use App\Models\DiscountType;
+use App\Models\ProductSearch;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -1106,5 +1107,12 @@ class ProductController extends BaseController
                 'error' => 'Exception: ' . $e->getMessage(),
             ]);
         }
+    }
+
+    public function searchProductsByTerm($term)
+    {
+        $productId = ProductSearch::searchByTerm($term);
+
+        return $productId;
     }
 }
