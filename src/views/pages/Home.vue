@@ -139,13 +139,15 @@ export default {
         },
 
         handleSearchInput() {
-            this.$router.push({
-                path: '/searchcodes',
-                query: {
-                    code: `${this.selectedCode.key}`,
-                    value: `${this.searchTerm}`,
-                },
-            });
+            if (this.searchTerm?.length > 1 && this.selectedCode?.key) {
+                this.$router.push({
+                    path: '/searchcodes',
+                    query: {
+                        code: `${this.selectedCode.key}`,
+                        value: `${this.searchTerm}`,
+                    },
+                });
+            }
         },
     },
 };
