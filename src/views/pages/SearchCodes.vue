@@ -93,8 +93,10 @@ export default {
 
 <template>
     <p class="text-xl">
-        <span class="font-bold">Rezultati pretrage:</span>
-        {{ this.code }} = "{{ this.value }}"
+        <span class="font-bold mr-1">Rezultati pretrage:</span>
+        <span class="bg-blue-100 p-1 border-round-md"
+            >{{ this.code }} = "{{ this.value }}"</span
+        >
     </p>
     <Results
         v-if="isSearchDone"
