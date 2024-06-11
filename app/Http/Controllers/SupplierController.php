@@ -14,6 +14,7 @@ class SupplierController extends BaseController
             $query = DB::connection('webshopdb')
                 ->table('dbo.Supplier')
                 ->select('Supplier.Id', 'Supplier.Name')
+                ->orderBy('Supplier.Name', 'asc')
                 ->get();
 
             return $this->convertKeysToCamelCase($query);
