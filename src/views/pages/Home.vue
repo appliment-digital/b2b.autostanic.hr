@@ -21,7 +21,6 @@ import Results from '@/components/Results.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
-import ProductService from '@/service/ProductService.js';
 
 setSlugCharMap(slug);
 
@@ -139,27 +138,14 @@ export default {
             this.showQueryModal = !this.showQueryModal;
         },
 
-        getSearchResults() {
-            ProductService.getProductsByCodeAndTerm(
-                this.page.current,
-                this.page.size,
-                this.selectedCode.key,
-                this.searchTerm,
-                {},
-            )
-                .then((response) => {
-                    const { data } = response;
-
-                    this.resultsStore.setSearchCodesResult(data);
-                    this.$router.push({
-                        path: '/searchcodes',
-                        query: {
-                            code: `${this.selectedCode.key}`,
-                            value: `${this.searchTerm}`,
-                        },
-                    });
-                })
-                .catch((err) => console.error(err));
+        handleSearchInput() {
+            this.$router.push({
+                path: '/searchcodes',
+                query: {
+                    code: `${this.selectedCode.key}`,
+                    value: `${this.searchTerm}`,
+                },
+            });
         },
     },
 };
@@ -223,7 +209,7 @@ export default {
                         <Button
                             label="Pretraži"
                             class="button--submit block w-full sm:w-4 md:w-full lg:w-4"
-                            @click="getSearchResults()"
+                            @click="handleSearchInput()"
                         />
                     </div>
                 </div>

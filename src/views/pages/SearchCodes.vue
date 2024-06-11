@@ -4,6 +4,7 @@ import { mapStores } from 'pinia';
 import { useResultsStore } from '@/store/resultsStore';
 import Results from '@/components/Results.vue';
 
+import ProductService from '@/service/ProductService.js';
 export default {
     components: {
         Results,
@@ -20,6 +21,13 @@ export default {
                 { name: 'Šifra motora', key: 'EngineCode' },
                 { name: 'Šifra mjenjača', key: 'GearboxCode' },
             ],
+            code: null,
+            value: null,
+            products: [],
+            productCount: null,
+            status: [],
+            manufacturers: [],
+            isSearchDone: false,
         };
     },
     computed: {
@@ -31,9 +39,42 @@ export default {
         },
     },
     mounted() {
-        this.handleDefaultProductImage(this.resultsStore.searchcodes.products);
+        this.code = this.$route.query.code;
+        this.value = this.$route.query.value;
+        this.getSearchResults();
+        this.handleDefaultProductImage(this.products);
+    },
+    watch: {
+        '$route.query.code'(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getSearchResults();
+            }
+        },
+        '$route.query.value'(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getSearchResults();
+            }
+        },
     },
     methods: {
+        getSearchResults() {
+            ProductService.getProductsByCodeAndTerm(
+                this.page.current,
+                this.page.size,
+                this.code,
+                this.value,
+                {},
+            )
+                .then((response) => {
+                    var data = response.data;
+                    this.products = data.products;
+                    this.productCount = data.productCount;
+                    this.status = data.status;
+                    this.manufacturers = data.manufacturers;
+                    this.isSearchDone = true;
+                })
+                .catch((err) => console.error(err));
+        },
         handleDefaultProductImage(products) {
             products.forEach((entry) => {
                 if (
@@ -53,14 +94,14 @@ export default {
 <template>
     <p class="text-xl">
         <span class="font-bold">Rezultati pretrage:</span>
-        {{ this.searchCode }} = "{{ this.$route.query.value }}"
+        {{ this.code }} = "{{ this.value }}"
     </p>
-
     <Results
-        :productCount="resultsStore.searchcodes.productCount"
-        :products="resultsStore.searchcodes.products"
-        :status="resultsStore.searchcodes.status"
-        :manufacturers="resultsStore.searchcodes.manufacturers"
+        v-if="isSearchDone"
+        :productCount="productCount"
+        :products="products"
+        :status="status"
+        :manufacturers="manufacturers"
         :pageOptions="page"
     />
 </template>

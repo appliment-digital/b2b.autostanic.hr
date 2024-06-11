@@ -19,14 +19,33 @@ export default {
     },
     watch: {
         '$route.path': function (newPath) {
-            if (newPath === '/shopping-cart') {
+            this.setBreadcrums(newPath);
+        },
+
+        'breadcrumbsStore.current': function (newCrumbs) {
+            this.items = newCrumbs;
+        },
+    },
+    mounted() {
+        this.setBreadcrums(this.$route.path);
+    },
+    methods: {
+        setBreadcrums(path) {
+            if (path === '/shopping-cart') {
                 this.items = [
                     {
                         label: 'Košarica',
                         route: '/shopping-cart',
                     },
                 ];
-            } else if (newPath === '/searchcodes') {
+            } else if (path === '/searchcodes') {
+                this.items = [
+                    {
+                        label: 'Rezultati pretraživanja',
+                        route: '',
+                    },
+                ];
+            } else if (path === '/search-header-results') {
                 this.items = [
                     {
                         label: 'Rezultati pretraživanja',
@@ -37,30 +56,6 @@ export default {
                 this.items = this.breadcrumbsStore.current;
             }
         },
-
-        'breadcrumbsStore.current': function (newCrumbs) {
-            this.items = newCrumbs;
-        },
-    },
-    mounted() {
-        if (this.$route.path === '/shopping-cart') {
-            this.items = [
-                {
-                    label: 'Košarica',
-                    route: '/shopping-cart',
-                },
-            ];
-        }
-        if (this.$route.path === '/searchcodes') {
-            this.items = [
-                {
-                    label: 'Rezultati pretraživanja',
-                    route: '',
-                },
-            ];
-        }
-    },
-    methods: {
         handleBreadcrumbsNavigate(e, item, navigate) {
             e.preventDefault();
 

@@ -14,7 +14,7 @@ class ProductSearchSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('product_search')->insert([
+        DB::table('product_searches')->insert([
             [
                 'product_id' => 67964,
                 'search_text' =>

@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('product_search', function (Blueprint $table) {
+        Schema::create('product_searches', function (Blueprint $table) {
             $table->unsignedBigInteger('product_id');
             $table->text('search_text');
             $table->timestamps();
@@ -22,6 +22,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_search');
+        Schema::dropIfExists('product_searches');
     }
 };

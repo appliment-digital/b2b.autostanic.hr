@@ -13,7 +13,8 @@ class ProductSearch extends Model
 
     public static function searchByTerm($term)
     {
-        return self::where('search_text', 'LIKE', '%' . $term . '%')->pluck(
+        $term = '%' . $term . '%';
+        return ProductSearch::where('search_text', 'ilike', $term)->pluck(
             'product_id'
         );
     }
