@@ -23,42 +23,65 @@ export default {
             this.$router.push('/auth/forgot-password');
         },
         login() {
-            userService
-                .login(this.email, this.password)
-                .then((response) => {
-                    if (response.error) {
-                        this.$toast.add({
-                            severity: 'error',
-                            summary: 'Error',
-                            detail: response.error,
-                            life: 3000,
-                        });
-                    }
-                    if (response.success) {
-                        this.$toast.add({
-                            severity: 'success',
-                            summary: 'Uspješna prijava',
-                            detail:
-                                response.message +
-                                ', ' +
-                                response.data.name +
-                                ' ' +
-                                response.data.last_name,
-                            life: 3000,
-                        });
-                        this.userStore.add(response.data);
-                        this.$router.push('/');
-                    }
-                })
-                .catch((error) => {
-                    console.log({ error });
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Greška',
-                        detail: error.data.error,
-                        life: 3000,
+            if (this.email && this.password) {
+                userService
+                    .login(this.email, this.password)
+                    .then((response) => {
+                        console.log(response.data.error);
+                        if (response.data.error) {
+                            this.$toast.add({
+                                severity: 'error',
+                                summary: 'Greška',
+                                detail: response.data.error,
+                                life: 3000,
+                            });
+                        }
+                        if (response.success) {
+                            this.$toast.add({
+                                severity: 'success',
+                                summary: 'Uspješna prijava',
+                                detail:
+                                    response.message +
+                                    ', ' +
+                                    response.data.name +
+                                    ' ' +
+                                    response.data.last_name,
+                                life: 3000,
+                            });
+                            this.userStore.add(response.data);
+                            this.$router.push('/');
+                        }
+                    })
+                    .catch((error) => {
+                        if (
+                            error.response &&
+                            error.response.data &&
+                            error.response.data.error
+                        ) {
+                            this.$toast.add({
+                                severity: 'error',
+                                summary: 'Greška',
+                                detail: error.response.data.error,
+                                life: 3000,
+                            });
+                        } else {
+                            console.log(error.data);
+                            this.$toast.add({
+                                severity: 'error',
+                                summary: 'Greška',
+                                detail: 'Došlo je do greške prilikom prijave.',
+                                life: 3000,
+                            });
+                        }
                     });
+            } else {
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Greška',
+                    detail: 'Za prijavu potrebno je popuniti oba polja.',
+                    life: 3000,
                 });
+            }
         },
     },
 };
