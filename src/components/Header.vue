@@ -50,6 +50,9 @@ export default {
         handleLogoClick() {
             this.$router.push('/');
         },
+        handleShoppingCartClick() {
+            this.$router.push('shopping-cart');
+        },
     },
 };
 </script>
