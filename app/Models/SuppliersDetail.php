@@ -64,7 +64,7 @@ class SuppliersDetail extends Model
         return $suppliersDetail;
     }
 
-    public function getDetailsForProduct($data)
+    public static function getDetailsForProduct($data)
     {
         $price = $data['price'];
         $details = SuppliersDetail::where(
@@ -72,7 +72,13 @@ class SuppliersDetail extends Model
             $data['supplierId']
         )
             ->where('web_db_category_id', $data['categoryId'])
-            ->select('id', 'mark_up', 'expenses')
+            ->select(
+                'id',
+                'mark_up',
+                'expenses',
+                'warrent_id',
+                'delivery_deadline_id'
+            )
             ->when(!is_null($price), function ($query) use ($price) {
                 return $query
                     ->where('min_product_cost', '<=', $price)

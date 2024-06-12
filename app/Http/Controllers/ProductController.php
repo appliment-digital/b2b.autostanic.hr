@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\SuppliersDetail;
 use App\Models\DiscountType;
 use App\Models\ProductSearch;
+use App\Models\Warrent;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -453,6 +454,16 @@ class ProductController extends BaseController
             }
 
             $productData->Categories = $categories;
+
+            // //warrent
+            // $data = [
+            //     'supplierId' => $productData->SupplierId,
+            //     'categoryId' => $productData->CategoryId,
+            //     'price' => $productData->Price,
+            // ];
+            // return Warrent::getDetailsForProduct($data);
+
+            // // $productData->warrent = $details ? $details->warrent_id : null;
 
             return $productData;
         } catch (\Exception $e) {
