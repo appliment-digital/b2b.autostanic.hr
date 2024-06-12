@@ -15,14 +15,6 @@
             -ms-text-size-adjust: none;
             background: #edf2ff;
         }
-
-        #order {
-            border-collapse: collapse;
-        }
-
-        #order tr{
-            border-bottom: 0.5px solid rgb(201, 194, 194);
-        }
     </style>
 
 </head>
@@ -127,28 +119,38 @@
                                                             <!-- Table for items -->
                                                             <tr>
                                                                 <td>
-                                                                    <table id="order" width="100%" cellspacing="1" cellpadding="1" style="font-family:'Open Sans', sans-serif, Verdana; font-size:14px; color:#3b3a3a; font-weight:normal; line-height:24px;">
+                                                                    <table id="order" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; width: 100%; font-family: 'Open Sans', sans-serif, Verdana; font-size: 14px; color: #3b3a3a; font-weight: normal; line-height: 24px;">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th colspan="2" style="color: #203c4db3;">Artikl</th>
-                                                                                <th style="width: 10%; text-align: center; color: #203c4db3;">Kol</th>
-                                                                                <th style="color: #203c4db3;">Cijena</th>
+                                                                                <th colspan="2" style="padding: 8px; border-bottom: 1px solid #d4d6d9; background-color: #f2f2f2; color: #203c4db3;">Artikl</th>
+                                                                                <th style="width: 10%; text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9; background-color: #f2f2f2; color: #203c4db3;">Kol</th>
+                                                                                <th style="padding: 8px; border-bottom: 1px solid #d4d6d9; background-color: #f2f2f2; color: #203c4db3;">VPC</th>
+                                                                                <th style="padding: 8px; border-bottom: 1px solid #d4d6d9; background-color: #f2f2f2; color: #203c4db3;">Ukupno VPC</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             @foreach ($order_items as $item)
                                                                             <tr>
-                                                                                <td><img src="{{ $item['picture'] }}" style="width: 50px; height: auto;"></td>
-                                                                                <td>{{ $item['name'] }}</td>
-                                                                                <td style="width: 10%; text-align: center;">{{ $item['quantity'] }}</td>
-                                                                                <td style="text-align: center;">{{ $item['priceString'] }} €</td>
+                                                                                <td style="padding: 8px; border-bottom: 1px solid #d4d6d9;"><img src="{{ $item['picture'] }}" style="width: 50px; height: auto;"></td>
+                                                                                <td style="padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $item['name'] }}</td>
+                                                                                <td style="width: 10%; text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $item['quantity'] }}</td>
+                                                                                <td style="text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $item['priceWithDiscountString'] }} €</td>
+                                                                                <td style="text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $total }} €</td>
                                                                             </tr>
                                                                             @endforeach
                                                                         </tbody>
                                                                         <tfoot>
                                                                             <tr style="font-weight: 600;">
-                                                                                <td colspan="3" align="right">Ukupno: </td>
-                                                                                <td style="width: 20%; text-align: center;">{{ $order_total }} €</td>
+                                                                                <td colspan="4" align="right" style="padding: 8px; border-bottom: 1px solid #d4d6d9;">Ukupno VPC s rabatom ({{ $discountPercentage }}%): </td>
+                                                                                <td style="width: 20%; text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $total }} €</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="4" align="right" style="padding: 8px; border-bottom: 1px solid #d4d6d9;">PDV: </td>
+                                                                                <td style="width: 20%; text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">+{{ $taxAmount }} €</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="4" align="right" style="padding: 8px; border-bottom: 1px solid #d4d6d9;">Ukupno s rabatom i PDV-om: </td>
+                                                                                <td style="width: 20%; text-align: center; padding: 8px; border-bottom: 1px solid #d4d6d9;">{{ $totalWithTax }} €</td>
                                                                             </tr>
                                                                         </tfoot>
                                                                     </table>

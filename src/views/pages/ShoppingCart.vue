@@ -137,7 +137,9 @@ export default {
             this.sendingOrder = true;
             orderService
                 .createOrder({
-                    orderTotal: this.shoppingCartStore.totalWithTax,
+                    totalWithTax: this.shoppingCartStore.totalWithTax,
+                    total: this.shoppingCartStore.total,
+                    taxAmount: this.shoppingCartStore.taxAmount,
                     items: this.shoppingCartStore.cart,
                     note: this.shoppingNote,
                 })

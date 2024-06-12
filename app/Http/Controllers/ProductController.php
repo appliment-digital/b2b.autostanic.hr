@@ -205,10 +205,7 @@ class ProductController extends BaseController
                         $product->Price -
                         $product->Price * ($discountPercentage / 100);
 
-                    $product->PriceWithDiscount = round(
-                        $product->PriceWithDiscount,
-                        2
-                    );
+                    $product->PriceWithDiscount = $product->PriceWithDiscount;
 
                     $product->PriceString = number_format(
                         $product->Price,
@@ -400,10 +397,8 @@ class ProductController extends BaseController
                         $productData->Price -
                         $productData->Price * ($discountPercentage / 100);
 
-                    $productData->PriceWithDiscount = round(
-                        $productData->PriceWithDiscount,
-                        2
-                    );
+                    $productData->PriceWithDiscount =
+                        $productData->PriceWithDiscount;
 
                     $productData->PriceString = number_format(
                         $productData->Price,
@@ -1006,10 +1001,7 @@ class ProductController extends BaseController
                     $product->PriceWithDiscount =
                         $product->Price -
                         $product->Price * ($discountPercentage / 100);
-                    $product->PriceWithDiscount = round(
-                        $product->PriceWithDiscount,
-                        2
-                    );
+                    $product->PriceWithDiscount = $product->PriceWithDiscount;
 
                     $product->PriceString = number_format(
                         $product->Price,
@@ -1296,10 +1288,7 @@ class ProductController extends BaseController
                     $product->PriceWithDiscount =
                         $product->Price -
                         $product->Price * ($discountPercentage / 100);
-                    $product->PriceWithDiscount = round(
-                        $product->PriceWithDiscount,
-                        2
-                    );
+                    $product->PriceWithDiscount = $product->PriceWithDiscount;
 
                     $product->PriceString = number_format(
                         $product->Price,

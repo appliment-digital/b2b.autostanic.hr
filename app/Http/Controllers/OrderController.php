@@ -17,7 +17,7 @@ class OrderController extends BaseController
 
         $authUser = Auth::user();
         $discountPercentage =
-            DiscountType::getDiscountForUser($authUser->id) ?? 0;
+            DiscountType::getDiscountForUser($authUser->discount_type_id) ?? 0;
 
         $orderData = [
             'token' => env('CREATE_DEAL_PROTECTION'),
@@ -36,7 +36,14 @@ class OrderController extends BaseController
             'state_province' => $currentUserData->state_province,
             'method_of_payment' => $currentUserData->payment_method_e_racuni,
             'discountPercentage' => $discountPercentage,
-            'order_total' => number_format($request->orderTotal, 2, ',', '.'),
+            'totalWithTax' => number_format(
+                $request->totalWithTax,
+                2,
+                ',',
+                '.'
+            ),
+            'total' => number_format($request->total, 2, ',', '.'),
+            'taxAmount' => number_format($request->taxAmount, 2, ',', '.'),
             'order_items' => $request->items,
             'note' => $request->note,
         ];

@@ -34,7 +34,9 @@ class AuthController extends BaseController
 
             $authUserWithRoles = $authUser->load('roles');
 
-            $discount = DiscountType::getDiscountForUser($authUser->id);
+            $discount = DiscountType::getDiscountForUser(
+                $authUser->discount_type_id
+            );
 
             $success['token'] = $authUser->createToken(
                 'MyAuthApp'
