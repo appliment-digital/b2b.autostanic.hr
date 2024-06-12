@@ -37,23 +37,15 @@ export default {
     },
     data() {
         return {
-            selectedProduct: null,
-
-            fees: {
-                taxPercentage: 25,
-            },
-
+            // user note
             shoppingNote: '',
 
+            // delivery table
             tableData: {
                 delivery: null,
             },
 
-            orderTotal: 0,
-
             sendingOrder: false,
-
-            shoppingBill: null,
         };
     },
     computed: {
@@ -65,35 +57,26 @@ export default {
         ),
 
         order() {
-            const userDiscount = this.userStore.discount;
-            const cartTotal = this.shoppingCartStore.total;
-
-            const discount = cartTotal * (userDiscount / 100);
-
-            const cartTotalWithDiscount = cartTotal - discount;
-
-            const tax = cartTotalWithDiscount * 0.25;
-            const totalAmount = cartTotalWithDiscount + tax;
-
-            this.orderTotal = totalAmount;
-
             return [
                 {
-                    name: 'Ukupno VPC s rabatom',
-                    value: `${stringifyProductPrice(cartTotalWithDiscount)} €`,
+                    name: `Ukupno VPC s rabatom (${this.userStore.discount}%)`,
+                    value: `${stringifyProductPrice(this.shoppingCartStore.total)} €`,
                 },
                 {
                     name: 'PDV (25%)',
-                    value: `+ ${stringifyProductPrice(tax)} €`,
+                    value: `+ ${stringifyProductPrice(this.shoppingCartStore.taxAmount)} €`,
                 },
                 {
                     name: 'Ukupno s rabatom i PDV-om',
-                    value: `${stringifyProductPrice(totalAmount)} €`,
+                    value: `${stringifyProductPrice(this.shoppingCartStore.totalWithTax)} €`,
                 },
             ];
         },
     },
     mounted() {
+        // test data
+        this.shoppingCartStore.cartV2;
+
         // create delivery data
 
         UserService.getCurrentUserData()
@@ -140,8 +123,6 @@ export default {
 
                 product.quantity = Number(product.stockQuantity);
             }
-
-            // this.shoppingCartStore.updateQuantity(product);
         },
 
         handlePrice(price) {
@@ -156,7 +137,7 @@ export default {
             this.sendingOrder = true;
             orderService
                 .createOrder({
-                    orderTotal: this.orderTotal,
+                    orderTotal: this.shoppingCartStore.totalWithTax,
                     items: this.shoppingCartStore.cart,
                     note: this.shoppingNote,
                 })
@@ -306,35 +287,6 @@ export default {
                     </template>
                 </Column>
 
-                <Column>
-                    <template #header>
-                        <span class="text-sm">Rabat</span>
-                    </template>
-                    <template #body>
-                        <span>{{ this.userStore.discount }}%</span>
-                    </template>
-                </Column>
-
-                <Column>
-                    <template #header>
-                        <span>Ukupno VPC s rabatom</span>
-                    </template>
-                    <template #body="{ data }">
-                        <span style="user-select: none"
-                            >{{
-                                handlePrice(
-                                    data.priceWithDiscount * data.quantity -
-                                        (data.priceWithDiscount *
-                                            data.quantity *
-                                            this.userStore.discount) /
-                                            100,
-                                )
-                            }}
-                            €</span
-                        >
-                    </template>
-                </Column>
-
                 <Column header="Obriši">
                     <template #body="{ data }">
                         <Button
@@ -377,8 +329,18 @@ export default {
                                     data.name === 'Sveukupno' ? 'font-bold' : ''
                                 "
                             >
-                                <span>{{ data.name }}</span>
-                                <span class="text-right"
+                                <span
+                                    >{{ data.name }}
+                                    <span
+                                        class="block text-sm font-bold mt-2"
+                                        >{{
+                                            data.name === 'Ukupno VPC s rabatom'
+                                                ? `(Rabat od ${this.userStore.discount}% je uračunat)`
+                                                : ''
+                                        }}</span
+                                    ></span
+                                >
+                                <span class="text-right flex align-items-center"
                                     >{{ data.value }}
                                 </span>
                             </div>
@@ -438,7 +400,10 @@ export default {
                 </DataTable>
             </div>
         </div>
-        <div class="w-full mt-2 grid column-gap-8">
+        <div
+            v-if="shoppingCartStore.cart && shoppingCartStore.cart.length"
+            class="w-full mt-2 grid column-gap-8"
+        >
             <div class="col"></div>
             <div class="col"></div>
         </div>

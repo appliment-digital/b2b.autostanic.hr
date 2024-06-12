@@ -2,6 +2,7 @@
 // pinia
 import { mapStores } from 'pinia';
 import { useUserStore } from '@/store/userStore.js';
+import { useShoppingCartStore } from '@/store/shoppingCartStore.js';
 
 // services
 import UserService from '../../service/UserService.js';
@@ -16,7 +17,7 @@ export default {
         };
     },
     computed: {
-        ...mapStores(useUserStore),
+        ...mapStores(useUserStore, useShoppingCartStore),
     },
     methods: {
         handleForgotPasswordClick() {
@@ -47,8 +48,12 @@ export default {
                             life: 3000,
                         });
                         this.userStore.add(response.data);
-                        this.$router.push('/');
                     }
+                })
+                .then(() => {
+                    // set shopping cart data relative to user
+                    this.$router.push('/');
+                    this.shoppingCartStore.init();
                 })
                 .catch((error) => {
                     console.log({ error });
