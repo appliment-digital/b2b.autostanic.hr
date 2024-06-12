@@ -199,7 +199,7 @@ class ProductController extends BaseController
                         DiscountType::getDiscountForUser(
                             $authUser->discount_type_id
                         ) ?? 0;
-
+                    $product->discountPercentage = $discountPercentage;
                     // Calculate price with discount
                     $product->PriceWithDiscount =
                         $product->Price -
@@ -394,7 +394,7 @@ class ProductController extends BaseController
                         DiscountType::getDiscountForUser(
                             $authUser->discount_type_id
                         ) ?? 0;
-
+                    $productData->discountPercentage = $discountPercentage;
                     // Calculate price with discount
                     $productData->PriceWithDiscount =
                         $productData->Price -
@@ -1000,6 +1000,8 @@ class ProductController extends BaseController
                         DiscountType::getDiscountForUser(
                             $authUser->discount_type_id
                         ) ?? 0;
+
+                    $product->discountPercentage = $discountPercentage;
                     // Calculate price with discount
                     $product->PriceWithDiscount =
                         $product->Price -
@@ -1289,6 +1291,7 @@ class ProductController extends BaseController
                             $authUser->discount_type_id
                         ) ?? 0;
 
+                    $product->discountPercentage = $discountPercentage;
                     // Calculate price with discount
                     $product->PriceWithDiscount =
                         $product->Price -

@@ -35,7 +35,7 @@ class OrderController extends BaseController
             'country' => $currentUserData->country_bitrix_id,
             'state_province' => $currentUserData->state_province,
             'method_of_payment' => $currentUserData->payment_method_e_racuni,
-            'customer_discount' => $discountPercentage,
+            'discountPercentage' => $discountPercentage,
             'order_total' => number_format($request->orderTotal, 2, ',', '.'),
             'order_items' => $request->items,
             'note' => $request->note,
