@@ -141,7 +141,7 @@ export default {
         handleSearchInput() {
             if (this.searchTerm?.length > 1 && this.selectedCode?.key) {
                 this.$router.push({
-                    path: '/searchcodes',
+                    path: '/codes',
                     query: {
                         code: `${this.selectedCode.key}`,
                         value: `${this.searchTerm}`,

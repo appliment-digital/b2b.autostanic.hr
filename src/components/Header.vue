@@ -41,7 +41,7 @@ export default {
     methods: {
         handleSearchInput() {
             this.$router.push({
-                path: '/search-header-results',
+                path: '/search',
                 query: {
                     q: `${this.searchTerm}`,
                 },

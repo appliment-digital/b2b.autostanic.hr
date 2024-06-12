@@ -74,11 +74,11 @@ const routes = [
                 component: Category,
             },
             {
-                path: '/searchcodes',
+                path: '/codes',
                 component: SearchCodes,
             },
             {
-                path: '/search-header-results',
+                path: '/search',
                 component: SearchHeaderResults,
             },
             {
