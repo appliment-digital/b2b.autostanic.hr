@@ -177,7 +177,7 @@ export default {
             this.$emit(
                 'on-filter-select',
                 selectedFilters,
-                this.categoryStore.selectedCategory.id,
+                this.$route.query.id,
             );
         },
 

@@ -19,7 +19,6 @@ export const useResultsStore = defineStore('results', {
     },
     actions: {
         setSearchCodesResult(data) {
-            console.log('storing data..', data);
             this.store.session.searchcodes = data;
 
             session.save('results-store', this.store.session);

@@ -114,15 +114,17 @@ export default {
                     const { data } = response;
 
                     // make breadcrumbs
-                    const ids = this.$route.query.id.split('&');
-                    const breadcrumbs = camelcaseKeys(data.categories)
-                        .reverse()
-                        .map((c, i) => ({
-                            label: c.name.trim(),
-                            route: `/category?id=${ids.slice(0, i + 1).join(encodeURIComponent('&'))}`,
-                        }));
+                    if (data.categories) {
+                        const ids = this.$route.query.id.split('&');
+                        const breadcrumbs = camelcaseKeys(data.categories)
+                            .reverse()
+                            .map((c, i) => ({
+                                label: c.name.trim(),
+                                route: `/category?id=${ids.slice(0, i + 1).join(encodeURIComponent('&'))}`,
+                            }));
 
-                    this.breadcrumbsStore.set(breadcrumbs);
+                        this.breadcrumbsStore.set(breadcrumbs);
+                    }
 
                     // store response data
                     this.products = data.products;
@@ -149,9 +151,6 @@ export default {
             // set product count to display on results page
             this.productCount = subcategory.productCount;
 
-            // store
-            this.categoryStore.setSelectedCategory(subcategory);
-
             this.$router.push({
                 path: '/category',
                 query: { id: `${this.$route.query.id}&${subcategory.id}` },
@@ -160,7 +159,7 @@ export default {
 
         handleResultsPageChange(event, filters) {
             this.page.current = event.page + 1;
-            this.getProducts(this.categoryStore.selectedCategory.id, filters);
+            this.getProducts(this.$route.query.id, filters);
         },
 
         handleFilterSelect(filters, categoryId) {

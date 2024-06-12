@@ -82,21 +82,17 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
     actions: {
         init() {
             const { user } = useUserStore();
-            console.log('initializing cart...', user.id);
 
             const existingCart = local.load('shopping-cart-store')?.cartV2[
                 user.id
             ];
-            console.log({ existingCart });
 
             if (!existingCart) {
-                console.log('not existing');
                 this.store.local.cartV2[user.id] = [];
                 this.store.userId = user.id
 
                 local.save('shopping-cart-store', this.store.local);
             } else {
-                console.log('existing');
                 this.store.local.cartV2[user.id] = existingCart;
                 this.store.userId = user.id
             }
@@ -130,7 +126,6 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
             const { userId } = this.store;
 
             const cart = this.store.local.cartV2[userId];
-            console.log('adding product', { userId, cart });
 
             const entryId = cart.findIndex((entry) => entry.id == product.id);
 
@@ -185,13 +180,10 @@ export const useShoppingCartStore = defineStore('shoppingCart', {
         },
 
         delete(product) {
-            console.log('deleting product from cart...');
-
             const { userId } = this.store;
             let cart = this.store.local.cartV2[userId];
 
             cart = cart.filter((entry) => entry.id != product.id);
-            console.log('filtered cart:', { cart });
 
             this.store.local.cartV2[userId] = cart;
 

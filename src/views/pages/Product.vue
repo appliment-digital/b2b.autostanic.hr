@@ -109,9 +109,6 @@ export default {
             this.loadProductDetails(this.$route.query.id);
         }
     },
-    mounted() {
-        // console.log('product mounted, current user: ', this.userStore.user);
-    },
     methods: {
         loadProduct(id) {
             this.UIStore.setIsDataLoading(true);
@@ -157,8 +154,6 @@ export default {
                         oemCodes: res.data.oemCodes,
                         carTypes: res.data.carTypes,
                     };
-
-                    console.log('product car types', this.details.carTypes);
 
                     this.UIStore.setIsDataLoading(false);
 
