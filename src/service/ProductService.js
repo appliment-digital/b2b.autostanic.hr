@@ -109,4 +109,17 @@ export default class ProductService {
             filter,
         );
     }
+
+    static async searchProductsByTerm(page, pageSize, term, filter = {}) {
+        return axios.post(
+            this.apiResourceEndpoint +
+                '/searchProductsByTerm/' +
+                page +
+                '/' +
+                pageSize +
+                '/' +
+                term,
+            filter,
+        );
+    }
 }

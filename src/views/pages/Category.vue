@@ -149,6 +149,9 @@ export default {
             // set product count to display on results page
             this.productCount = subcategory.productCount;
 
+            // store
+            this.categoryStore.setSelectedCategory(subcategory);
+
             this.$router.push({
                 path: '/category',
                 query: { id: `${this.$route.query.id}&${subcategory.id}` },

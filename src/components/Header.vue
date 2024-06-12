@@ -12,6 +12,7 @@ import UserService from '../service/UserService.js';
 
 // components
 import UserMenu from '@/components/UserMenu.vue';
+import { handleError, resolveTransitionHooks } from 'vue';
 
 const userService = new UserService();
 
@@ -20,17 +21,35 @@ export default {
         UserMenu,
     },
     data() {
-        return {};
+        return {
+            searchTerm: '',
+        };
     },
-    watch: {},
+    watch: {
+        searchTerm(newVal) {
+            if (newVal.length > 2) {
+                this.handleSearchInput();
+            }
+            if (newVal.length == 0) {
+                this.handleLogoClick();
+            }
+        },
+    },
     computed: {
         ...mapStores(useUserStore, useShoppingCartStore),
     },
     methods: {
+        handleSearchInput() {
+            this.$router.push({
+                path: '/search',
+                query: {
+                    q: `${this.searchTerm}`,
+                },
+            });
+        },
         handleLogoClick() {
             this.$router.push('/');
         },
-
         handleShoppingCartClick() {
             this.$router.push('shopping-cart');
         },
@@ -59,7 +78,7 @@ export default {
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
-                <InputText class="border-200 w-full" placeholder="Pretraži" />
+                <InputText v-model="searchTerm" @input="handleSearchInput()" type="search" class="border-200 w-full" placeholder="Pretraži" />
             </IconField>
         </div>
 

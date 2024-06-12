@@ -39,12 +39,6 @@ Route::get('/category/categories', [
     'getMainCategories',
 ]);
 
-Route::get('/test', function (Request $Request) {
-    return response()->json([
-        'x' => 'hi',
-    ]);
-});
-
 Route::get('/user/getCurrentUserData', [
     UserController::class,
     'getCurrentUserData',
@@ -129,6 +123,10 @@ Route::middleware('auth:sanctum')->group(function () {
         '/product/getProductsByCodeAndTerm/{page}/{pageSize}/{code}/{term}',
         [ProductController::class, 'getProductsByCodeAndTerm']
     );
+    Route::post('/product/searchProductsByTerm/{page}/{pageSize}/{term}', [
+        ProductController::class,
+        'searchProductsByTerm',
+    ]);
 
     //****************   BITRIX CONTOLLER ******************
 

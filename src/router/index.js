@@ -28,6 +28,7 @@ import ShoppingCart from '@/views/pages/ShoppingCart.vue';
 import ThankYou from '@/views/pages/ThankYou.vue';
 import PriceManagement from '@/views/pages/admin/PriceManagement.vue';
 import SearchCodes from '@/views/pages/SearchCodes.vue';
+import SearchHeaderResults from '@/views/pages/SearchHeaderResults.vue';
 
 // service
 import CategoryService from '@/service/CategoryService';
@@ -71,11 +72,15 @@ const routes = [
             {
                 path: '/category',
                 component: Category,
-            }, 
+            },
             {
-                path: '/searchcodes',
+                path: '/codes',
                 component: SearchCodes,
-            }, 
+            },
+            {
+                path: '/search',
+                component: SearchHeaderResults,
+            },
             {
                 path: '/:product',
                 component: Product,
@@ -86,13 +91,13 @@ const routes = [
             //     return {
             //         path: '/:categoryId',
             //         component: Category,
-                    // children: [
-                    //     {
-                    //         path: `/${slug(category.name)}/:subcategory(.*)`,
-                    //         component: Category,
-                    //     },
-                    // ],
-                // };
+            // children: [
+            //     {
+            //         path: `/${slug(category.name)}/:subcategory(.*)`,
+            //         component: Category,
+            //     },
+            // ],
+            // };
             // }),
         ],
     },

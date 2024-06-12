@@ -21,7 +21,6 @@ import Results from '@/components/Results.vue';
 
 // services
 import CategoryService from '@/service/CategoryService.js';
-import ProductService from '@/service/ProductService.js';
 
 setSlugCharMap(slug);
 
@@ -61,9 +60,9 @@ export default {
             showQueryModal: false,
             searchCodeType: [
                 { name: 'Broj artikla', key: 'sku' },
-                { name: 'Broj dijela', key: 'oem' },
-                { name: 'Šifra motora', key: 'EngineCode' },
-                { name: 'Šifra mjenjača', key: 'GearboxCode' },
+                { name: 'Kataloški kod', key: 'oem' },
+                { name: 'Kod motora', key: 'EngineCode' },
+                { name: 'Kod mjenjača', key: 'GearboxCode' },
             ],
             selectedCode: {},
             searchTerm: null,
@@ -139,33 +138,16 @@ export default {
             this.showQueryModal = !this.showQueryModal;
         },
 
-        getSearchResults() {
-            ProductService.getProductsByCodeAndTerm(
-                this.page.current,
-                this.page.size,
-                this.selectedCode.key,
-                this.searchTerm,
-                {},
-            )
-                .then((response) => {
-                    const { data } = response;
-
-                    this.resultsStore.setSearchCodesResult(data);
-                    console.log({ data });
-                    // store response data
-                    // this.products = data.products;
-                    // this.status = data.status;
-                    // this.manufacturers = data.manufacturers;
-                    // this.productCount = data.productCount[0];
-                    this.$router.push({
-                        path: '/searchcodes',
-                        query: {
-                            code: `${this.selectedCode.key}`,
-                            value: `${this.searchTerm}`,
-                        },
-                    });
-                })
-                .catch((err) => console.error(err));
+        handleSearchInput() {
+            if (this.searchTerm?.length > 1 && this.selectedCode?.key) {
+                this.$router.push({
+                    path: '/codes',
+                    query: {
+                        code: `${this.selectedCode.key}`,
+                        value: `${this.searchTerm}`,
+                    },
+                });
+            }
         },
     },
 };
@@ -229,7 +211,7 @@ export default {
                         <Button
                             label="Pretraži"
                             class="button--submit block w-full sm:w-4 md:w-full lg:w-4"
-                            @click="getSearchResults()"
+                            @click="handleSearchInput()"
                         />
                     </div>
                 </div>
@@ -458,15 +440,6 @@ export default {
             </div>
         </footer>
     </div>
-    <!-- <div v-if="products" class="mt-3">
-        <Results
-            :productCount="productCount"
-            :products="products"
-            :status="status"
-            :manufacturers="manufacturers"
-            :pageOptions="page"
-        />
-    </div> -->
     <Query
         :showQueryModal="showQueryModal"
         @on-query-modal-click="handleQueryModalClick"

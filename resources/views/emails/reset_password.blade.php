@@ -59,7 +59,7 @@
                                                                     <table width="170" cellspacing="0" cellpadding="0" border="0" align="center">
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td><a href="#" style="text-decoration:none;"><img src="{{ asset('images/as-logo.png') }}" style="width: 200px;" /></a>
+                                                                                <td><a href="#" style="text-decoration:none;"><img src="https://sustav.autostanic.hr/local/components/app/app.b2b.webshop/images/as-logo.png" style="width: 200px;" /></a>
                                                                                     </multiline>
                                                                                 </td>
                                                                             </tr>

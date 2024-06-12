@@ -25,10 +25,11 @@ class AuthController extends BaseController
             $authUser = Auth::user();
 
             if ($authUser->active == false) {
-                return response()->json(
-                    ['error' => 'Nemate pravo pristupa.'],
-                    401
-                );
+                return response()->json([
+                    'data' => [
+                        'error' => 'Nemate pravo pristupa.',
+                    ],
+                ]);
             }
 
             $authUserWithRoles = $authUser->load('roles');
@@ -47,13 +48,12 @@ class AuthController extends BaseController
 
             return $this->sendResponse($success, 'Dobro došli');
         } else {
-            return response()->json(
-                [
+            return response()->json([
+                'data' => [
                     'error' =>
                         'Email ili lozinka koju ste unijeli nisu ispravni.',
                 ],
-                401
-            );
+            ]);
         }
     }
 

@@ -104,17 +104,21 @@ export default {
             this.filters.status = [];
             this.filters.manufacturers = {};
 
-            this.manufacturers.forEach((entry) => {
-                this.filters.manufacturers[entry] = false;
-            });
-
-            this.status.forEach((s) => {
-                this.filters.status.push({
-                    id: s.id,
-                    name: s.name,
-                    value: false,
+            if (this.manufacturers) {
+                this.manufacturers.forEach((entry) => {
+                    this.filters.manufacturers[entry] = false;
                 });
-            });
+            }
+
+            if (this.status) {
+                this.status.forEach((s) => {
+                    this.filters.status.push({
+                        id: s.id,
+                        name: s.name,
+                        value: false,
+                    });
+                });
+            }
         },
 
         fetchInitialProducts() {
