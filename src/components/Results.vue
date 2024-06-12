@@ -395,6 +395,7 @@ export default {
                         :key="product.id"
                         class="col-12 md:col-4"
                     >
+                        {{ product }}
                         <!-- Product -->
                         <Card
                             :pt="{

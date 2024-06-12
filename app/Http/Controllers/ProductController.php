@@ -196,7 +196,9 @@ class ProductController extends BaseController
                     // Fetch discount for the current user
                     $authUser = Auth::user();
                     $discountPercentage =
-                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+                        DiscountType::getDiscountForUser(
+                            $authUser->discount_type_id
+                        ) ?? 0;
 
                     // Calculate price with discount
                     $product->PriceWithDiscount =
@@ -389,7 +391,9 @@ class ProductController extends BaseController
                 } else {
                     $authUser = Auth::user();
                     $discountPercentage =
-                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+                        DiscountType::getDiscountForUser(
+                            $authUser->discount_type_id
+                        ) ?? 0;
 
                     // Calculate price with discount
                     $productData->PriceWithDiscount =
@@ -993,8 +997,9 @@ class ProductController extends BaseController
                     // Fetch discount for the current user
                     $authUser = Auth::user();
                     $discountPercentage =
-                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
-
+                        DiscountType::getDiscountForUser(
+                            $authUser->discount_type_id
+                        ) ?? 0;
                     // Calculate price with discount
                     $product->PriceWithDiscount =
                         $product->Price -
@@ -1280,7 +1285,9 @@ class ProductController extends BaseController
                     // Fetch discount for the current user
                     $authUser = Auth::user();
                     $discountPercentage =
-                        DiscountType::getDiscountForUser($authUser->id) ?? 0;
+                        DiscountType::getDiscountForUser(
+                            $authUser->discount_type_id
+                        ) ?? 0;
 
                     // Calculate price with discount
                     $product->PriceWithDiscount =

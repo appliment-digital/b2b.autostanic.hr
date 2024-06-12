@@ -39,12 +39,6 @@ Route::get('/category/categories', [
     'getMainCategories',
 ]);
 
-Route::get('/test', function (Request $Request) {
-    return response()->json([
-        'x' => 'hi',
-    ]);
-});
-
 Route::get('/user/getCurrentUserData', [
     UserController::class,
     'getCurrentUserData',
