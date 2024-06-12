@@ -585,6 +585,7 @@ class ProductController extends BaseController
                 'Product_OEMCode_Mapping.ProductId'
             )
             ->where('Product.Id', $id)
+            ->where('Product_OEMCode_Mapping.IsOEMCode', 1)
             ->get();
 
         $result = [];

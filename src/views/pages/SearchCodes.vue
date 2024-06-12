@@ -20,6 +20,7 @@ export default {
                 { name: 'Broj dijela', key: 'oem' },
                 { name: 'Šifra motora', key: 'EngineCode' },
                 { name: 'Šifra mjenjača', key: 'GearboxCode' },
+                { name: 'Šifra proizvođača', key: 'CrossReference' },
             ],
             code: null,
             value: null,

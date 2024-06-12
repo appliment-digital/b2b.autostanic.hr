@@ -60,9 +60,9 @@ export default {
             showQueryModal: false,
             searchCodeType: [
                 { name: 'Broj artikla', key: 'sku' },
-                { name: 'Broj dijela', key: 'oem' },
-                { name: 'Šifra motora', key: 'EngineCode' },
-                { name: 'Šifra mjenjača', key: 'GearboxCode' },
+                { name: 'Kataloški kod', key: 'oem' },
+                { name: 'Kod motora', key: 'EngineCode' },
+                { name: 'Kod mjenjača', key: 'GearboxCode' },
             ],
             selectedCode: {},
             searchTerm: null,
