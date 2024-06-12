@@ -17,10 +17,9 @@ export default {
             },
             searchCodeType: [
                 { name: 'Broj artikla', key: 'sku' },
-                { name: 'Broj dijela', key: 'oem' },
-                { name: 'Šifra motora', key: 'EngineCode' },
-                { name: 'Šifra mjenjača', key: 'GearboxCode' },
-                { name: 'Šifra proizvođača', key: 'CrossReference' },
+                { name: 'Kataloški kod', key: 'oem' },
+                { name: 'Kod motora', key: 'EngineCode' },
+                { name: 'Kod mjenjača', key: 'GearboxCode' },
             ],
             code: null,
             value: null,
@@ -96,7 +95,7 @@ export default {
     <p class="text-xl">
         <span class="font-bold mr-1">Rezultati pretrage:</span>
         <span class="bg-blue-100 p-1 border-round-md"
-            >{{ this.code }} = "{{ this.value }}"</span
+            >{{ this.searchCode }} = "{{ this.value }}"</span
         >
     </p>
     <Results
