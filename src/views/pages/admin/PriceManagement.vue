@@ -90,6 +90,8 @@ export default {
         validateMinPrices() {
             let isOverlap = this.addedPricesForCategories.some((range) => {
                 if (
+                    range.min_product_cost != NULL &&
+                    range.max_product_cost != NULL &&
                     this.minPrice >= parseFloat(range.min_product_cost) &&
                     this.minPrice <= parseFloat(range.max_product_cost)
                 ) {
@@ -178,6 +180,9 @@ export default {
                 });
         },
         async openDialog(data) {
+            this.categoryName = await this.getCategoryName(
+                this.selectedCategory.id,
+            );
             if (data) {
                 this.selectedDetailsId = data.id;
                 this.getCategoryName(data.web_db_category_id);
@@ -259,6 +264,9 @@ export default {
                         }
                     });
             } else {
+                if (this.minPrice == 0 && this.maxPrice == 0) {
+                    this.minPrice = this.maxPrice = null;
+                }
                 supplierDetailService
                     .addDetailsforSupplier({
                         supplierId: this.selectedSupplier.id,
@@ -495,7 +503,11 @@ export default {
                 </Column>
                 <Column header="Nabavna cijena" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.min_product_cost"
+                        <span
+                            v-if="
+                                data.min_product_cost != NULL &&
+                                data.max_product_cost != NULL
+                            "
                             >{{ data.min_product_cost }} -
                             {{ data.max_product_cost }} €</span
                         >

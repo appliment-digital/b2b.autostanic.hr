@@ -143,6 +143,7 @@ class ProductController extends BaseController
                 ->get()
                 ->map(function ($product) {
                     // Fetch supplier details
+                    $product->PriceWithoutExpenses = $product->Price;
                     $supplierDetails = SuppliersDetail::where(
                         'web_db_supplier_id',
                         $product->SupplierId
