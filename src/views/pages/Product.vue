@@ -321,11 +321,17 @@ export default {
                             košarici</span
                         >
                     </div>
+                    <div v-if="product.warrent" class="mt-2">
+                        <label class="font-semibold">Garancija: </label>
+                        <span class="ml-2">{{ product.warrent }}</span>
+                    </div>
+                    <div v-if="product.deliveryDeadline" class="mt-2">
+                        <label class="font-semibold">Rok isporuke: </label>
+                        <span class="ml-2">{{ product.deliveryDeadline }}</span>
+                    </div>
                 </div>
 
-                <div
-                    class="mt-4 flex flex-column justify-content-between"
-                >
+                <div class="mt-4 flex flex-column justify-content-between">
                     <div>
                         <span class="mb-0 mr-2 text-lg font-bold"
                             >Veleprodajna cijena
@@ -333,7 +339,10 @@ export default {
                                 >(VPC <span class="">s rabatom</span>):</span
                             ></span
                         >
-                        <span v-if="details" class="text-lg font-bold text-green-500">
+                        <span
+                            v-if="details"
+                            class="text-lg font-bold text-green-500"
+                        >
                             {{ product.priceWithDiscountString }} €</span
                         >
                     </div>
@@ -575,7 +584,10 @@ export default {
                             }"
                         >
                             <div
-                                v-if="details.carTypes && Object.keys(details.carTypes)?.length"
+                                v-if="
+                                    details.carTypes &&
+                                    Object.keys(details.carTypes)?.length
+                                "
                                 v-for="(
                                     details, carType, index
                                 ) in details.carTypes"

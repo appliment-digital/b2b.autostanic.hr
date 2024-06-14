@@ -205,6 +205,35 @@ class SupplierDetailController extends BaseController
         }
     }
 
+    public function getSuppliersDetailsForCategory(Request $request)
+    {
+        try {
+            $supplierId = $request->supplierId;
+            $categoryId = $request->categoryId;
+
+            $suppliersData = SuppliersDetail::where(
+                'web_db_supplier_id',
+                $supplierId
+            )
+                ->where('web_db_category_id', $categoryId)
+                ->select(
+                    'id',
+                    'web_db_category_id',
+                    'min_product_cost',
+                    'max_product_cost'
+                )
+                ->where('min_product_cost', '=', null)
+                ->where('max_product_cost', '=', null)
+                ->get();
+
+            return $suppliersData;
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
     public function getDetailsForProduct(Request $request)
     {
         try {

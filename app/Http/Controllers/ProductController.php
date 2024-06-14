@@ -8,6 +8,7 @@ use App\Models\SuppliersDetail;
 use App\Models\DiscountType;
 use App\Models\ProductSearch;
 use App\Models\Warrent;
+use App\Models\DeliveryDeadline;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -142,39 +143,59 @@ class ProductController extends BaseController
                 ->distinct()
                 ->get()
                 ->map(function ($product) {
-                    // Fetch supplier details
-                    $product->PriceWithoutExpenses = $product->Price;
+                    // Fetch supplier details for category
                     $supplierDetails = SuppliersDetail::where(
                         'web_db_supplier_id',
                         $product->SupplierId
                     )
                         ->where('web_db_category_id', $product->CategoryId)
-                        ->select('id', 'mark_up', 'expenses')
-                        ->when(!is_null($product->Price), function (
-                            $query
-                        ) use ($product) {
-                            return $query
-                                ->where(
-                                    'min_product_cost',
-                                    '<=',
-                                    $product->Price
-                                )
-                                ->where(
-                                    'max_product_cost',
-                                    '>=',
-                                    $product->Price
-                                );
-                        })
+                        ->whereNull('min_product_cost')
+                        ->whereNull('max_product_cost')
                         ->first();
 
-                    // Calculate new price with mark up and expenses
+                    // Calculate the adjusted price
                     if ($supplierDetails) {
                         $markup = $supplierDetails->mark_up ?? 0;
                         $expenses = $supplierDetails->expenses ?? 0;
-                        $product->Price =
+                        $adjustedPrice =
                             $product->Price +
                             $product->Price * ($markup / 100) +
                             $expenses;
+                        $product->Price = $adjustedPrice;
+                    } else {
+                        // Fetch supplier details with price range
+                        $supplierDetailsWithPriceRange = SuppliersDetail::where(
+                            'web_db_supplier_id',
+                            $product->SupplierId
+                        )
+                            ->where('web_db_category_id', $product->CategoryId)
+                            ->where(function ($query) use ($product) {
+                                $query
+                                    ->where(
+                                        'min_product_cost',
+                                        '<=',
+                                        $product->Price
+                                    )
+                                    ->where(
+                                        'max_product_cost',
+                                        '>=',
+                                        $product->Price
+                                    );
+                            })
+                            ->first();
+
+                        // Calculate the adjusted price if supplier details with price range exist
+                        if ($supplierDetailsWithPriceRange) {
+                            $markup =
+                                $supplierDetailsWithPriceRange->mark_up ?? 0;
+                            $expenses =
+                                $supplierDetailsWithPriceRange->expenses ?? 0;
+                            $adjustedPrice =
+                                $product->Price +
+                                $product->Price * ($markup / 100) +
+                                $expenses;
+                            $product->Price = $adjustedPrice;
+                        }
                     }
 
                     // Generate picture URL
@@ -354,28 +375,14 @@ class ProductController extends BaseController
                 ->first();
 
             if ($productData) {
-                // Fetch supplier details
+                // Fetch supplier details for category
                 $supplierDetails = SuppliersDetail::where(
                     'web_db_supplier_id',
                     $productData->SupplierId
                 )
                     ->where('web_db_category_id', $productData->CategoryId)
-                    ->select('id', 'mark_up', 'expenses')
-                    ->when(!is_null($productData->Price), function (
-                        $query
-                    ) use ($productData) {
-                        return $query
-                            ->where(
-                                'min_product_cost',
-                                '<=',
-                                $productData->Price
-                            )
-                            ->where(
-                                'max_product_cost',
-                                '>=',
-                                $productData->Price
-                            );
-                    })
+                    ->whereNull('min_product_cost')
+                    ->whereNull('max_product_cost')
                     ->first();
 
                 // Calculate the adjusted price
@@ -387,36 +394,92 @@ class ProductController extends BaseController
                         $productData->Price * ($markup / 100) +
                         $expenses;
                     $productData->Price = $adjustedPrice;
+
+                    $warrent =
+                        Warrent::find($supplierDetails->warrent_id)
+                            ->description ?? 'prvi';
+                    $productData->warrent = $warrent;
+
+                    $deliveryDeadline =
+                        DeliveryDeadline::find(
+                            $supplierDetails->delivery_deadline_id
+                        )->description ?? 'prvi';
+                    $productData->deliveryDeadline = $deliveryDeadline;
                 } else {
-                    $authUser = Auth::user();
-                    $discountPercentage =
-                        DiscountType::getDiscountForUser(
-                            $authUser->discount_type_id
-                        ) ?? 0;
-                    $productData->discountPercentage = $discountPercentage;
-                    // Calculate price with discount
-                    $productData->PriceWithDiscount =
-                        $productData->Price -
-                        $productData->Price * ($discountPercentage / 100);
+                    // Fetch supplier details with price range
+                    $supplierDetailsWithPriceRange = SuppliersDetail::where(
+                        'web_db_supplier_id',
+                        $productData->SupplierId
+                    )
+                        ->where('web_db_category_id', $productData->CategoryId)
+                        ->where(function ($query) use ($productData) {
+                            $query
+                                ->where(
+                                    'min_product_cost',
+                                    '<=',
+                                    $productData->Price
+                                )
+                                ->where(
+                                    'max_product_cost',
+                                    '>=',
+                                    $productData->Price
+                                );
+                        })
+                        ->first();
 
-                    $productData->PriceWithDiscount =
-                        $productData->PriceWithDiscount;
+                    // Calculate the adjusted price if supplier details with price range exist
+                    if ($supplierDetailsWithPriceRange) {
+                        $markup = $supplierDetailsWithPriceRange->mark_up ?? 0;
+                        $expenses =
+                            $supplierDetailsWithPriceRange->expenses ?? 0;
+                        $adjustedPrice =
+                            $productData->Price +
+                            $productData->Price * ($markup / 100) +
+                            $expenses;
+                        $productData->Price = $adjustedPrice;
 
-                    $productData->PriceString = number_format(
-                        $productData->Price,
-                        2,
-                        ',',
-                        '.'
-                    );
-                    $productData->PriceWithDiscountString = number_format(
-                        $productData->PriceWithDiscount,
-                        2,
-                        ',',
-                        '.'
-                    );
+                        $warrent =
+                            Warrent::find(
+                                $supplierDetailsWithPriceRange->warrent_id
+                            )->description ?? '';
+                        $productData->warrent = $warrent;
 
-                    $productData->Price = $productData->Price;
+                        $deliveryDeadline =
+                            DeliveryDeadline::find(
+                                $supplierDetailsWithPriceRange->delivery_deadline_id
+                            )->description ?? '';
+                        $productData->deliveryDeadline = $deliveryDeadline;
+                    }
                 }
+
+                $authUser = Auth::user();
+                $discountPercentage =
+                    DiscountType::getDiscountForUser(
+                        $authUser->discount_type_id
+                    ) ?? 0;
+                $productData->discountPercentage = $discountPercentage;
+                // Calculate price with discount
+                $productData->PriceWithDiscount =
+                    $productData->Price -
+                    $productData->Price * ($discountPercentage / 100);
+
+                $productData->PriceWithDiscount =
+                    $productData->PriceWithDiscount;
+
+                $productData->PriceString = number_format(
+                    $productData->Price,
+                    2,
+                    ',',
+                    '.'
+                );
+                $productData->PriceWithDiscountString = number_format(
+                    $productData->PriceWithDiscount,
+                    2,
+                    ',',
+                    '.'
+                );
+
+                $productData->Price = $productData->Price;
             }
 
             $productData->Price = round($productData->Price, 2);
@@ -455,16 +518,6 @@ class ProductController extends BaseController
             }
 
             $productData->Categories = $categories;
-
-            // //warrent
-            // $data = [
-            //     'supplierId' => $productData->SupplierId,
-            //     'categoryId' => $productData->CategoryId,
-            //     'price' => $productData->Price,
-            // ];
-            // return Warrent::getDetailsForProduct($data);
-
-            // // $productData->warrent = $details ? $details->warrent_id : null;
 
             return $productData;
         } catch (\Exception $e) {

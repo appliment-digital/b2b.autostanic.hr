@@ -179,6 +179,16 @@ export default {
                     this.addedPricesForCategories = response.data;
                 });
         },
+        getSuppliersDetailsForCategory() {
+            supplierDetailService
+                .getSuppliersDetailsForCategory({
+                    supplierId: this.selectedSupplier.id,
+                    categoryId: this.selectedCategory,
+                })
+                .then((response) => {
+                    //this.addedPricesForCategories = response.data;
+                });
+        },
         async openDialog(data) {
             this.categoryName = await this.getCategoryName(
                 this.selectedCategory.id,
@@ -335,6 +345,7 @@ export default {
                             v-else
                             v-model="selectedCategory"
                             :options="categories"
+                            optionDisabled="disabled"
                             filter
                             display="chip"
                             optionLabel="name"
@@ -368,7 +379,7 @@ export default {
                     <label class="col-12 md:col-4 mt-2">
                         Definirano za cijene
                     </label>
-                    <div class="col-12 md:col-8">
+                    <div class="col-12 md:col-8 mt-2">
                         <div class="flex flex-wrap">
                             <div
                                 v-for="(

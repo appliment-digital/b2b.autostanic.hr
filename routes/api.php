@@ -44,6 +44,11 @@ Route::get('/user/getCurrentUserData', [
     'getCurrentUserData',
 ]);
 
+Route::get('/product/getProductById/{id}', [
+    ProductController::class,
+    'getProductById',
+]);
+
 //**************** MIDDLEWARE ******************
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -91,10 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
         '/product/getProductsByCategoryId/{categoryId}/{page}/{pageSize}',
         [ProductController::class, 'getProductsByCategoryId']
     );
-    Route::get('/product/getProductById/{id}', [
-        ProductController::class,
-        'getProductById',
-    ]);
+
     Route::get('/product/getProductPictures/{id}', [
         ProductController::class,
         'getProductPictures',
@@ -175,6 +177,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/supplierDetail/getAddedPriceRange', [
         SupplierDetailController::class,
         'getAddedPriceRange',
+    ]);
+
+    Route::post('/supplierDetail/getSuppliersDetailsForCategory', [
+        SupplierDetailController::class,
+        'getSuppliersDetailsForCategory',
     ]);
 
     Route::post('/supplierDetail/getDetailsForProduct', [
