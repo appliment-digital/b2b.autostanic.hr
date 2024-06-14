@@ -789,6 +789,8 @@ class ProductController extends BaseController
         try {
             $offset = ($page - 1) * $pageSize;
 
+            $term = preg_replace('/[^\w\s]/u', '', $term);
+
             $productCount = DB::connection('webshopdb')
                 ->table('dbo.Product')
                 ->join(
