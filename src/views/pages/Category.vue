@@ -102,6 +102,7 @@ export default {
          * Get products based on the category id, page options, and filters.
          */
         getProducts(id, filters) {
+            //console.log(id);
             this.UIStore.setIsDataLoading(true);
 
             ProductService.getProductsByCategoryId(

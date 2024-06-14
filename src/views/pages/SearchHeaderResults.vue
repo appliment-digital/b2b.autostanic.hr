@@ -34,6 +34,21 @@ export default {
         },
     },
     methods: {
+        handleFilterSelect(filters) {
+            this.getHeaderSearchResults(filters);
+        },
+        handleResultsPageChange(event, filters) {
+            this.page.current = event.page + 1;
+            this.getHeaderSearchResults(filters);
+        },
+        handleNumOfResultsChange(val) {
+            this.page.size = val;
+            //this.getHeaderSearchResults({});
+        },
+        handleResetPaginator() {
+            this.page.current = 1;
+            this.page.size = 24;
+        },
         getHeaderSearchResults() {
             ProductService.searchProductsByTerm(
                 this.page.current,
@@ -67,5 +82,9 @@ export default {
         :status="status"
         :manufacturers="manufacturers"
         :pageOptions="page"
+        @on-filter-select="handleFilterSelect"
+        @on-page-change="handleResultsPageChange"
+        @on-num-of-results-change="handleNumOfResultsChange"
+        @on-reset-paginator="handleResetPaginator"
     />
 </template>

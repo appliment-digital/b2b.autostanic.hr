@@ -339,9 +339,14 @@ class ProductController extends BaseController
 
             return $this->convertKeysToCamelCase($response);
         } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Exception: ' . $e->getMessage(),
-            ]);
+            return [
+                'exception' =>
+                    $e->getMessage() .
+                    ' on line ' .
+                    $e->getLine() .
+                    ' in file ' .
+                    $e->getFile(),
+            ];
         }
     }
 
@@ -901,6 +906,7 @@ class ProductController extends BaseController
                             ->where('ProductSearch.EntityValue', $term);
                     }
                 )
+                //filteri
                 ->when(
                     $filters->has('manufacturerName') &&
                         $filters->manufacturerName !== [],

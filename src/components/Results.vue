@@ -122,11 +122,23 @@ export default {
         },
 
         fetchInitialProducts() {
-            this.$emit(
-                'on-filter-select',
-                {},
-                this.categoryStore.selectedCategory.id,
-            );
+            if (this.$route.path == '/category') {
+                let ids = this.$route.query.id;
+
+                // Decode the URL component to handle the encoded characters
+                let decodedIds = decodeURIComponent(ids);
+
+                // Split the 'id' values using '&' as delimiter
+                let idsArray = decodedIds.split('&');
+
+                // Get the last ID
+                let lastCategoryID = idsArray[idsArray.length - 1];
+
+                this.$emit('on-filter-select', {}, lastCategoryID);
+            }
+            if (this.$route.path == '/codes' || this.$route.path == '/search') {
+                this.$emit('on-filter-select', {});
+            }
         },
 
         handleProductDataReset() {
@@ -173,12 +185,23 @@ export default {
             }
 
             this.selectedFilters = selectedFilters;
+            if (this.$route.path == '/category') {
+                let ids = this.$route.query.id;
 
-            this.$emit(
-                'on-filter-select',
-                selectedFilters,
-                this.$route.query.id,
-            );
+                // Decode the URL component to handle the encoded characters
+                let decodedIds = decodeURIComponent(ids);
+
+                // Split the 'id' values using '&' as delimiter
+                let idsArray = decodedIds.split('&');
+
+                // Get the last ID
+                let lastCategoryID = idsArray[idsArray.length - 1];
+
+                this.$emit('on-filter-select', selectedFilters, lastCategoryID);
+            }
+            if (this.$route.path == '/codes' || this.$route.path == '/search') {
+                this.$emit('on-filter-select', selectedFilters);
+            }
         },
 
         handleNumOfResultsClick(val) {

@@ -41,29 +41,29 @@ export default {
     mounted() {
         this.code = this.$route.query.code;
         this.value = this.$route.query.value;
-        this.getSearchResults();
+        this.getSearchResults({});
         this.handleDefaultProductImage(this.products);
     },
     watch: {
         '$route.query.code'(newValue, oldValue) {
             if (newValue !== oldValue) {
-                this.getSearchResults();
+                this.getSearchResults({});
             }
         },
         '$route.query.value'(newValue, oldValue) {
             if (newValue !== oldValue) {
-                this.getSearchResults();
+                this.getSearchResults({});
             }
         },
     },
     methods: {
-        getSearchResults() {
+        getSearchResults(filters) {
             ProductService.getProductsByCodeAndTerm(
                 this.page.current,
                 this.page.size,
                 this.code,
                 this.value,
-                {},
+                filters,
             )
                 .then((response) => {
                     var data = response.data;
@@ -74,6 +74,21 @@ export default {
                     this.isSearchDone = true;
                 })
                 .catch((err) => console.error(err));
+        },
+        handleFilterSelect(filters) {
+            this.getSearchResults(filters);
+        },
+        handleResultsPageChange(event, filters) {
+            this.page.current = event.page + 1;
+            this.getSearchResults(filters);
+        },
+        handleNumOfResultsChange(val) {
+            this.page.size = val;
+            //this.getSearchResults();
+        },
+        handleResetPaginator() {
+            this.page.current = 1;
+            this.page.size = 24;
         },
         handleDefaultProductImage(products) {
             products.forEach((entry) => {
@@ -105,5 +120,9 @@ export default {
         :status="status"
         :manufacturers="manufacturers"
         :pageOptions="page"
+        @on-filter-select="handleFilterSelect"
+        @on-page-change="handleResultsPageChange"
+        @on-num-of-results-change="handleNumOfResultsChange"
+        @on-reset-paginator="handleResetPaginator"
     />
 </template>
