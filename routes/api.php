@@ -14,6 +14,7 @@ use App\Http\Controllers\SupplierDetailController;
 use App\Http\Controllers\WarrentController;
 use App\Http\Controllers\DeliveryDeadlineController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductSearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,11 @@ Route::get('/user/getCurrentUserData', [
 Route::get('/product/getProductById/{id}', [
     ProductController::class,
     'getProductById',
+]);
+
+Route::get('/productSearch/addSearchText/{productId}', [
+    ProductSearchController::class,
+    'addSearchText',
 ]);
 
 //**************** MIDDLEWARE ******************
@@ -129,6 +135,13 @@ Route::middleware('auth:sanctum')->group(function () {
         ProductController::class,
         'searchProductsByTerm',
     ]);
+
+    //****************   PRODUCT SEARCH CONTOLLER ******************
+
+    // Route::post('/productSearch/addSearchText', [
+    //     ProductSearchController::class,
+    //     'addSearchText',
+    // ]);
 
     //****************   BITRIX CONTOLLER ******************
 

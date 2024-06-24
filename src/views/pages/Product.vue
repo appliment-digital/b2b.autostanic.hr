@@ -532,25 +532,6 @@ export default {
                                 },
                             }"
                         >
-                            <p style="max-width: 600px">
-                                OEM je skraćenica od „Original Equipment
-                                Manufacturer“ ili u prijevodu OEM se odnosi na
-                                originalne dijelove za automobilsku industriju.
-                                Na primjer, ako imate Audi i potreban vam je
-                                motor, možete ga kupiti od drugog proizvođača
-                                ili autentičan Audi motor. <br /><br />
-                                Iako proizvođač ne može napraviti identičan dio,
-                                OEM se odnosi na dio koji proizvođač koristi u
-                                originalnom vozilu. Ljudi često traže originalne
-                                OEM dijelove kako bi zamjenili potrgani dio jer
-                                mogu biti sigurni u kvalitetu dijela. U većini
-                                slučajeva proizvođač vozila ne proizvodi i OEM
-                                dijelove već angažira vanjsku tvrtku da bude
-                                službeni proizvođač tog dijela kao što je BOSCH,
-                                VALO, LUK itd. To znači da ti proizvođači mogu
-                                te dijelove prodavati i kasnije pod oznakom OEM
-                                dio samo bez oznake proizvođača vozila.
-                            </p>
                             <div v-if="details.oemCodes" class="mt-4">
                                 <div
                                     v-for="(
