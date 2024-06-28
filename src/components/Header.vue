@@ -25,13 +25,6 @@ export default {
             searchTerm: '',
         };
     },
-    watch: {
-        searchTerm(newVal) {
-            if (newVal.length == 0) {
-                this.handleLogoClick();
-            }
-        },
-    },
     computed: {
         ...mapStores(useUserStore, useShoppingCartStore),
     },
@@ -75,7 +68,7 @@ export default {
         >
             <IconField v-if="!isAdminPage" iconPosition="left">
                 <InputIcon class="pi pi-search"> </InputIcon>
-                <InputText v-model="searchTerm" @keyup.enter="handleSearchInput()" type="search" class="border-200 w-full" placeholder="Pretraži" />
+                <InputText v-model="searchTerm" v-on:keyup.enter="handleSearchInput()" type="search" class="border-200 w-full" placeholder="Pretraži" />
             </IconField>
         </div>
 
