@@ -60,7 +60,7 @@ return new class extends Migration {
         );
         if (!empty($userExists)) {
             DB::statement(
-                "CREATE USER MAPPING FOR b2b_autostanic_hr_test SERVER mssql_server OPTIONS (odbc_uid 'appliment', odbc_pwd 'w1nvm1098#2');"
+                "CREATE USER MAPPING FOR forge SERVER mssql_server OPTIONS (odbc_uid 'appliment', odbc_pwd 'w1nvm1098#2');"
             );
         }
 
