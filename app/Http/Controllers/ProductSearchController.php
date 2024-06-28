@@ -13,7 +13,7 @@ class ProductSearchController extends BaseController
     public function addSearchText($productId)
     {
         //getting data form database
-        $productData = DB::connection('webshopdb')
+        return DB::connection('webshopdb')
             ->table('dbo.Product')
             ->select(
                 'Product.Id AS id',
@@ -43,7 +43,9 @@ class ProductSearchController extends BaseController
                 'ProductSearch.ProductId'
             )
             ->where('Product.Id', $productId)
-            ->first();
+            ->where('Product.Deleted', 0)
+            ->where('Product.Published', 1)
+            ->tosql();
         return ProductSearch::add($productId, $productData->search_text);
     }
 }
