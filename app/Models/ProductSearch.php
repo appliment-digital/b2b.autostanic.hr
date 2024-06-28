@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ProductSearch extends Model
 {
@@ -17,10 +18,9 @@ class ProductSearch extends Model
 
     public static function searchByTerm($term)
     {
-        $term = '%' . $term . '%';
-        return ProductSearch::where('search_text', 'ilike', $term)->pluck(
-            'product_id'
-        );
+        return DB::table('product_searches')
+            ->whereRaw("search_vector @@ to_tsquery('simple', ?)", [$term])
+            ->pluck('product_id');
     }
 
     public static function add($id, $searchText)

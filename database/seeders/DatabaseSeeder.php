@@ -24,5 +24,11 @@ class DatabaseSeeder extends Seeder
 
         $role = Role::create(['name' => 'customer']);
         $role->givePermissionTo(Permission::all());
+
+        $this->call(UserSeeder::class);
+
+        $this->call(DeliveryDeadlinesSeeder::class);
+
+        $this->call(WarrentSeeder::class);
     }
 }

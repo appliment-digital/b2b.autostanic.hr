@@ -23,7 +23,5 @@ class WarrentSeeder extends Seeder
             ['description' => '24 mjeseci'],
             ['description' => '36 mjeseci'],
         ]);
-
-        $this->call(DeliveryDeadlinesSeeder::class);
     }
 }
