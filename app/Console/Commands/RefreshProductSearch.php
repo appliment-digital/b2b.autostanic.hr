@@ -28,13 +28,9 @@ class RefreshProductSearch extends Command
     {
         DB::table('product_searches')->delete();
 
-        // DB::insert('
-        //      insert into product_searches (product_id, search_text)
-        //      select id, search_text from mssql_ProductSearchText
-        //  ');
-
-        // $this->info('Product searches have been refreshed successfully.');
-
-        // return 0;
+        DB::insert('
+             insert into product_searches (product_id, search_text)
+             select id, search_text from mssql_ProductSearchText
+         ');
     }
 }

@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('product_search:refresh')->daily();
+        $schedule->command('product_search:refresh')->dailyAt('02:00');
     }
 
     /**
