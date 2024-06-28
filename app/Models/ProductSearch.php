@@ -18,8 +18,13 @@ class ProductSearch extends Model
 
     public static function searchByTerm($term)
     {
+        $words = explode(' ', $term);
+
+        $searchQuery = implode(' & ', $words);
         return DB::table('product_searches')
-            ->whereRaw("search_vector @@ to_tsquery('simple', ?)", [$term])
+            ->whereRaw("search_vector @@ to_tsquery('simple', ?)", [
+                $searchQuery,
+            ])
             ->pluck('product_id');
     }
 
